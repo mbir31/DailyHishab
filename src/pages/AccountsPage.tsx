@@ -8,10 +8,11 @@ import { ExportModal } from '../components/accounts/ExportModal';
 import { AnalyticsDashboard } from '../components/accounts/AnalyticsDashboard';
 import { AdvancedSearch } from '../components/accounts/AdvancedSearch';
 import { StatementExportSection } from '../components/accounts/StatementExportSection';
+import { FinancialHealthCard } from '../components/accounts/FinancialHealthCard';
 import { TimeFilterType } from '../types/entry.types';
 import { getDateRangeForFilter } from '../utils/dateHelpers';
 import { getEntriesForRange, getNoteForRange, getAllEntries } from '../utils/storage';
-import { ArrowUpRight, ArrowDownRight, Wallet, Scale, BarChart3, Search, FileSpreadsheet, LayoutDashboard } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Wallet, Scale, BarChart3, Search, FileSpreadsheet, LayoutDashboard, Activity } from 'lucide-react';
 
 export const AccountsPage: React.FC = () => {
   const { selectedDate, userProfile, t } = useApp();
@@ -153,6 +154,7 @@ export const AccountsPage: React.FC = () => {
               count={incomeCount}
               type="income"
               icon={<ArrowUpRight className="w-5 h-5 text-emerald-500" />}
+              subtitle={`${incomePercent}% of volume`}
             />
 
             <SummaryCard
@@ -161,13 +163,16 @@ export const AccountsPage: React.FC = () => {
               count={expenseCount}
               type="expense"
               icon={<ArrowDownRight className="w-5 h-5 text-rose-500" />}
+              subtitle={`${expensePercent}% of volume`}
             />
 
             <SummaryCard
               title={t.accounts.summaryCards.netBalance}
               amount={netBalance}
+              count={incomeCount + expenseCount}
               type="balance"
               icon={<Wallet className="w-5 h-5 text-blue-500" />}
+              subtitle={netBalance >= 0 ? 'Surplus' : 'Deficit'}
             />
           </div>
 
@@ -199,6 +204,16 @@ export const AccountsPage: React.FC = () => {
               />
             </div>
           </div>
+
+          {/* Professional Financial Health & Ratios Card */}
+          <FinancialHealthCard
+            entries={entriesInRange}
+            fromDate={dateFrom}
+            toDate={dateTo}
+            totalIncome={totalIncome}
+            totalExpense={totalExpense}
+            netBalance={netBalance}
+          />
 
           {/* Notes Section for Selected Period */}
           <NotesSection fromDate={dateFrom} toDate={dateTo} />

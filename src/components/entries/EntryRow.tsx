@@ -199,26 +199,28 @@ export const EntryRow: React.FC<EntryRowProps> = ({
                 </button>
               </div>
 
-              {/* Preset Tags List */}
+              {/* Saved Tags List */}
               <div className="pt-1.5 border-t border-gray-200/50 dark:border-gray-700/50">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[10px] font-bold tracking-wider uppercase text-gray-500 dark:text-gray-400">
-                    Preset Tags
+                    Your Saved Tags
                   </span>
-                  <button
-                    type="button"
-                    onClick={handleResetPresetsList}
-                    className="text-[10px] text-gray-400 hover:text-blue-500 flex items-center gap-0.5 cursor-pointer"
-                    title="Reset default preset tags"
-                  >
-                    <RotateCcw className="w-2.5 h-2.5" />
-                    <span>Reset</span>
-                  </button>
+                  {presetTags.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleResetPresetsList}
+                      className="text-[10px] text-gray-400 hover:text-rose-500 flex items-center gap-0.5 cursor-pointer"
+                      title="Clear all saved tags"
+                    >
+                      <Trash2 className="w-2.5 h-2.5" />
+                      <span>Clear All</span>
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-1.5">
                   {presetTags.length === 0 ? (
-                    <span className="text-[11px] text-gray-400 italic">No preset tags available.</span>
+                    <span className="text-[11px] text-gray-400 italic">No saved tags yet. Type a tag above to create one!</span>
                   ) : (
                     presetTags.map((pTag) => {
                       const isAttached = (entry.tags || []).includes(pTag);
@@ -247,7 +249,7 @@ export const EntryRow: React.FC<EntryRowProps> = ({
                               handleDeletePresetTagFromStorage(pTag);
                             }}
                             className="p-0.5 ml-0.5 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10 rounded-full transition-all cursor-pointer"
-                            title={`Remove #${pTag} from presets`}
+                            title={`Delete #${pTag}`}
                           >
                             <X className="w-2.5 h-2.5" />
                           </button>

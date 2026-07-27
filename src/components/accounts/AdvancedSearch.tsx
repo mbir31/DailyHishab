@@ -3,7 +3,8 @@ import { Entry, DEFAULT_INCOME_CATEGORIES, DEFAULT_EXPENSE_CATEGORIES } from '..
 import { useApp } from '../../context/AppContext';
 import { formatDateWithDay } from '../../utils/dateHelpers';
 import { getPresetTags, removePresetTag } from '../../utils/categories';
-import { Search, Filter, Calendar, X, Tag, ArrowUpRight, ArrowDownRight, RotateCcw } from 'lucide-react';
+import { Search, Filter, Calendar, X, Tag, ArrowUpRight, ArrowDownRight, RotateCcw, FileSpreadsheet, ArrowUpDown } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 interface AdvancedSearchProps {
   entries: Entry[];
@@ -21,6 +22,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
   const [maxAmount, setMaxAmount] = useState<string>('');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+  const [sortBy, setSortBy] = useState<'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'>('date-desc');
   const [presetTags, setPresetTags] = useState<string[]>([]);
 
   useEffect(() => {
@@ -38,9 +40,9 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
     return Array.from(set);
   }, [entries]);
 
-  // Filtered Entries Logic
+  // Filtered & Sorted Entries Logic
   const filteredEntries = useMemo(() => {
-    return entries.filter((e) => {
+    const list = entries.filter((e) => {
       // 1. Type filter
       if (selectedType !== 'all' && e.type !== selectedType) return false;
 
@@ -66,11 +68,21 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
 
       return true;
     });
-  }, [entries, selectedType, selectedCategory, minAmount, maxAmount, startDate, endDate, searchQuery]);
+
+    // Sorting
+    return list.sort((a, b) => {
+      if (sortBy === 'date-desc') return b.date.localeCompare(a.date) || b.createdAt - a.createdAt;
+      if (sortBy === 'date-asc') return a.date.localeCompare(b.date) || a.createdAt - b.createdAt;
+      if (sortBy === 'amount-desc') return b.amount - a.amount;
+      if (sortBy === 'amount-asc') return a.amount - b.amount;
+      return 0;
+    });
+  }, [entries, selectedType, selectedCategory, minAmount, maxAmount, startDate, endDate, searchQuery, sortBy]);
 
   // Totals for filtered view
   const filteredIncome = filteredEntries.reduce((s, e) => (e.type === 'income' ? s + e.amount : s), 0);
   const filteredExpense = filteredEntries.reduce((s, e) => (e.type === 'expense' ? s + e.amount : s), 0);
+  const filteredNet = filteredIncome - filteredExpense;
 
   const handleResetFilters = () => {
     setSearchQuery('');
@@ -80,6 +92,28 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
     setMaxAmount('');
     setStartDate('');
     setEndDate('');
+    setSortBy('date-desc');
+  };
+
+  const handleExportSearchResults = () => {
+    try {
+      const rows = filteredEntries.map((e, idx) => ({
+        'SL No': idx + 1,
+        Date: e.date,
+        Type: e.type.toUpperCase(),
+        Description: e.description || '',
+        Category: e.category || 'General',
+        Tags: e.tags ? e.tags.join(', ') : '',
+        Amount: e.amount,
+      }));
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb, ws, 'Filtered Search Results');
+      XLSX.writeFile(wb, `DailyHishab_Search_Export_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    } catch (err) {
+      alert('Failed to export search results.');
+    }
   };
 
   return (
@@ -267,18 +301,51 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
       )}
 
       {/* Filter Stats Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-black/5 dark:bg-white/5 text-xs font-bold">
-        <span className="text-gray-700 dark:text-gray-300">
-          Found <span className="text-blue-600 dark:text-blue-400 font-extrabold">{filteredEntries.length}</span> matching entries
-        </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-gray-200/50 dark:border-gray-800 text-xs font-bold">
+        <div className="flex items-center gap-3">
+          <span className="text-gray-700 dark:text-gray-300">
+            Found <span className="text-blue-600 dark:text-blue-400 font-extrabold">{filteredEntries.length}</span> entries
+          </span>
 
-        <div className="flex items-center gap-4">
-          <span className="text-emerald-600 dark:text-emerald-400">
-            Income: {currencySymbol} {filteredIncome.toLocaleString()}
-          </span>
-          <span className="text-rose-600 dark:text-rose-400">
-            Expense: {currencySymbol} {filteredExpense.toLocaleString()}
-          </span>
+          {/* Sort Selector */}
+          <div className="flex items-center gap-1.5 text-gray-500">
+            <ArrowUpDown className="w-3.5 h-3.5" />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="bg-transparent text-gray-800 dark:text-gray-200 font-bold outline-none cursor-pointer"
+            >
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="amount-desc">Highest Amount</option>
+              <option value="amount-asc">Lowest Amount</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between sm:justify-end gap-3">
+          <div className="flex items-center gap-3 text-xs">
+            <span className="text-emerald-600 dark:text-emerald-400">
+              In: {currencySymbol} {filteredIncome.toLocaleString()}
+            </span>
+            <span className="text-rose-600 dark:text-rose-400">
+              Out: {currencySymbol} {filteredExpense.toLocaleString()}
+            </span>
+            <span className={`font-black ${filteredNet >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600'}`}>
+              Net: {currencySymbol} {filteredNet.toLocaleString()}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleExportSearchResults}
+            disabled={filteredEntries.length === 0}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs transition-all active:scale-95 cursor-pointer disabled:opacity-40"
+            title="Export current search results to Excel"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5" />
+            <span>Export Search</span>
+          </button>
         </div>
       </div>
 

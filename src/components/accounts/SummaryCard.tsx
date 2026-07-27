@@ -8,6 +8,7 @@ interface SummaryCardProps {
   count?: number;
   type: 'income' | 'expense' | 'balance';
   icon: React.ReactNode;
+  subtitle?: string;
 }
 
 export const SummaryCard: React.FC<SummaryCardProps> = ({
@@ -16,6 +17,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({
   count,
   type,
   icon,
+  subtitle,
 }) => {
   const { userProfile } = useApp();
 
@@ -24,6 +26,8 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({
     userProfile.language,
     userProfile.currency
   );
+
+  const avgValue = typeof count === 'number' && count > 0 ? Math.round(amount / count) : 0;
 
   let badgeColor = '';
   let textColor = '';
@@ -46,16 +50,23 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({
   }
 
   return (
-    <div className="glass-card p-4 sm:p-5 flex flex-col justify-between h-[130px] sm:h-[140px] relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
+    <div className="glass-card p-4 sm:p-5 flex flex-col justify-between h-[135px] sm:h-[150px] relative overflow-hidden group hover:scale-[1.01] transition-all duration-300 border border-white/50 dark:border-white/10">
       {/* Top Row: Icon & Count */}
       <div className="flex items-center justify-between">
-        <div className={`p-2.5 rounded-2xl border ${badgeColor} shadow-sm group-hover:scale-110 transition-transform`}>
+        <div className={`p-2.5 rounded-2xl border ${badgeColor} shadow-sm group-hover:scale-105 transition-transform`}>
           {icon}
         </div>
         {typeof count === 'number' && (
-          <span className="text-[11px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-full">
-            {count} {count === 1 ? 'entry' : 'entries'}
-          </span>
+          <div className="text-right">
+            <span className="text-[11px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-full block">
+              {count} {count === 1 ? 'entry' : 'entries'}
+            </span>
+            {count > 0 && (
+              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium block mt-0.5">
+                Avg: {formatCurrency(avgValue, userProfile.language, userProfile.currency)}
+              </span>
+            )}
+          </div>
         )}
       </div>
 
@@ -64,8 +75,15 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({
         <div className={`text-xl sm:text-2xl font-black font-tabular truncate ${textColor} tracking-tight`}>
           {formattedAmount}
         </div>
-        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">
-          {title}
+        <div className="flex items-center justify-between mt-0.5">
+          <div className="text-xs font-extrabold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+            {title}
+          </div>
+          {subtitle && (
+            <span className="text-[10px] font-semibold text-gray-400">
+              {subtitle}
+            </span>
+          )}
         </div>
       </div>
     </div>

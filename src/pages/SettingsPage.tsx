@@ -9,12 +9,46 @@ import { AuthSettingsModal } from '../components/settings/AuthSettingsModal';
 import { BackupSection } from '../components/settings/BackupSection';
 import { GoogleDriveSection } from '../components/settings/GoogleDriveSection';
 import { BrandShowcaseSection } from '../components/settings/BrandShowcaseSection';
-import { ShieldCheck, UserCheck, KeyRound, Lock, Smartphone, Info, CheckCircle, Monitor, ExternalLink, Download } from 'lucide-react';
+import { ShieldCheck, UserCheck, KeyRound, Lock, Smartphone, CheckCircle, Monitor, ExternalLink, Download, Share2, Copy, Check, MessageSquare } from 'lucide-react';
+import { getAppUrl, shareAppUrl, shareAppToWhatsApp, copyAppUrlToClipboard } from '../utils/shareApp';
 
 export const SettingsPage: React.FC = () => {
   const { userProfile, lockApp, deferredPwaPrompt, installPwa, isPwaInstalled, t } = useApp();
 
   const [authModalType, setAuthModalType] = useState<'username' | 'pin' | null>(null);
+  const [copiedLink, setCopiedLink] = useState<boolean>(false);
+  const [shareMsg, setShareMsg] = useState<string | null>(null);
+
+  const liveAppUrl = getAppUrl();
+
+  const handleCopyLink = async () => {
+    const success = await copyAppUrlToClipboard();
+    if (success) {
+      setCopiedLink(true);
+      setShareMsg('Live HTTPS App Link copied to clipboard!');
+      setTimeout(() => {
+        setCopiedLink(false);
+        setShareMsg(null);
+      }, 3000);
+    }
+  };
+
+  const handleNativeShare = async () => {
+    const res = await shareAppUrl(userProfile.mainTitle || 'DailyHishab');
+    if (res.success) {
+      if (res.method === 'clipboard') {
+        setCopiedLink(true);
+        setShareMsg('App link copied to clipboard!');
+        setTimeout(() => {
+          setCopiedLink(false);
+          setShareMsg(null);
+        }, 3000);
+      } else {
+        setShareMsg('Share menu opened!');
+        setTimeout(() => setShareMsg(null), 3000);
+      }
+    }
+  };
 
   return (
     <div className="space-y-6 pb-28 max-w-4xl mx-auto animate-fade-in">
@@ -112,6 +146,63 @@ export const SettingsPage: React.FC = () => {
             <span>{t.settings.about.installed}</span>
           </div>
         )}
+
+        {/* 🔗 Live PWA Link & Quick Share Card */}
+        <div className="p-4 rounded-xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-teal-500/10 border border-blue-500/30 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-blue-700 dark:text-blue-300">
+              <Share2 className="w-4 h-4 text-blue-500" />
+              <span>Share Live PWA App Link:</span>
+            </div>
+            <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[10px] font-bold uppercase tracking-wider">
+              HTTPS Verified
+            </span>
+          </div>
+
+          <p className="text-xs text-gray-600 dark:text-gray-300">
+            Share this exact live web application URL with family, business partners, or accounting staff to open and install DailyHishab PWA on any device:
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div className="flex-1 bg-white/80 dark:bg-slate-900/80 px-3 py-2 rounded-xl border border-gray-300 dark:border-slate-700 text-xs font-mono font-bold text-gray-800 dark:text-gray-200 truncate select-all">
+              {liveAppUrl}
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={handleCopyLink}
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm active:scale-95 transition-all cursor-pointer"
+              >
+                {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedLink ? 'Copied!' : 'Copy Link'}</span>
+              </button>
+
+              <button
+                onClick={() => shareAppToWhatsApp(userProfile.mainTitle || 'DailyHishab')}
+                className="flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm active:scale-95 transition-all cursor-pointer"
+                title="Share to WhatsApp"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">WhatsApp</span>
+              </button>
+
+              <button
+                onClick={handleNativeShare}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 font-bold text-xs shadow-sm active:scale-95 transition-all cursor-pointer"
+                title="More Share Options"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {shareMsg && (
+            <div className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 animate-fade-in flex items-center gap-1 pt-1">
+              <CheckCircle className="w-3.5 h-3.5" />
+              <span>{shareMsg}</span>
+            </div>
+          )}
+        </div>
 
         {/* 📱 Android Phone Installation */}
         <div className="p-4 rounded-xl bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20 space-y-2">

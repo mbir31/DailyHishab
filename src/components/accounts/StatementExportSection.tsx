@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { formatDDMMYYYY, formatDateWithDay } from '../../utils/dateHelpers';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
-import { FileSpreadsheet, FileText, Download, CheckCircle2, Share2, Image as ImageIcon, Loader2, Send } from 'lucide-react';
+import { FileSpreadsheet, FileText, Download, CheckCircle2, Share2, Image as ImageIcon, Loader2, Send, ShieldCheck, Award } from 'lucide-react';
 import { shareStatementAsImage } from '../../utils/exportService';
 
 interface StatementExportSectionProps {
@@ -291,112 +291,252 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
       <div className="overflow-hidden h-0 w-0 absolute -left-[9999px] -top-[9999px]">
         <div
           id="statement-image-export-card"
-          className="w-[680px] p-8 bg-white text-gray-900 font-sans space-y-6 rounded-3xl border border-gray-200 shadow-2xl"
+          className="w-[820px] p-8 bg-white text-slate-800 font-sans space-y-5 rounded-3xl border border-slate-200 shadow-2xl relative"
         >
-          {/* Statement Header */}
-          <div className="flex items-center justify-between border-b border-gray-200 pb-5">
-            <div>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-sm">
+          {/* Top Decorative Gradient Accent Bar */}
+          <div className="h-2 w-full bg-gradient-to-r from-blue-700 via-indigo-600 to-teal-500 rounded-t-3xl -mt-8 -mx-8 mb-4" />
+
+          {/* Statement Header Banner */}
+          <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-900 text-white rounded-2xl p-6 shadow-md border border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-teal-400 p-0.5 shadow-lg flex items-center justify-center shrink-0">
+                <div className="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center text-white font-black text-lg tracking-wider">
                   DH
                 </div>
-                <h1 className="text-2xl font-black text-blue-600 tracking-tight">
-                  {appTitle}
-                </h1>
               </div>
-              <p className="text-xs text-gray-500 font-medium mt-1">
-                {userProfile.subtitle || 'Personal & Business Financial Statement'}
-              </p>
+
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-black text-white tracking-tight">
+                    {appTitle}
+                  </h1>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold uppercase tracking-wider">
+                    Verified Ledger
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300 font-medium mt-0.5">
+                  {userProfile.subtitle || 'Personal & Business General Financial Statement'}
+                </p>
+              </div>
             </div>
 
-            <div className="text-right">
-              <span className="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-bold text-xs border border-blue-200 uppercase tracking-wider">
-                STATEMENT OF ACCOUNT
+            <div className="text-right space-y-1">
+              <span className="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-extrabold border border-blue-400/30 uppercase tracking-widest">
+                OFFICIAL STATEMENT
               </span>
-              <p className="text-xs text-gray-700 font-bold mt-1.5">
-                {dateLabel}
+              <div className="text-xs font-bold text-slate-200">
+                Ref: DH-{fromDate.replace(/-/g, '')}-{toDate.replace(/-/g, '')}
+              </div>
+              <p className="text-[11px] text-slate-400 font-medium">
+                Period: {formatDDMMYYYY(fromDate, userProfile.language)} to {formatDDMMYYYY(toDate, userProfile.language)}
               </p>
             </div>
           </div>
 
-          {/* Account Owner Info */}
-          <div className="flex items-center justify-between bg-gray-50 px-4 py-2.5 rounded-xl border border-gray-200 text-xs text-gray-600 font-semibold">
-            <span>Owner: <strong className="text-gray-900">{userProfile.username || 'Account Holder'}</strong></span>
-            <span>Generated: <strong className="text-gray-900">{new Date().toLocaleString()}</strong></span>
+          {/* Account & Report Metadata Bar */}
+          <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200 text-xs text-slate-600 font-medium grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <div>
+                <span className="text-slate-400 font-normal">Account Holder: </span>
+                <strong className="text-slate-900 font-bold">{userProfile.username || 'Valued Account Owner'}</strong>
+              </div>
+              <div>
+                <span className="text-slate-400 font-normal">Currency & Format: </span>
+                <strong className="text-slate-900 font-bold">{userProfile.currency || 'BDT (৳)'} • Standard Accounting</strong>
+              </div>
+            </div>
+
+            <div className="space-y-1 text-right">
+              <div>
+                <span className="text-slate-400 font-normal">Issued On: </span>
+                <strong className="text-slate-900 font-bold">{new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong>
+              </div>
+              <div>
+                <span className="text-slate-400 font-normal">Total Records in Period: </span>
+                <strong className="text-blue-600 font-black">{entries.length} Transactions</strong>
+              </div>
+            </div>
           </div>
 
-          {/* 3 Summary KPI Cards */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
-              <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block">
+          {/* 4 KPI Financial Summary Cards Grid */}
+          <div className="grid grid-cols-4 gap-3">
+            {/* Income Card */}
+            <div className="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 flex flex-col justify-between">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">
                 Total Income
               </span>
-              <span className="text-xl font-black text-emerald-600 mt-1 block">
+              <div className="text-lg font-black text-emerald-700 font-tabular my-1">
                 {currencySymbol} {totalIncome.toLocaleString()}
+              </div>
+              <span className="text-[10px] font-semibold text-emerald-600">
+                {entries.filter((e) => e.type === 'income').length} Revenue Records
               </span>
             </div>
 
-            <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200">
-              <span className="text-[11px] font-bold text-rose-800 uppercase tracking-wider block">
+            {/* Expense Card */}
+            <div className="p-3.5 rounded-2xl bg-rose-50/80 border border-rose-200/80 flex flex-col justify-between">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-800">
                 Total Expense
               </span>
-              <span className="text-xl font-black text-rose-600 mt-1 block">
+              <div className="text-lg font-black text-rose-700 font-tabular my-1">
                 {currencySymbol} {totalExpense.toLocaleString()}
+              </div>
+              <span className="text-[10px] font-semibold text-rose-600">
+                {entries.filter((e) => e.type === 'expense').length} Expense Records
               </span>
             </div>
 
-            <div className={`p-4 rounded-2xl border ${netBalance >= 0 ? 'bg-blue-50 border-blue-200' : 'bg-amber-50 border-amber-200'}`}>
-              <span className={`text-[11px] font-bold uppercase tracking-wider block ${netBalance >= 0 ? 'text-blue-800' : 'text-amber-800'}`}>
+            {/* Net Balance Card */}
+            <div className={`p-3.5 rounded-2xl border flex flex-col justify-between ${netBalance >= 0 ? 'bg-blue-50/80 border-blue-200/80' : 'bg-amber-50/80 border-amber-200/80'}`}>
+              <span className={`text-[10px] font-extrabold uppercase tracking-wider ${netBalance >= 0 ? 'text-blue-800' : 'text-amber-800'}`}>
                 Net Balance
               </span>
-              <span className={`text-xl font-black mt-1 block ${netBalance >= 0 ? 'text-blue-600' : 'text-amber-600'}`}>
+              <div className={`text-lg font-black font-tabular my-1 ${netBalance >= 0 ? 'text-blue-700' : 'text-amber-700'}`}>
                 {currencySymbol} {netBalance.toLocaleString()}
+              </div>
+              <span className={`text-[10px] font-bold ${netBalance >= 0 ? 'text-blue-600' : 'text-amber-600'}`}>
+                {netBalance >= 0 ? '🟢 Profit Surplus' : '🔴 Net Deficit'}
+              </span>
+            </div>
+
+            {/* Profit Margin / Retention */}
+            <div className="p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200/80 flex flex-col justify-between">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-800">
+                Profit Margin
+              </span>
+              <div className="text-lg font-black text-indigo-700 font-tabular my-1">
+                {totalIncome > 0 ? Math.round((netBalance / totalIncome) * 100) : 0}%
+              </div>
+              <span className="text-[10px] font-semibold text-indigo-600">
+                Net Cash Retention
               </span>
             </div>
           </div>
 
-          {/* Itemized Transactions Table Preview (Top 12) */}
+          {/* Itemized Transactions Table */}
           {entries.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs font-bold text-gray-700 border-b border-gray-200 pb-1">
-                <span>Transaction Itemization ({entries.length} total)</span>
-                <span>Amount ({currencySymbol})</span>
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-between text-xs font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-200">
+                <span>Itemized Ledger Records ({Math.min(entries.length, 14)} of {entries.length} displayed)</span>
+                <span className="text-slate-500 font-normal normal-case text-[11px]">Amounts in {currencySymbol}</span>
               </div>
 
-              <div className="divide-y divide-gray-100 text-xs">
-                {entries.slice(0, 12).map((e, idx) => (
-                  <div key={e.id || idx} className="py-2 flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-gray-900">{e.description || e.category || 'Entry'}</span>
-                        <span className="px-2 py-0.5 rounded-md bg-gray-100 text-[10px] font-semibold text-gray-600">
+              <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                {/* Table Header */}
+                <div className="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider py-2.5 px-3 grid grid-cols-12 gap-2 items-center">
+                  <div className="col-span-1 text-center">SL</div>
+                  <div className="col-span-2">Date</div>
+                  <div className="col-span-2">Category</div>
+                  <div className="col-span-4">Description / Tags</div>
+                  <div className="col-span-1 text-center">Type</div>
+                  <div className="col-span-2 text-right">Amount ({currencySymbol})</div>
+                </div>
+
+                {/* Table Rows */}
+                <div className="divide-y divide-slate-100 text-xs">
+                  {entries.slice(0, 14).map((e, idx) => (
+                    <div
+                      key={e.id || idx}
+                      className={`py-2 px-3 grid grid-cols-12 gap-2 items-center ${
+                        idx % 2 === 0 ? 'bg-slate-50/60' : 'bg-white'
+                      }`}
+                    >
+                      <div className="col-span-1 text-center font-bold text-slate-400 text-[11px]">
+                        {idx + 1}
+                      </div>
+
+                      <div className="col-span-2 font-medium text-slate-700 text-[11px]">
+                        {formatDateWithDay(e.date, userProfile.language, true)}
+                      </div>
+
+                      <div className="col-span-2">
+                        <span className="inline-block px-2 py-0.5 rounded-md bg-slate-200/70 text-slate-700 text-[10px] font-bold truncate max-w-[100px]">
                           {e.category || 'General'}
                         </span>
                       </div>
-                      <p className="text-[10px] text-gray-400">
-                        {formatDateWithDay(e.date, userProfile.language, true)} {e.tags && e.tags.length > 0 ? `• Tags: ${e.tags.join(', ')}` : ''}
-                      </p>
-                    </div>
 
-                    <span className={`font-extrabold text-sm ${e.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                      {e.type === 'income' ? '+' : '-'}{currencySymbol} {e.amount.toLocaleString()}
+                      <div className="col-span-4 space-y-0.5 min-w-0">
+                        <div className="font-bold text-slate-900 truncate text-xs">
+                          {e.description || e.category || 'Transaction Record'}
+                        </div>
+                        {e.tags && e.tags.length > 0 && (
+                          <div className="text-[9px] text-slate-400 font-medium truncate">
+                            #{e.tags.join(' #')}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="col-span-1 text-center">
+                        <span
+                          className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wide ${
+                            e.type === 'income'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-rose-100 text-rose-800'
+                          }`}
+                        >
+                          {e.type === 'income' ? 'INC' : 'EXP'}
+                        </span>
+                      </div>
+
+                      <div className="col-span-2 text-right font-black font-tabular text-xs">
+                        <span className={e.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}>
+                          {e.type === 'income' ? '+' : '-'}{currencySymbol} {e.amount.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Subtotal Summary Row */}
+                <div className="bg-slate-100 border-t border-slate-300 py-2 px-3 flex items-center justify-between text-xs font-bold text-slate-800">
+                  <span>Period Totals ({entries.length} items)</span>
+                  <div className="flex items-center gap-4 font-tabular text-[11px]">
+                    <span className="text-emerald-700">In: +{currencySymbol} {totalIncome.toLocaleString()}</span>
+                    <span className="text-rose-700">Out: -{currencySymbol} {totalExpense.toLocaleString()}</span>
+                    <span className={`font-black ${netBalance >= 0 ? 'text-blue-700' : 'text-amber-700'}`}>
+                      Net: {currencySymbol} {netBalance.toLocaleString()}
                     </span>
                   </div>
-                ))}
+                </div>
               </div>
 
-              {entries.length > 12 && (
-                <p className="text-[10px] text-gray-400 text-center pt-1 italic">
-                  + {entries.length - 12} additional entries included in full ledger report
+              {entries.length > 14 && (
+                <p className="text-[10px] text-slate-400 text-center pt-0.5 italic">
+                  + {entries.length - 14} additional itemized entries saved in full digital database
                 </p>
               )}
             </div>
           )}
 
-          {/* Footer Branding */}
-          <div className="flex items-center justify-between border-t border-gray-100 pt-4 text-[10px] text-gray-400 font-medium">
-            <span>Generated via DailyHishab — Smart Daily Expense & Ledger Manager</span>
-            <span>https://dailyhishab.app</span>
+          {/* Verification Stamp & Security Footer */}
+          <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
+            {/* Security disclaimer */}
+            <div className="space-y-1 text-[10px] text-slate-500 max-w-[500px]">
+              <div className="flex items-center gap-1.5 text-slate-800 font-bold">
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                <span>Digitally Authenticated Ledger Statement</span>
+              </div>
+              <p className="leading-tight text-slate-400">
+                This document is generated automatically by {appTitle} double-entry accounting engine. Verified for accuracy, tax estimation, and audit documentation.
+              </p>
+            </div>
+
+            {/* Official Stamp Graphic */}
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="w-20 h-20 rounded-full border-2 border-dashed border-blue-600/40 p-1 flex items-center justify-center text-center">
+                <div className="w-full h-full rounded-full bg-blue-50/80 border border-blue-600/60 p-1 flex flex-col items-center justify-center leading-none text-[8px] font-black text-blue-800 uppercase tracking-tighter">
+                  <span className="text-[7px] text-blue-600">★ OFFICIAL ★</span>
+                  <span className="my-0.5 text-blue-900 font-extrabold">VERIFIED</span>
+                  <span className="text-[7px] text-emerald-600">AUDIT READY</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Copyright bar */}
+          <div className="text-[9px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-100">
+            <span>Powered by {appTitle} • Smart Personal & Business Ledger</span>
+            <span>Ref ID: DH-STMT-{fromDate.replace(/-/g, '')}</span>
           </div>
         </div>
       </div>

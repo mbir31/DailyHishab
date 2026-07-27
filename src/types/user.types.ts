@@ -35,6 +35,7 @@ export interface UserProfile {
   offlineAutoBackup?: boolean; // default true
   onlineAutoBackup?: boolean; // default true
   lastOfflineAutoBackupTime?: string;
+  logoVariant?: 'full' | 'badge' | 'stacked' | 'icon-only';
 }
 
 export interface BackupData {

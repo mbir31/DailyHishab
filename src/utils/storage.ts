@@ -30,6 +30,7 @@ export const DEFAULT_PROFILE: UserProfile = {
   backupMode: 'both',
   offlineAutoBackup: true,
   onlineAutoBackup: true,
+  logoVariant: 'full',
 };
 
 // Simple cryptographic PIN hash function using Web Crypto API

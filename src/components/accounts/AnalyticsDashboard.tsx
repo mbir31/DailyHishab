@@ -13,8 +13,10 @@ import {
   PieChart,
   Pie,
   Cell,
+  AreaChart,
+  Area,
 } from 'recharts';
-import { TrendingUp, TrendingDown, PieChart as PieIcon, BarChart3, Calendar, Wallet } from 'lucide-react';
+import { TrendingUp, TrendingDown, PieChart as PieIcon, BarChart3, Calendar, Wallet, AreaChart as AreaChartIcon } from 'lucide-react';
 
 interface AnalyticsDashboardProps {
   entries: Entry[];
@@ -27,7 +29,7 @@ const CATEGORY_COLORS = [
 
 export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ entries }) => {
   const { userProfile } = useApp();
-  const [analyticsView, setAnalyticsView] = useState<'monthly' | 'yearly' | 'categories'>('monthly');
+  const [analyticsView, setAnalyticsView] = useState<'monthly' | 'cumulative' | 'categories'>('monthly');
 
   const currencySymbol = userProfile.currency || (userProfile.language === 'bn' ? '৳' : '₹');
 
@@ -36,9 +38,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ entries 
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const currentYear = new Date().getFullYear();
 
-    const monthMap: Record<number, { month: string; income: number; expense: number; net: number }> = {};
+    const monthMap: Record<number, { month: string; income: number; expense: number; net: number; cumulative: number }> = {};
     for (let i = 0; i < 12; i++) {
-      monthMap[i] = { month: months[i], income: 0, expense: 0, net: 0 };
+      monthMap[i] = { month: months[i], income: 0, expense: 0, net: 0, cumulative: 0 };
     }
 
     entries.forEach((e) => {
@@ -56,6 +58,12 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ entries 
         monthMap[m].net = monthMap[m].income - monthMap[m].expense;
       }
     });
+
+    let runningTotal = 0;
+    for (let i = 0; i < 12; i++) {
+      runningTotal += monthMap[i].net;
+      monthMap[i].cumulative = runningTotal;
+    }
 
     return Object.values(monthMap);
   }, [entries]);
@@ -127,7 +135,18 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ entries 
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
-            Monthly Trend
+            Monthly Cash Flow
+          </button>
+          <button
+            type="button"
+            onClick={() => setAnalyticsView('cumulative')}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              analyticsView === 'cumulative'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            Cumulative Net Trajectory
           </button>
           <button
             type="button"
@@ -208,6 +227,41 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ entries 
                 <Bar dataKey="income" name="Income" fill="#10B981" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="expense" name="Expense" fill="#EF4444" radius={[4, 4, 0, 0]} />
               </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
+      {/* View 2: Cumulative Cash Trajectory Area Chart */}
+      {analyticsView === 'cumulative' && (
+        <div className="space-y-3">
+          <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+            Cumulative Net Balance Trajectory ({new Date().getFullYear()})
+          </h3>
+          <div className="w-full h-72 sm:h-80 pt-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563EB" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#2563EB" stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                <XAxis dataKey="month" tick={{ fill: '#888', fontSize: 11 }} />
+                <YAxis tick={{ fill: '#888', fontSize: 11 }} />
+                <Tooltip
+                  formatter={(val) => [`${currencySymbol} ${Number(val).toLocaleString()}`, 'Cumulative Balance']}
+                  contentStyle={{
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    borderRadius: '12px',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    color: '#fff',
+                    fontSize: '12px',
+                  }}
+                />
+                <Area type="monotone" dataKey="cumulative" stroke="#2563EB" strokeWidth={3} fillOpacity={1} fill="url(#colorCumulative)" />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>

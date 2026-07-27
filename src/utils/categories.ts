@@ -29,18 +29,9 @@ export const DEFAULT_EXPENSE_CATEGORIES: CategoryOption[] = [
   { id: 'other_expense', label: 'General Expense', iconName: 'MinusCircle', color: 'bg-gray-500' },
 ];
 
-export const DEFAULT_PRESET_TAGS = [
-  'cash',
-  'bank',
-  'online',
-  'urgent',
-  'projectA',
-  'vendor',
-  'client',
-  'pending',
-];
+export const DEFAULT_PRESET_TAGS: string[] = [];
 
-export const POPULAR_TAGS = DEFAULT_PRESET_TAGS.map(t => `#${t}`);
+export const POPULAR_TAGS: string[] = [];
 
 const PRESET_TAGS_STORAGE_KEY = 'dailyhishab_preset_tags';
 
@@ -50,7 +41,17 @@ export function getPresetTags(): string[] {
     if (stored) {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed)) {
-        return parsed.map((t: string) => t.replace(/^#/, ''));
+        const tags = parsed.map((t: string) => t.replace(/^#/, ''));
+        // Clean up legacy preset tags if user hasn't customized yet
+        const legacyDefaults = ['cash', 'bank', 'online', 'urgent', 'projecta', 'vendor', 'client', 'pending'];
+        if (
+          tags.length === legacyDefaults.length &&
+          tags.every((t, i) => t.toLowerCase() === legacyDefaults[i])
+        ) {
+          localStorage.setItem(PRESET_TAGS_STORAGE_KEY, JSON.stringify([]));
+          return [];
+        }
+        return tags;
       }
     }
   } catch (e) {
