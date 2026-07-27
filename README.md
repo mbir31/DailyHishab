@@ -8,7 +8,6 @@
 [![React 19](https://img.shields.io/badge/React-19.0-61DAFB.svg?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6.svg?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4.0-06B6D4.svg?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Vite](https://img.shields.io/badge/Vite-6.2-646CFF.svg?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![PWA Ready](https://img.shields.io/badge/PWA-Installable-5A0FC8.svg?style=flat-square&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
 [![Offline First](https://img.shields.io/badge/Offline-100%25_Functional-10B981.svg?style=flat-square&logo=sqlite&logoColor=white)](#)
 
@@ -16,7 +15,43 @@
   <b>Replace messy paper notebooks (খাতা) and complex accounting software with a sleek, private, zero-latency daily financial ledger.</b>
 </p>
 
+### 🚀 [**Click Here to Open & Use DailyHishab Instantly in Browser**](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app)
+*(No download or terminal installation required! Works 100% offline & keeps your data private on your device.)*
+
 </div>
+
+---
+
+## 📱 Easy 1-Minute Setup (No Terminal or Coding Needed!)
+
+You don't need any technical skills, commands, or terminal to use **DailyHishab**. You can access it directly in your browser or install it as a real app on your mobile phone or computer!
+
+### 🌐 Option A: Use Directly in Web Browser
+1. Click the live app link: **[Open DailyHishab](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app)**
+2. Start adding cash entries right away! Everything is saved safely on your device.
+
+---
+
+### 📲 Option B: Install as Mobile App on your Phone (PWA)
+
+#### 🤖 On Android (Google Chrome / Brave / Edge):
+1. Open **[DailyHishab App Link](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app)** in Google Chrome.
+2. Tap the **3 dots menu (⋮)** in the top-right corner.
+3. Tap **"Install App"** or **"Add to Home Screen"**.
+4. Confirm by tapping **Install**. A **DailyHishab** icon will appear on your phone's home screen just like an app from the Play Store!
+
+#### 🍏 On iPhone / iPad (Apple Safari):
+1. Open **[DailyHishab App Link](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app)** in Safari.
+2. Tap the **Share button** (square icon with an arrow pointing up at the bottom bar).
+3. Scroll down and tap **"Add to Home Screen"**.
+4. Tap **Add** in the top right corner. The **DailyHishab** app icon is now ready on your iPhone!
+
+---
+
+### 💻 Option C: Install on Desktop / Laptop Computer
+1. Open **[DailyHishab App Link](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app)** in Google Chrome, Microsoft Edge, or Brave.
+2. Look at the address bar on the top right — click the **Install icon** (monitor with a small down-arrow) OR click **3 dots (⋮) ➔ Save and share ➔ Install DailyHishab**.
+3. Launch DailyHishab anytime directly from your Desktop or Start Menu!
 
 ---
 
@@ -72,13 +107,39 @@ Whether you're tracking daily household expenses, managing shop cash-in/cash-out
 
 | Feature | Paper Notebook (খাতা) | Complex Accounting Apps | DailyHishab 📊 |
 | :--- | :---: | :---: | :---: |
-| **Setup Time** | Instant | Hours of configuration | **0 Seconds** |
+| **Setup Time** | Instant | Hours of configuration | **0 Seconds (Direct Link)** |
 | **Offline Support** | Yes | Often requires login/cloud | **100% Offline-First** |
 | **Automated Totals** | ❌ Manual calculation | Yes | **Instant Real-Time** |
 | **WhatsApp Image Export** | ❌ Take photos | ❌ Rare | **One-Tap HD Render** |
 | **Excel & PDF Statements** | ❌ Impossible | Paid feature | **Free & Built-in** |
 | **Privacy & Security** | ❌ Easily misplaced | Data sent to servers | **Local Storage & PIN** |
 | **Bengali Numeral Support** | Manual | ❌ English only | **Full `১, ২, ৩` Support** |
+
+---
+
+## 💻 Developers / Local Terminal Installation
+
+If you are a developer and wish to run or customize DailyHishab locally using the command line:
+
+### Prerequisites
+* **Node.js**: `v18.0.0` or higher
+* **npm**: `v9.0.0` or higher
+
+```bash
+# 1. Clone the Repository
+git clone https://github.com/your-username/daily-hishab.git
+cd daily-hishab
+
+# 2. Install Dependencies
+npm install
+
+# 3. Start Development Server
+npm run dev
+
+# 4. Build for Production
+npm run build
+npm start
+```
 
 ---
 
@@ -106,68 +167,6 @@ Data Visualization & Export
 
 ---
 
-## 🚀 Quick Start Guide
-
-### Prerequisites
-* **Node.js**: `v18.0.0` or higher
-* **npm**: `v9.0.0` or higher
-
-### 1️⃣ Clone the Repository
-```bash
-git clone https://github.com/your-username/daily-hishab.git
-cd daily-hishab
-```
-
-### 2️⃣ Install Dependencies
-```bash
-npm install
-```
-
-### 3️⃣ Start Development Server
-```bash
-npm run dev
-```
-Navigate to `http://localhost:3000` in your browser.
-
-### 4️⃣ Production Build & Execution
-```bash
-# Build Vite client and bundle ESBuild Express server
-npm run build
-
-# Launch production server
-npm start
-```
-
----
-
-## 📁 Directory Architecture
-
-```
-daily-hishab/
-├── src/
-│   ├── components/
-│   │   ├── accounts/          # Advanced search, time filters, statement exports & notes
-│   │   ├── analytics/         # Recharts visual dashboards & category breakdown charts
-│   │   ├── auth/              # Lock screen & PIN setup modals
-│   │   ├── brand/             # Responsive logo & branding elements
-│   │   ├── entries/           # Income (+), Expense (-) tables & quick entry rows
-│   │   ├── layout/            # Main layout wrapper, header bar & mobile bottom navigation
-│   │   ├── settings/          # Currency, theme, language, brand, PIN & Google Drive sync
-│   │   └── shared/            # Date selector, calendar popups & date navigator
-│   ├── context/               # Global React AppContext state & offline handling
-│   ├── i18n/                  # English & Bengali translation dictionaries
-│   ├── pages/                 # EntryPlus, EntryMinus, Accounts, & Settings pages
-│   ├── styles/                # Tailwind v4 imports & glassmorphism custom CSS
-│   ├── types/                 # TypeScript interfaces (Entry, UserProfile, Categories)
-│   └── utils/                 # Date helpers (DD-MM-YYYY), export engine & storage API
-├── server.ts                  # Express server entry point & API route proxy
-├── index.html                 # PWA HTML shell & metadata
-├── package.json               # App manifest & npm scripts
-└── README.md                  # Application documentation
-```
-
----
-
 ## 🎯 Use Cases
 
 * **🏬 Retail & Shopkeepers (দোকানদার)**: Track daily sales, cash balances, supplier expenses, and generate instant WhatsApp receipt summaries for customers.
@@ -187,6 +186,6 @@ Distributed under the **MIT License**. See `LICENSE` for details.
 
 **Made with ❤️ for simple, clear, and secure daily financial management.**
 
-[⭐ Star on GitHub](https://github.com/your-username/daily-hishab) • [🐛 Report Bug](https://github.com/your-username/daily-hishab/issues) • [💡 Request Feature](https://github.com/your-username/daily-hishab/issues)
+[🚀 Open App Link](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app) • [⭐ Star on GitHub](https://github.com/your-username/daily-hishab) • [🐛 Report Bug](https://github.com/your-username/daily-hishab/issues)
 
 </div>
