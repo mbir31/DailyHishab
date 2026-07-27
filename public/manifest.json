@@ -1,0 +1,30 @@
+{
+  "name": "DailyHishab - Daily Accounting",
+  "short_name": "DailyHishab",
+  "description": "Simple and elegant daily accounting Progressive Web App for income and expense tracking.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8F9FA",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Income",
+      "url": "/?page=income",
+      "icons": [{ "src": "/favicon.svg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Add Expense",
+      "url": "/?page=expense",
+      "icons": [{ "src": "/favicon.svg", "sizes": "96x96" }]
+    }
+  ]
+}
