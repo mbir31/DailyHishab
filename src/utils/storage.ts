@@ -89,7 +89,14 @@ export function loadUserProfile(): UserProfile {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.PROFILE);
     if (!raw) return DEFAULT_PROFILE;
-    return { ...DEFAULT_PROFILE, ...JSON.parse(raw) };
+    const parsed = { ...DEFAULT_PROFILE, ...JSON.parse(raw) };
+    if (!parsed.userId || !/^\d{11}$/.test(String(parsed.userId).trim())) {
+      parsed.userId = '01712345678';
+    }
+    if (!parsed.pin || !/^\d{4}$/.test(String(parsed.pin).trim())) {
+      parsed.pin = '1234';
+    }
+    return parsed;
   } catch (err) {
     console.error('Failed to load profile', err);
     return DEFAULT_PROFILE;
@@ -359,12 +366,19 @@ export function triggerAutoBackupSequence(profile?: UserProfile): void {
   if (isCloudEnabled && currentProfile.onlineAutoBackup !== false) {
     try {
       const backupData = createBackupObject();
+      const uId = currentProfile.userId && /^\d{11}$/.test(String(currentProfile.userId).trim())
+        ? String(currentProfile.userId).trim()
+        : '01712345678';
+      const uPin = currentProfile.pin && /^\d{4}$/.test(String(currentProfile.pin).trim())
+        ? String(currentProfile.pin).trim()
+        : '1234';
+
       fetch('/api/central-backup/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: currentProfile.userId || '01712345678',
-          pin: currentProfile.pin || '1234',
+          userId: uId,
+          pin: uPin,
           payload: backupData,
         }),
       })
@@ -375,13 +389,15 @@ export function triggerAutoBackupSequence(profile?: UserProfile): void {
               ...loadUserProfile(),
               lastCloudBackupTime: data.lastSync || new Date().toISOString(),
             });
+          } else if (data && data.error) {
+            console.warn('Cloud auto-backup response error:', data.error);
           }
         })
-        .catch(() => {
-          // Silent catch when offline
+        .catch((err) => {
+          console.warn('Cloud auto-backup network catch:', err);
         });
     } catch (err) {
-      // Ignore network errors
+      console.warn('Failed to send cloud auto-backup:', err);
     }
   }
 }

@@ -728,6 +728,54 @@ async function renameGoogleDriveUserFolder(oldUserId: string, newUserId: string)
   }
 }
 
+// Fetch backup from user subfolder in Developer Google Drive
+async function fetchBackupFromGoogleDrive(userId: string): Promise<any | null> {
+  if (!driveSession || !driveSession.tokens) return null;
+  try {
+    const masterFolderId = await ensureGoogleDriveMasterFolder();
+    if (!masterFolderId) return null;
+
+    const oauth2Client = getOAuth2Client();
+    const drive = getDriveClient(oauth2Client);
+
+    const userFolderRes = await drive.files.list({
+      q: `mimeType='application/vnd.google-apps.folder' and name='${userId}' and '${masterFolderId}' in parents and trashed=false`,
+      fields: 'files(id, name)',
+      spaces: 'drive',
+    });
+
+    if (!userFolderRes.data.files || userFolderRes.data.files.length === 0) {
+      return null;
+    }
+
+    const userFolderId = userFolderRes.data.files[0].id!;
+
+    const latestFileRes = await drive.files.list({
+      q: `name='latest.json' and '${userFolderId}' in parents and trashed=false`,
+      fields: 'files(id, name)',
+      spaces: 'drive',
+    });
+
+    if (!latestFileRes.data.files || latestFileRes.data.files.length === 0) {
+      return null;
+    }
+
+    const fileId = latestFileRes.data.files[0].id!;
+    const fileContentRes = await drive.files.get({
+      fileId,
+      alt: 'media',
+    });
+
+    if (fileContentRes.data) {
+      const record = typeof fileContentRes.data === 'string' ? JSON.parse(fileContentRes.data) : fileContentRes.data;
+      return record;
+    }
+  } catch (err) {
+    console.warn(`Could not fetch backup from Google Drive for ${userId}:`, err);
+  }
+  return null;
+}
+
 // Save backup to central developer cloud store
 app.post('/api/central-backup/save', async (req, res) => {
   try {
@@ -871,7 +919,7 @@ app.post('/api/central-backup/change-userid', async (req, res) => {
 });
 
 // Verify & Restore Cloud Backup by 11-digit User ID & PIN
-app.post('/api/central-backup/verify-and-restore', (req, res) => {
+app.post('/api/central-backup/verify-and-restore', async (req, res) => {
   try {
     const { userId, pin } = req.body;
     const cleanUserId = (userId || '').trim();
@@ -884,16 +932,36 @@ app.post('/api/central-backup/verify-and-restore', (req, res) => {
     const userDir = path.join(CENTRAL_BACKUP_DIR, cleanUserId);
     const latestPath = path.join(userDir, 'latest.json');
 
-    if (!fs.existsSync(latestPath)) {
+    let record: any = null;
+
+    if (fs.existsSync(latestPath)) {
+      try {
+        const raw = fs.readFileSync(latestPath, 'utf-8');
+        record = JSON.parse(raw);
+      } catch (e) {
+        record = null;
+      }
+    }
+
+    // Fallback: check Google Drive if local record missing
+    if (!record && driveSession && driveSession.tokens) {
+      const driveRecord = await fetchBackupFromGoogleDrive(cleanUserId);
+      if (driveRecord) {
+        record = driveRecord;
+        if (!fs.existsSync(userDir)) {
+          fs.mkdirSync(userDir, { recursive: true });
+        }
+        fs.writeFileSync(latestPath, JSON.stringify(record, null, 2));
+      }
+    }
+
+    if (!record) {
       return res.status(404).json({
         success: false,
         notFound: true,
         error: `No central cloud backup found for User ID ${cleanUserId}. Please check your 11-digit ID or perform a backup first.`,
       });
     }
-
-    const raw = fs.readFileSync(latestPath, 'utf-8');
-    const record = JSON.parse(raw);
 
     // Verify PIN if stored
     if (record.pin && record.pin !== cleanPin) {
