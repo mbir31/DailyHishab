@@ -1,5 +1,98 @@
 import html2canvas from 'html2canvas';
 
+const oklchCache = new Map<string, string>();
+
+function convertSingleOklchToRgb(match: string): string {
+  if (oklchCache.has(match)) {
+    return oklchCache.get(match)!;
+  }
+
+  try {
+    const div = document.createElement('div');
+    div.style.color = match;
+    document.body.appendChild(div);
+    const computed = window.getComputedStyle(div).color;
+    document.body.removeChild(div);
+
+    if (computed && !computed.includes('oklch') && computed !== '') {
+      oklchCache.set(match, computed);
+      return computed;
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  const fallback = 'rgb(100, 116, 139)';
+  oklchCache.set(match, fallback);
+  return fallback;
+}
+
+export function replaceOklchInCssText(cssText: string): string {
+  if (!cssText || typeof cssText !== 'string') return cssText;
+  if (!cssText.includes('oklch') && !cssText.includes('oklab')) return cssText;
+
+  return cssText
+    .replace(/oklch\([^)]+\)/gi, (m) => convertSingleOklchToRgb(m))
+    .replace(/oklab\([^)]+\)/gi, (m) => convertSingleOklchToRgb(m));
+}
+
+export function sanitizeClonedDocForCanvas(clonedDoc: Document, targetElementId?: string) {
+  try {
+    // 1. Sanitize all <style> elements
+    const styleElements = clonedDoc.querySelectorAll('style');
+    styleElements.forEach((style) => {
+      if (style.textContent && (style.textContent.includes('oklch') || style.textContent.includes('oklab'))) {
+        style.textContent = replaceOklchInCssText(style.textContent);
+      }
+    });
+
+    // 2. Sanitize inline style attributes
+    const elements = clonedDoc.querySelectorAll('*');
+    elements.forEach((el) => {
+      const htmlEl = el as HTMLElement;
+      if (htmlEl.getAttribute) {
+        const inlineStyle = htmlEl.getAttribute('style');
+        if (inlineStyle && (inlineStyle.includes('oklch') || inlineStyle.includes('oklab'))) {
+          htmlEl.setAttribute('style', replaceOklchInCssText(inlineStyle));
+        }
+      }
+    });
+
+    // 3. Ensure target container in cloned doc is positioned correctly if offscreen
+    if (targetElementId) {
+      const clonedTarget = clonedDoc.getElementById(targetElementId);
+      if (clonedTarget) {
+        clonedTarget.style.position = 'relative';
+        clonedTarget.style.left = '0';
+        clonedTarget.style.top = '0';
+        if (clonedTarget.parentElement) {
+          clonedTarget.parentElement.style.position = 'relative';
+          clonedTarget.parentElement.style.left = '0';
+          clonedTarget.parentElement.style.top = '0';
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Error sanitizing cloned doc for html2canvas:', err);
+  }
+}
+
+export async function renderElementToCanvas(
+  element: HTMLElement,
+  options?: { backgroundColor?: string | null }
+): Promise<HTMLCanvasElement> {
+  return await html2canvas(element, {
+    scale: 2, // 2x resolution for crisp high-DPI retina rendering
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: options?.backgroundColor !== undefined ? options.backgroundColor : '#FFFFFF',
+    logging: false,
+    onclone: (clonedDoc) => {
+      sanitizeClonedDocForCanvas(clonedDoc, element.id);
+    },
+  });
+}
+
 export interface ExportReportOptions {
   elementId: string;
   filename: string;
@@ -16,12 +109,8 @@ export async function exportElementToImage(options: ExportReportOptions): Promis
   }
 
   try {
-    const canvas = await html2canvas(element, {
-      scale: 2, // 2x resolution for crisp high-DPI retina rendering
-      useCORS: true,
-      allowTaint: true,
+    const canvas = await renderElementToCanvas(element, {
       backgroundColor: format === 'jpg' ? '#FFFFFF' : null,
-      logging: false,
     });
 
     const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
@@ -75,12 +164,8 @@ export async function shareStatementAsImage(options: {
   }
 
   try {
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
+    const canvas = await renderElementToCanvas(element, {
       backgroundColor: '#FFFFFF',
-      logging: false,
     });
 
     const mimeType = 'image/jpeg';

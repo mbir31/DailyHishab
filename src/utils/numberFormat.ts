@@ -2,17 +2,24 @@ import { Language } from '../types/user.types';
 
 const BENGALI_NUMERALS = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
 
-export function toBengaliNumerals(numStr: string): string {
-  return numStr.replace(/\d/g, (digit) => BENGALI_NUMERALS[parseInt(digit, 10)]);
+export function toBengaliNumerals(numStr: string | number): string {
+  if (numStr === undefined || numStr === null) return '';
+  return String(numStr).replace(/\d/g, (digit) => BENGALI_NUMERALS[parseInt(digit, 10)]);
+}
+
+export function parseBengaliToEnglishDigits(val: string): string {
+  if (!val) return '';
+  let clean = val;
+  BENGALI_NUMERALS.forEach((bengali, idx) => {
+    clean = clean.replaceAll(bengali, idx.toString());
+  });
+  return clean;
 }
 
 export function parseFormattedNumber(val: string): number {
   if (!val) return 0;
   // Convert Bengali numerals to Western digits if present
-  let clean = val;
-  BENGALI_NUMERALS.forEach((bengali, idx) => {
-    clean = clean.replaceAll(bengali, idx.toString());
-  });
+  let clean = parseBengaliToEnglishDigits(val);
   // Strip non-numeric except decimal
   clean = clean.replace(/[^0-9.]/g, '');
   const parsed = parseFloat(clean);

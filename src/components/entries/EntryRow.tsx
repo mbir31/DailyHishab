@@ -7,6 +7,7 @@ import {
   addCustomCategory,
   removeCustomCategory,
 } from '../../utils/categories';
+import { toBengaliNumerals, parseBengaliToEnglishDigits } from '../../utils/numberFormat';
 
 interface EntryRowProps {
   entry: Entry;
@@ -30,9 +31,31 @@ export const EntryRow: React.FC<EntryRowProps> = ({
   const [showCatManager, setShowCatManager] = useState<boolean>(false);
   const [catInput, setCatInput] = useState<string>('');
 
+  // Display Amount state to allow typing in both Bangla and English numerals
+  const [displayAmount, setDisplayAmount] = useState<string>(() => {
+    if (!entry.amount) return '';
+    return userProfile.language === 'bn' ? toBengaliNumerals(entry.amount) : String(entry.amount);
+  });
+
   useEffect(() => {
     setCustomCategories(getCustomCategories(type));
   }, [type]);
+
+  // Sync display string with entry.amount when modified externally or language changes
+  useEffect(() => {
+    const currentNum = parseFloat(parseBengaliToEnglishDigits(displayAmount)) || 0;
+    if (currentNum !== (entry.amount || 0)) {
+      if (!entry.amount) {
+        setDisplayAmount('');
+      } else {
+        setDisplayAmount(userProfile.language === 'bn' ? toBengaliNumerals(entry.amount) : String(entry.amount));
+      }
+    } else if (userProfile.language === 'bn' && entry.amount && !/[০-৯]/.test(displayAmount)) {
+      setDisplayAmount(toBengaliNumerals(entry.amount));
+    } else if (userProfile.language === 'en' && entry.amount && /[০-৯]/.test(displayAmount)) {
+      setDisplayAmount(String(entry.amount));
+    }
+  }, [entry.amount, userProfile.language]);
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onUpdate(index, { description: e.target.value });
@@ -66,9 +89,23 @@ export const EntryRow: React.FC<EntryRowProps> = ({
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawVal = e.target.value;
-    const sanitized = rawVal.replace(/[^0-9.]/g, '');
-    const num = parseFloat(sanitized) || 0;
+    // Convert Bengali numerals to Western digits first
+    const cleanEng = parseBengaliToEnglishDigits(rawVal);
+    // Keep digits and decimal point
+    let sanitizedEng = cleanEng.replace(/[^0-9.]/g, '');
+    const parts = sanitizedEng.split('.');
+    if (parts.length > 2) {
+      sanitizedEng = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    const num = parseFloat(sanitizedEng) || 0;
     onUpdate(index, { amount: num });
+
+    if (userProfile.language === 'bn') {
+      setDisplayAmount(toBengaliNumerals(sanitizedEng));
+    } else {
+      setDisplayAmount(sanitizedEng);
+    }
   };
 
   return (
@@ -76,7 +113,9 @@ export const EntryRow: React.FC<EntryRowProps> = ({
       {/* Column 1: Serial Number + Delete */}
       <td className="py-2.5 px-2 sm:px-3 text-center align-top pt-3 font-bold text-gray-500 dark:text-gray-400 w-12 sm:w-16 shrink-0 relative">
         <div className="flex items-center justify-center gap-1">
-          <span className="group-hover:hidden">{entry.serial}</span>
+          <span className="group-hover:hidden">
+            {userProfile.language === 'bn' ? toBengaliNumerals(entry.serial) : entry.serial}
+          </span>
           <button
             type="button"
             onClick={() => onDelete(index)}
@@ -240,12 +279,11 @@ export const EntryRow: React.FC<EntryRowProps> = ({
             {userProfile.currency || (userProfile.language === 'bn' ? '৳' : '₹')}
           </span>
           <input
-            type="number"
-            step="any"
-            min="0"
-            value={entry.amount === 0 ? '' : entry.amount}
+            type="text"
+            inputMode="decimal"
+            value={displayAmount}
             onChange={handleAmountChange}
-            placeholder="0"
+            placeholder={userProfile.language === 'bn' ? '০' : '0'}
             className={`w-full bg-transparent pl-7 pr-2.5 py-1.5 rounded-lg border border-transparent hover:border-gray-300 dark:hover:border-gray-700 focus:border-blue-500 focus:bg-white/50 dark:focus:bg-gray-900/50 text-right font-bold font-tabular text-sm sm:text-base outline-none transition-all ${
               type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
             }`}

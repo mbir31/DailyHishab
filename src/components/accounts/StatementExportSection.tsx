@@ -6,7 +6,7 @@ import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { FileSpreadsheet, FileText, CheckCircle2, Share2, Loader2, Send, ShieldCheck, Download, Award, Stamp } from 'lucide-react';
-import { shareStatementAsImage } from '../../utils/exportService';
+import { shareStatementAsImage, renderElementToCanvas } from '../../utils/exportService';
 
 interface StatementExportSectionProps {
   fromDate: string;
@@ -151,12 +151,8 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
         return;
       }
 
-      const canvas = await html2canvas(element, {
-        scale: 2, // 2x High-DPI crisp rendering
-        useCORS: true,
-        allowTaint: true,
+      const canvas = await renderElementToCanvas(element, {
         backgroundColor: '#FFFFFF',
-        logging: false,
       });
 
       const imgData = canvas.toDataURL('image/jpeg', 0.95);

@@ -3,6 +3,7 @@ import { Entry, DEFAULT_INCOME_CATEGORIES, DEFAULT_EXPENSE_CATEGORIES } from '..
 import { useApp } from '../../context/AppContext';
 import { formatDateWithDay } from '../../utils/dateHelpers';
 import { getPresetTags, removePresetTag } from '../../utils/categories';
+import { toBengaliNumerals, parseBengaliToEnglishDigits } from '../../utils/numberFormat';
 import { Search, Filter, Calendar, X, Tag, ArrowUpRight, ArrowDownRight, RotateCcw, FileSpreadsheet, ArrowUpDown } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -50,20 +51,26 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
       if (selectedCategory !== 'all' && e.category !== selectedCategory) return false;
 
       // 3. Amount filter
-      if (minAmount && (e.amount || 0) < parseFloat(minAmount)) return false;
-      if (maxAmount && (e.amount || 0) > parseFloat(maxAmount)) return false;
+      const numMin = minAmount ? parseFloat(parseBengaliToEnglishDigits(minAmount)) : NaN;
+      const numMax = maxAmount ? parseFloat(parseBengaliToEnglishDigits(maxAmount)) : NaN;
+      if (!isNaN(numMin) && (e.amount || 0) < numMin) return false;
+      if (!isNaN(numMax) && (e.amount || 0) > numMax) return false;
 
       // 4. Date filter
       if (startDate && e.date < startDate) return false;
       if (endDate && e.date > endDate) return false;
 
-      // 5. Keyword Query Search (Description, Category, Tags)
+      // 5. Keyword Query Search (Description, Category, Tags, Amount)
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
+        const qEng = parseBengaliToEnglishDigits(q);
         const descMatch = (e.description || '').toLowerCase().includes(q);
         const catMatch = (e.category || '').toLowerCase().includes(q);
         const tagMatch = e.tags?.some((t) => t.toLowerCase().includes(q));
-        if (!descMatch && !catMatch && !tagMatch) return false;
+        const amountValStr = (e.amount || 0).toString();
+        const amountBnStr = toBengaliNumerals(amountValStr);
+        const amountMatch = amountValStr.includes(q) || amountValStr.includes(qEng) || amountBnStr.includes(q);
+        if (!descMatch && !catMatch && !tagMatch && !amountMatch) return false;
       }
 
       return true;
@@ -228,10 +235,14 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
             {userProfile.language === 'bn' ? 'সর্বনিম্ন পরিমাণ' : 'Min Amount'} ({currencySymbol})
           </label>
           <input
-            type="number"
-            value={minAmount}
-            onChange={(e) => setMinAmount(e.target.value)}
-            placeholder="0"
+            type="text"
+            inputMode="decimal"
+            value={userProfile.language === 'bn' ? toBengaliNumerals(minAmount) : minAmount}
+            onChange={(e) => {
+              const eng = parseBengaliToEnglishDigits(e.target.value).replace(/[^0-9.]/g, '');
+              setMinAmount(eng);
+            }}
+            placeholder={userProfile.language === 'bn' ? '০' : '0'}
             className="w-full px-3 py-2 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-300 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -242,9 +253,13 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
             {userProfile.language === 'bn' ? 'সর্বোচ্চ পরিমাণ' : 'Max Amount'} ({currencySymbol})
           </label>
           <input
-            type="number"
-            value={maxAmount}
-            onChange={(e) => setMaxAmount(e.target.value)}
+            type="text"
+            inputMode="decimal"
+            value={userProfile.language === 'bn' ? toBengaliNumerals(maxAmount) : maxAmount}
+            onChange={(e) => {
+              const eng = parseBengaliToEnglishDigits(e.target.value).replace(/[^0-9.]/g, '');
+              setMaxAmount(eng);
+            }}
             placeholder={userProfile.language === 'bn' ? 'যেকোনো' : 'Any'}
             className="w-full px-3 py-2 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-300 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
           />

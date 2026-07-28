@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { getAllEntries } from '../../utils/storage';
 import { formatDateWithDay } from '../../utils/dateHelpers';
 import { Entry, EntryType } from '../../types/entry.types';
+import { toBengaliNumerals, parseBengaliToEnglishDigits } from '../../utils/numberFormat';
 import {
   DEFAULT_INCOME_CATEGORIES,
   DEFAULT_EXPENSE_CATEGORIES,
@@ -65,14 +66,18 @@ export const AdvancedSearchSection: React.FC = () => {
   // Execute advanced search & filter pipeline
   const filteredEntries = useMemo(() => {
     return allEntries.filter((e) => {
-      // 1. Keyword search (Description / Serial / Category / Tags)
+      // 1. Keyword search (Description / Serial / Category / Tags / Amount)
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
+        const qEng = parseBengaliToEnglishDigits(q);
         const inDesc = e.description?.toLowerCase().includes(q);
         const inCat = e.category?.toLowerCase().includes(q);
-        const inSerial = e.serial.toString() === q;
+        const inSerial = e.serial.toString() === q || toBengaliNumerals(e.serial) === q;
         const inTag = e.tags ? e.tags.some((t) => t.toLowerCase().includes(q)) : false;
-        if (!inDesc && !inCat && !inSerial && !inTag) return false;
+        const amtStr = (e.amount || 0).toString();
+        const amtBnStr = toBengaliNumerals(amtStr);
+        const inAmount = amtStr.includes(q) || amtStr.includes(qEng) || amtBnStr.includes(q);
+        if (!inDesc && !inCat && !inSerial && !inTag && !inAmount) return false;
       }
 
       // 2. Type filter
@@ -88,11 +93,11 @@ export const AdvancedSearchSection: React.FC = () => {
 
       // 5. Min/Max Amount filter
       if (minAmount !== '') {
-        const min = parseFloat(minAmount);
+        const min = parseFloat(parseBengaliToEnglishDigits(minAmount));
         if (!isNaN(min) && e.amount < min) return false;
       }
       if (maxAmount !== '') {
-        const max = parseFloat(maxAmount);
+        const max = parseFloat(parseBengaliToEnglishDigits(maxAmount));
         if (!isNaN(max) && e.amount > max) return false;
       }
 
@@ -253,22 +258,34 @@ export const AdvancedSearchSection: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Min Amount</label>
+            <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase">
+              {userProfile.language === 'bn' ? 'সর্বনিম্ন পরিমাণ' : 'Min Amount'}
+            </label>
             <input
-              type="number"
-              value={minAmount}
-              onChange={(e) => setMinAmount(e.target.value)}
-              placeholder="0"
+              type="text"
+              inputMode="decimal"
+              value={userProfile.language === 'bn' ? toBengaliNumerals(minAmount) : minAmount}
+              onChange={(e) => {
+                const eng = parseBengaliToEnglishDigits(e.target.value).replace(/[^0-9.]/g, '');
+                setMinAmount(eng);
+              }}
+              placeholder={userProfile.language === 'bn' ? '০' : '0'}
               className="w-full px-2.5 py-1.5 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-300 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Max Amount</label>
+            <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase">
+              {userProfile.language === 'bn' ? 'সর্বোচ্চ পরিমাণ' : 'Max Amount'}
+            </label>
             <input
-              type="number"
-              value={maxAmount}
-              onChange={(e) => setMaxAmount(e.target.value)}
+              type="text"
+              inputMode="decimal"
+              value={userProfile.language === 'bn' ? toBengaliNumerals(maxAmount) : maxAmount}
+              onChange={(e) => {
+                const eng = parseBengaliToEnglishDigits(e.target.value).replace(/[^0-9.]/g, '');
+                setMaxAmount(eng);
+              }}
               placeholder="∞"
               className="w-full px-2.5 py-1.5 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-300 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-none"
             />
