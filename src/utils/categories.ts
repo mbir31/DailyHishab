@@ -7,27 +7,69 @@ export interface CategoryOption {
   color: string;
 }
 
-export const DEFAULT_INCOME_CATEGORIES: CategoryOption[] = [
-  { id: 'sales', label: 'Sales & Revenue', iconName: 'ShoppingBag', color: 'bg-emerald-500' },
-  { id: 'services', label: 'Services & Consulting', iconName: 'Briefcase', color: 'bg-teal-500' },
-  { id: 'salary', label: 'Salary / Wages', iconName: 'Banknote', color: 'bg-cyan-500' },
-  { id: 'investments', label: 'Investments & Profit', iconName: 'TrendingUp', color: 'bg-blue-500' },
-  { id: 'refunds', label: 'Refunds & Returns', iconName: 'RotateCcw', color: 'bg-indigo-500' },
-  { id: 'other_income', label: 'Other Income', iconName: 'PlusCircle', color: 'bg-slate-500' },
-];
+export const DEFAULT_INCOME_CATEGORIES: CategoryOption[] = [];
+export const DEFAULT_EXPENSE_CATEGORIES: CategoryOption[] = [];
 
-export const DEFAULT_EXPENSE_CATEGORIES: CategoryOption[] = [
-  { id: 'rent', label: 'Rent & Lease', iconName: 'Building', color: 'bg-rose-500' },
-  { id: 'utilities', label: 'Utilities & Bills', iconName: 'Zap', color: 'bg-amber-500' },
-  { id: 'salaries', label: 'Staff Salaries', iconName: 'Users', color: 'bg-orange-500' },
-  { id: 'supplies', label: 'Office Supplies', iconName: 'Package', color: 'bg-yellow-500' },
-  { id: 'food', label: 'Food & Dining', iconName: 'Utensils', color: 'bg-red-500' },
-  { id: 'transport', label: 'Travel & Transport', iconName: 'Car', color: 'bg-purple-500' },
-  { id: 'marketing', label: 'Marketing & Ads', iconName: 'Megaphone', color: 'bg-pink-500' },
-  { id: 'maintenance', label: 'Maintenance & Repairs', iconName: 'Wrench', color: 'bg-stone-500' },
-  { id: 'taxes', label: 'Taxes & Fees', iconName: 'Receipt', color: 'bg-slate-500' },
-  { id: 'other_expense', label: 'General Expense', iconName: 'MinusCircle', color: 'bg-gray-500' },
-];
+export const CUSTOM_INCOME_CATEGORIES_KEY = 'dailyhishab_custom_income_categories';
+export const CUSTOM_EXPENSE_CATEGORIES_KEY = 'dailyhishab_custom_expense_categories';
+
+/**
+ * Load user's custom category options for Income or Expense from localStorage
+ */
+export function getCustomCategories(type: EntryType): string[] {
+  try {
+    const key = type === 'income' ? CUSTOM_INCOME_CATEGORIES_KEY : CUSTOM_EXPENSE_CATEGORIES_KEY;
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        return parsed.map((c: string) => c.trim()).filter(Boolean);
+      }
+    }
+  } catch (e) {
+    console.error(`Failed to load custom categories for ${type}:`, e);
+  }
+  return [];
+}
+
+/**
+ * Save custom category options for Income or Expense to localStorage
+ */
+export function saveCustomCategories(type: EntryType, categories: string[]): void {
+  try {
+    const key = type === 'income' ? CUSTOM_INCOME_CATEGORIES_KEY : CUSTOM_EXPENSE_CATEGORIES_KEY;
+    const cleaned = Array.from(new Set(categories.map(c => c.trim()).filter(Boolean)));
+    localStorage.setItem(key, JSON.stringify(cleaned));
+  } catch (e) {
+    console.error(`Failed to save custom categories for ${type}:`, e);
+  }
+}
+
+/**
+ * Add a new custom category option
+ */
+export function addCustomCategory(type: EntryType, newCategory: string): string[] {
+  const clean = newCategory.trim();
+  if (!clean) return getCustomCategories(type);
+  const current = getCustomCategories(type);
+  if (!current.some(c => c.toLowerCase() === clean.toLowerCase())) {
+    const updated = [...current, clean];
+    saveCustomCategories(type, updated);
+    return updated;
+  }
+  return current;
+}
+
+/**
+ * Remove an existing custom category option
+ */
+export function removeCustomCategory(type: EntryType, categoryToRemove: string): string[] {
+  const clean = categoryToRemove.trim();
+  const current = getCustomCategories(type);
+  const updated = current.filter(c => c.toLowerCase() !== clean.toLowerCase());
+  saveCustomCategories(type, updated);
+  return updated;
+}
 
 export const DEFAULT_PRESET_TAGS: string[] = [];
 

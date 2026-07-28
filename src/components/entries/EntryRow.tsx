@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Entry, EntryType, DEFAULT_INCOME_CATEGORIES, DEFAULT_EXPENSE_CATEGORIES } from '../../types/entry.types';
-import { Trash2, Tag, ChevronDown, Plus, X, Check, RotateCcw } from 'lucide-react';
+import { Entry, EntryType } from '../../types/entry.types';
+import { Trash2, Tag, ChevronDown, Plus, X, Check } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { getPresetTags, removePresetTag, addPresetTag, resetPresetTags } from '../../utils/categories';
+import {
+  getCustomCategories,
+  addCustomCategory,
+  removeCustomCategory,
+  getPresetTags,
+  removePresetTag,
+  addPresetTag,
+  resetPresetTags,
+} from '../../utils/categories';
 
 interface EntryRowProps {
   entry: Entry;
@@ -24,18 +32,44 @@ export const EntryRow: React.FC<EntryRowProps> = ({
   const [tagText, setTagText] = useState<string>('');
   const [presetTags, setPresetTags] = useState<string[]>([]);
 
+  // Custom Category Dropdown Options State
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
+  const [showCatManager, setShowCatManager] = useState<boolean>(false);
+  const [catInput, setCatInput] = useState<string>('');
+
   useEffect(() => {
     setPresetTags(getPresetTags());
-  }, []);
-
-  const categories = type === 'income' ? DEFAULT_INCOME_CATEGORIES : DEFAULT_EXPENSE_CATEGORIES;
+    setCustomCategories(getCustomCategories(type));
+  }, [type]);
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onUpdate(index, { description: e.target.value });
   };
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onUpdate(index, { category: e.target.value });
+  const handleCategorySelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (val === '__manage_options__') {
+      setShowCatManager(true);
+    } else {
+      onUpdate(index, { category: val });
+    }
+  };
+
+  const handleAddNewCategoryOption = () => {
+    if (!catInput.trim()) return;
+    const cleanCat = catInput.trim();
+    const updated = addCustomCategory(type, cleanCat);
+    setCustomCategories(updated);
+    onUpdate(index, { category: cleanCat });
+    setCatInput('');
+  };
+
+  const handleRemoveCategoryOption = (catToRemove: string) => {
+    const updated = removeCustomCategory(type, catToRemove);
+    setCustomCategories(updated);
+    if (entry.category === catToRemove) {
+      onUpdate(index, { category: '' });
+    }
   };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +86,6 @@ export const EntryRow: React.FC<EntryRowProps> = ({
     if (!existingTags.includes(cleanTag)) {
       onUpdate(index, { tags: [...existingTags, cleanTag] });
     }
-    // Also add to preset tags if new
     const updatedPresets = addPresetTag(cleanTag);
     setPresetTags(updatedPresets);
     setTagText('');
@@ -117,20 +150,44 @@ export const EntryRow: React.FC<EntryRowProps> = ({
 
         {/* Category Selector & Tags Pill Row */}
         <div className="flex flex-wrap items-center gap-1.5 px-1">
-          {/* Category Dropdown Pill */}
-          <div className="relative inline-flex items-center">
-            <select
-              value={entry.category || categories[0]}
-              onChange={handleCategoryChange}
-              className="appearance-none bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[11px] font-bold text-gray-700 dark:text-gray-300 px-2.5 py-0.5 pr-6 rounded-full border border-gray-300/40 dark:border-gray-700/40 outline-none cursor-pointer transition-all"
-            >
-              {categories.map((cat) => (
-                <option key={cat} value={cat} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-                  {cat}
+          {/* Category Dropdown Pill & Add Option Trigger */}
+          <div className="relative inline-flex items-center gap-1">
+            <div className="relative inline-flex items-center">
+              <select
+                value={entry.category || ''}
+                onChange={handleCategorySelectChange}
+                className="appearance-none bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[11px] font-bold text-gray-700 dark:text-gray-300 px-2.5 py-0.5 pr-6 rounded-full border border-gray-300/40 dark:border-gray-700/40 outline-none cursor-pointer transition-all"
+              >
+                <option value="" className="bg-white dark:bg-gray-900 text-gray-400">
+                  -- Category --
                 </option>
-              ))}
-            </select>
-            <ChevronDown className="w-3 h-3 text-gray-400 absolute right-1.5 pointer-events-none" />
+                {/* Custom entry value if set and not in customCategories */}
+                {entry.category && !customCategories.includes(entry.category) && (
+                  <option value={entry.category} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+                    {entry.category}
+                  </option>
+                )}
+                {/* Custom categories options added by user */}
+                {customCategories.map((cat) => (
+                  <option key={cat} value={cat} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+                    {cat}
+                  </option>
+                ))}
+                <option value="__manage_options__" className="bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 font-bold">
+                  + Add / Manage Options...
+                </option>
+              </select>
+              <ChevronDown className="w-3 h-3 text-gray-400 absolute right-1.5 pointer-events-none" />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowCatManager(!showCatManager)}
+              className="p-1 rounded-full text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer"
+              title="Add or remove dropdown options"
+            >
+              <Plus className="w-3 h-3" />
+            </button>
           </div>
 
           {/* Active Tags */}
@@ -271,6 +328,91 @@ export const EntryRow: React.FC<EntryRowProps> = ({
               <span>+ Tag</span>
             </button>
           )}
+
+          {/* Category Option Manager Popover */}
+          {showCatManager && (
+            <div className="w-full mt-1.5 p-2.5 rounded-xl bg-blue-50/90 dark:bg-gray-800/90 border border-blue-200 dark:border-blue-900/50 space-y-2 shadow-sm animate-fade-in">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold text-blue-900 dark:text-blue-300">
+                  Manage Dropdown Options ({type === 'income' ? 'Income' : 'Expense'})
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowCatManager(false)}
+                  className="p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg cursor-pointer"
+                  title="Close option manager"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Input to add a new custom option */}
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  autoFocus
+                  value={catInput}
+                  onChange={(e) => setCatInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleAddNewCategoryOption();
+                    if (e.key === 'Escape') setShowCatManager(false);
+                  }}
+                  placeholder="Type new option name..."
+                  className="flex-1 px-2.5 py-1 text-xs bg-white dark:bg-gray-900 border border-blue-300 dark:border-gray-700 rounded-lg outline-none text-gray-900 dark:text-white placeholder-gray-400"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddNewCategoryOption}
+                  disabled={!catInput.trim()}
+                  className="px-2.5 py-1 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Add</span>
+                </button>
+              </div>
+
+              {/* List of active custom options with Delete X buttons */}
+              <div className="pt-1.5 border-t border-blue-200/50 dark:border-gray-700/50">
+                <div className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                  Active Dropdown Options ({customCategories.length})
+                </div>
+                {customCategories.length === 0 ? (
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 italic">
+                    No custom options added yet. Type an option above to create one!
+                  </p>
+                ) : (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {customCategories.map((cat) => (
+                      <span
+                        key={cat}
+                        className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full text-[11px] font-bold bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700 shadow-2xs"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onUpdate(index, { category: cat });
+                            setShowCatManager(false);
+                          }}
+                          className="hover:underline cursor-pointer"
+                          title={`Select '${cat}' for this row`}
+                        >
+                          {cat}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCategoryOption(cat)}
+                          className="p-0.5 hover:bg-rose-500/20 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-full transition-all cursor-pointer ml-0.5"
+                          title={`Remove '${cat}' option from dropdown`}
+                        >
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </td>
 
@@ -296,3 +438,4 @@ export const EntryRow: React.FC<EntryRowProps> = ({
     </tr>
   );
 };
+

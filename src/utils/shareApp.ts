@@ -7,7 +7,7 @@ export function getAppUrl(): string {
     // Strip trailing slashes
     return window.location.origin.replace(/\/$/, '');
   }
-  return 'https://dailyhishab.app';
+  return 'https://dailyhishab.vercel.app';
 }
 
 export async function copyAppUrlToClipboard(): Promise<boolean> {

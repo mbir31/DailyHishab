@@ -218,20 +218,12 @@ export const AccountsPage: React.FC = () => {
           {/* Notes Section for Selected Period */}
           <NotesSection fromDate={dateFrom} toDate={dateTo} />
 
-          {/* Image Share Modal Card */}
-          <div className="glass-panel p-5 rounded-2xl space-y-3 border border-white/50 dark:border-white/10 text-center">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
-              Share Card Image
-            </h3>
-            <ExportModal
-              fromDate={dateFrom}
-              toDate={dateTo}
-              totalIncome={totalIncome}
-              totalExpense={totalExpense}
-              netBalance={netBalance}
-              noteContent={currentNote}
-            />
-          </div>
+          {/* Complete Financial Statement Export & Share Options (Directly on Overview Tab) */}
+          <StatementExportSection
+            fromDate={dateFrom}
+            toDate={dateTo}
+            entries={entriesInRange}
+          />
         </div>
       )}
 

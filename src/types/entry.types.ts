@@ -1,27 +1,8 @@
 export type EntryType = 'income' | 'expense';
 
-export const DEFAULT_INCOME_CATEGORIES = [
-  'General Income',
-  'Sales / Business',
-  'Salary / Wage',
-  'Freelance / Project',
-  'Investment / Profit',
-  'Gift / Grant',
-  'Other Income',
-];
+export const DEFAULT_INCOME_CATEGORIES: string[] = [];
 
-export const DEFAULT_EXPENSE_CATEGORIES = [
-  'General Expense',
-  'Groceries / Food',
-  'Rent / Housing',
-  'Utilities & Bills',
-  'Shopping & Retail',
-  'Transport / Fuel',
-  'Health & Medical',
-  'Entertainment',
-  'Business Expense',
-  'Other Expense',
-];
+export const DEFAULT_EXPENSE_CATEGORIES: string[] = [];
 
 export interface Entry {
   id: string;

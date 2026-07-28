@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { ProfileSection } from '../components/settings/ProfileSection';
 import { CurrencySection } from '../components/settings/CurrencySection';
 import { NavLabelsSection } from '../components/settings/NavLabelsSection';
+import { CustomDropdownSection } from '../components/settings/CustomDropdownSection';
 import { ThemeSelector } from '../components/settings/ThemeSelector';
 import { LanguageSelector } from '../components/settings/LanguageSelector';
 import { AuthSettingsModal } from '../components/settings/AuthSettingsModal';
@@ -73,6 +74,9 @@ export const SettingsPage: React.FC = () => {
 
       {/* Section 4: Customizable Navigation & Table Labels */}
       <NavLabelsSection />
+
+      {/* Section 5: Custom Dropdown Options Manager */}
+      <CustomDropdownSection />
 
       {/* Section 3: Credentials & Security */}
       <div className="glass-panel p-5 sm:p-6 space-y-4 rounded-2xl shadow-xl border border-white/50 dark:border-white/10">

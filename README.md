@@ -4,6 +4,7 @@
 
 ![DailyHishab Logo](https://img.shields.io/badge/DailyHishab-Smart_Financial_Ledger-3B82F6?style=for-the-badge&logo=wallet&logoColor=white)
 
+[![Deployed on Vercel](https://img.shields.io/badge/Hosted_on-Vercel-000000.svg?style=flat-square&logo=vercel&logoColor=white)](https://dailyhishab.vercel.app/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![React 19](https://img.shields.io/badge/React-19.0-61DAFB.svg?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6.svg?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -12,36 +13,47 @@
 [![Offline First](https://img.shields.io/badge/Offline-100%25_Functional-10B981.svg?style=flat-square&logo=sqlite&logoColor=white)](#)
 
 <p align="center">
-  <b>Replace messy paper notebooks (খাতা) and complex accounting software with a sleek, private, zero-latency daily financial ledger.</b>
+  <b>A professional-grade, high-performance daily financial ledger hosted globally on Vercel Edge Network. Replace messy paper notebooks (খাতা) and complex accounting tools with a sleek, private, zero-latency cash manager.</b>
 </p>
 
-### 🚀 [**Click Here to Open & Use DailyHishab Instantly in Browser**](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app)
-*(No download or terminal installation required! Works 100% offline & keeps your data private on your device.)*
+### 🚀 [**Click Here to Open & Use DailyHishab Live on Vercel**](https://dailyhishab.vercel.app/)
+*(Deployed on Vercel Global Edge Network • Works 100% offline & keeps your financial data 100% private on your device!)*
 
 </div>
 
 ---
 
-## 📱 Easy 1-Minute Setup (No Terminal or Coding Needed!)
+## ⚡ Global Deployment & Infrastructure Highlights
 
-You don't need any technical skills, commands, or terminal to use **DailyHishab**. You can access it directly in your browser or install it as a real app on your mobile phone or computer!
+**DailyHishab** is deployed directly on **Vercel Global Edge Infrastructure**, offering enterprise-level availability, ultra-fast global CDN routing, SSL encryption, and automated continuous deployment (CI/CD) from GitHub:
+
+* **🌐 Production Live URL:** [https://dailyhishab.vercel.app/](https://dailyhishab.vercel.app/)
+* **⚡ Sub-Second Load Times:** Served via Vercel's global edge network with instant global availability.
+* **🔒 Automatic SSL & Security:** Protected with HTTPS and client-side end-to-end data privacy.
+* **🔄 CI/CD Auto-Sync:** Any code updates pushed to GitHub trigger automated instant rebuilds and deployments on Vercel.
+
+---
+
+## 📱 Easy 1-Minute Setup (No Technical Skills Needed!)
+
+You don't need any technical skills, commands, or terminal to use **DailyHishab**. Access it directly in your browser or install it as a native app on your mobile phone or desktop!
 
 ### 🌐 Option A: Use Directly in Web Browser
-1. Click the live app link: **[Open DailyHishab](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app)**
-2. Start adding cash entries right away! Everything is saved safely on your device.
+1. Click the production app link: **[https://dailyhishab.vercel.app/](https://dailyhishab.vercel.app/)**
+2. Start adding income & expense entries right away! Everything is saved safely on your device.
 
 ---
 
 ### 📲 Option B: Install as Mobile App on your Phone (PWA)
 
 #### 🤖 On Android (Google Chrome / Brave / Edge):
-1. Open **[DailyHishab App Link](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app)** in Google Chrome.
+1. Open **[https://dailyhishab.vercel.app/](https://dailyhishab.vercel.app/)** in Google Chrome.
 2. Tap the **3 dots menu (⋮)** in the top-right corner.
 3. Tap **"Install App"** or **"Add to Home Screen"**.
 4. Confirm by tapping **Install**. A **DailyHishab** icon will appear on your phone's home screen just like an app from the Play Store!
 
 #### 🍏 On iPhone / iPad (Apple Safari):
-1. Open **[DailyHishab App Link](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app)** in Safari.
+1. Open **[https://dailyhishab.vercel.app/](https://dailyhishab.vercel.app/)** in Safari.
 2. Tap the **Share button** (square icon with an arrow pointing up at the bottom bar).
 3. Scroll down and tap **"Add to Home Screen"**.
 4. Tap **Add** in the top right corner. The **DailyHishab** app icon is now ready on your iPhone!
@@ -49,7 +61,7 @@ You don't need any technical skills, commands, or terminal to use **DailyHishab*
 ---
 
 ### 💻 Option C: Install on Desktop / Laptop Computer
-1. Open **[DailyHishab App Link](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app)** in Google Chrome, Microsoft Edge, or Brave.
+1. Open **[https://dailyhishab.vercel.app/](https://dailyhishab.vercel.app/)** in Google Chrome, Microsoft Edge, or Brave.
 2. Look at the address bar on the top right — click the **Install icon** (monitor with a small down-arrow) OR click **3 dots (⋮) ➔ Save and share ➔ Install DailyHishab**.
 3. Launch DailyHishab anytime directly from your Desktop or Start Menu!
 
@@ -108,6 +120,7 @@ Whether you're tracking daily household expenses, managing shop cash-in/cash-out
 | Feature | Paper Notebook (খাতা) | Complex Accounting Apps | DailyHishab 📊 |
 | :--- | :---: | :---: | :---: |
 | **Setup Time** | Instant | Hours of configuration | **0 Seconds (Direct Link)** |
+| **Hosting & Speed** | Physical book | Heavy server loads | **Vercel Global Edge CDN** |
 | **Offline Support** | Yes | Often requires login/cloud | **100% Offline-First** |
 | **Automated Totals** | ❌ Manual calculation | Yes | **Instant Real-Time** |
 | **WhatsApp Image Export** | ❌ Take photos | ❌ Rare | **One-Tap HD Render** |
@@ -119,7 +132,7 @@ Whether you're tracking daily household expenses, managing shop cash-in/cash-out
 
 ## 💻 Developers / Local Terminal Installation
 
-If you are a developer and wish to run or customize DailyHishab locally using the command line:
+If you wish to run or customize DailyHishab locally using the command line:
 
 ### Prerequisites
 * **Node.js**: `v18.0.0` or higher
@@ -153,9 +166,13 @@ Frontend Architecture
 ├── Motion (Framer)   # Smooth route transitions and micro-interactions
 └── Lucide React      # Clean, accessible vector icons
 
+Infrastructure & Deployment
+├── Vercel Platform   # Edge Network deployment & automatic CI/CD
+├── Vercel Rewrites   # SPA routing for single page web application
+└── Express Server    # Server proxy fallback
+
 Data & Storage Layer
 ├── LocalStorage API  # Instant client-side persistence
-├── Express Server    # Node.js backend proxy for server-side services
 └── Google GenAI SDK  # Optional smart financial insights proxy
 
 Data Visualization & Export
@@ -186,6 +203,7 @@ Distributed under the **MIT License**. See `LICENSE` for details.
 
 **Made with ❤️ for simple, clear, and secure daily financial management.**
 
-[🚀 Open App Link](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app) • [⭐ Star on GitHub](https://github.com/your-username/daily-hishab) • [🐛 Report Bug](https://github.com/your-username/daily-hishab/issues)
+[🚀 Open Live App on Vercel](https://dailyhishab.vercel.app/) • [⭐ Star on GitHub](https://github.com/your-username/daily-hishab) • [🐛 Report Bug](https://github.com/your-username/daily-hishab/issues)
 
 </div>
+
