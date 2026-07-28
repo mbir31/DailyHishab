@@ -85,7 +85,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       )}
 
       {/* Hidden Export Template Target for html2canvas */}
-      <div className="overflow-hidden h-0 w-0 absolute -left-[9999px] -top-[9999px]">
+      <div style={{ position: 'absolute', left: '-9999px', top: '0px', width: '600px', pointerEvents: 'none' }}>
         <div
           id="accounts-export-card"
           className="w-[600px] p-8 bg-white text-gray-900 font-sans space-y-6 rounded-3xl border border-gray-200 shadow-2xl"

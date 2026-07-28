@@ -23,12 +23,19 @@ export const ExportStatementModal: React.FC<ExportStatementModalProps> = ({
 
   const currency = userProfile.currency || (userProfile.language === 'bn' ? '৳' : '₹');
 
+  // Filter out blank / unfilled entries
+  const validEntries = entries.filter((e) => {
+    const hasAmount = typeof e.amount === 'number' && e.amount > 0;
+    const hasDesc = typeof e.description === 'string' && e.description.trim().length > 0;
+    return hasAmount || hasDesc;
+  });
+
   // Compute total summary
-  const totalIncome = entries
+  const totalIncome = validEntries
     .filter((e) => e.type === 'income')
     .reduce((sum, e) => sum + (e.amount || 0), 0);
 
-  const totalExpense = entries
+  const totalExpense = validEntries
     .filter((e) => e.type === 'expense')
     .reduce((sum, e) => sum + (e.amount || 0), 0);
 
@@ -57,7 +64,7 @@ export const ExportStatementModal: React.FC<ExportStatementModalProps> = ({
       XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
 
       // Sheet 2: Detailed Ledger Transactions Sheet
-      const ledgerRows = entries.map((e) => ({
+      const ledgerRows = validEntries.map((e) => ({
         Date: formatDateWithDay(e.date, userProfile.language, true),
         Serial: e.serial,
         Type: e.type.toUpperCase(),
@@ -96,7 +103,7 @@ export const ExportStatementModal: React.FC<ExportStatementModalProps> = ({
               Financial Statement Exporter
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Period: {formatDDMMYYYY(fromDate, userProfile.language)} to {formatDDMMYYYY(toDate, userProfile.language)} ({entries.length} records)
+              Period: {formatDDMMYYYY(fromDate, userProfile.language)} to {formatDDMMYYYY(toDate, userProfile.language)} ({validEntries.length} records)
             </p>
           </div>
           <button
