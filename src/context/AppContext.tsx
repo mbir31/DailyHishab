@@ -9,6 +9,7 @@ import {
   saveEntriesForDate,
   clearAllAppData,
   loadAllEntriesSync,
+  triggerAutoBackupSequence,
 } from '../utils/storage';
 import { getTodayDateString, shiftDateString } from '../utils/dateHelpers';
 import { getTranslation } from '../i18n/translations';
@@ -27,7 +28,7 @@ interface AppContextType {
   
   // Auth
   loginWithPin: (pin: string) => Promise<boolean>;
-  setupNewUser: (username: string, pin: string) => Promise<boolean>;
+  setupNewUser: (username: string, userId: string, pin: string) => Promise<boolean>;
   lockApp: () => void;
   
   // Entries for selected date
@@ -174,15 +175,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return false;
   };
 
-  const setupNewUser = async (username: string, pin: string): Promise<boolean> => {
+  const setupNewUser = async (username: string, userId: string, pin: string): Promise<boolean> => {
     const hashed = await hashPin(pin);
-    updateUserProfile({
-      username: username || 'User',
+    const cleanUserId = userId.trim() || '01712345678';
+    const cleanPin = pin.trim() || '1234';
+    const updatedProfile: UserProfile = {
+      ...userProfile,
+      username: username.trim() || 'Admin',
+      userId: cleanUserId,
+      pin: cleanPin,
       pinHash: hashed,
       isFirstSetupCompleted: true,
       isLoggedIn: true,
       lastActiveTimestamp: Date.now(),
-    });
+    };
+    updateUserProfile(updatedProfile);
+    triggerAutoBackupSequence(updatedProfile);
     return true;
   };
 
