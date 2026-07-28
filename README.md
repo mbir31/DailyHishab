@@ -10,7 +10,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6.svg?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4.0-06B6D4.svg?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![PWA Ready](https://img.shields.io/badge/PWA-Installable-5A0FC8.svg?style=flat-square&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
-[![Offline First](https://img.shields.io/badge/Offline-100%25_Functional-10B981.svg?style=flat-square&logo=sqlite&logoColor=white)](#)
+[![Offline First](https://img.shields.io/badge/Offline-100%25_Functional-10B981.svg?style=flat-square&logo=sqlite&logoColor=white)](#-7-100-offline-first--google-drive-sync)
 
 <p align="center">
   <b>A professional-grade, high-performance daily financial ledger hosted globally on Vercel Edge Network. Replace messy paper notebooks (খাতা) and complex accounting tools with a sleek, private, zero-latency cash manager.</b>
@@ -82,34 +82,43 @@ Whether you're tracking daily household expenses, managing shop cash-in/cash-out
 * **Instant Calculations**: Automatic real-time recalculation of daily subtotals, cumulative net balance, and entry volume.
 * **Smart Categorization & Custom Tags**: Pre-configured with essential categories (Salary, Business, Groceries, Rent, Utilities, Transport, etc.) plus complete freedom to add custom tags.
 
-### 📊 2. Visual Analytics & Financial Reports
+### 📋 2. Dedicated Monthly Financial Summary View
+* **Comprehensive Monthly Dashboard**: Dedicated text-based dashboard calculates total income, total expenses, net balance (surplus/deficit), savings retention rate, and expense-to-income ratio for any selected month and year.
+* **Executive Summary Narrative**: Automatically generates an executive text summary of the selected month's financial performance in both English and Bengali (বাংলা).
+* **Month-over-Month (MoM) Variance**: Compare current month against the previous month with side-by-side variance amounts and percentage changes.
+* **Category Distribution & Highlights**: Detailed breakdown of top income and expense categories with percentage progress bars, top single transaction highlights, and active entry days count.
+* **Interactive Month Picker**: Quick navigation controls to switch months, view past ledger histories, or reset to the current month in one click.
+
+### 📊 3. Visual Analytics & Financial Reports
 * **Interactive Recharts Graphs**: View income vs. expense trends over daily, monthly, and annual timeframes with fluid bar charts.
 * **Category Breakdown Charts**: Analyze spending patterns through intuitive donut and pie charts to identify cash leaks.
 * **Advanced Filter Engine**: Search and filter ledger history by exact date ranges, categories, keywords, tags, or min/max amount thresholds.
 
-### 📤 3. Multi-Format Exporting & One-Click Sharing
-* **WhatsApp & Social Media JPG Summaries**: High-DPI canvas engine (`html2canvas`) renders beautifully formatted image statements for direct sharing to WhatsApp, Messenger, or email.
+### 📤 4. Dual-Engine Exporting & One-Click Sharing
+* **WhatsApp & Social Media JPG Summaries**: Built-in dual-engine renderer (`html-to-image` SVG foreignObject canvas + `html2canvas` fallback) produces high-resolution, crash-free JPG statement cards for one-tap Web Share or direct WhatsApp sending.
+* **Cross-Browser OKLCH-to-RGB Fallback**: Features automatic RGB color resolution and standard HEX fallback maps to ensure 100% reliable canvas generation across all browsers.
 * **Excel (.XLSX) Worksheets**: Export clean, structured spreadsheet statements complete with formulas, dates, and itemized entry logs.
 * **Print-Ready PDF Reports**: Generate styled, client-ready PDF financial statements for accounting records or tax filing.
 
-### 📅 4. Localized Date Navigation (`DD-MM-YYYY` & Day Names)
+### 📅 5. Localized Date Navigation (`DD-MM-YYYY` & Day Names)
 * **Express Navigation Bar**: Seamlessly switch between *Yesterday*, *Today*, *Tomorrow*, or select any custom calendar date via an interactive modal picker.
 * **Bilingual Date Display**: Fully formats dates in standard `DD-MM-YYYY (Weekday)` format in both English (e.g. `27-07-2026 (Monday)`) and Bengali (e.g. `২৭-০৭-২০২৬ (সোমবার)`).
 
-### 🌐 5. Complete Bilingual (English & বাংলা) & Currency Flexibility
+### 🌐 6. Complete Bilingual (English & বাংলা) & Currency Flexibility
 * **Native English & Bengali (বাংলা) Full Translation**: Complete translation of every title, header, tab, filter, button, summary card, calendar, export option, and analytic chart for smooth native comprehension. Includes full support for Bengali numerals (`১, ২, ৩, ৪...`).
 * **Custom Currency Selector**: Toggle between local currencies (৳ BDT, ₹ INR, $ USD, € EUR, £ GBP, or custom symbols) with configurable formatting.
 
-### 🔐 6. App Lock PIN Security & Privacy Shield
+### 🔐 7. App Lock PIN Security & Privacy Shield
 * **4-Digit Security PIN**: Safeguard sensitive financial records with salted hashed PIN authentication and automatic inactivity auto-lock.
 * **One-Tap Privacy Masking**: Hide account balances and cash totals with an eye-icon toggle for safe usage in public places.
 
-### 💾 7. 100% Offline-First & Google Drive Sync
-* **Zero-Latency LocalStorage Architecture**: Operates 100% offline without requiring internet access or server authentication.
+### 💾 8. 100% Offline-First Architecture (Works Without Internet!)
+* **Fully Functional Offline**: All core features—including entry management, monthly summaries, calculations, local searches, and canvas JPG statement generation—run 100% locally on your browser/device without requiring an internet connection.
+* **Zero-Latency LocalStorage**: Operates with instant response times and zero server dependency.
 * **JSON Backup & Restore**: One-click data download and restoration to ensure zero data loss when switching devices.
-* **Google Drive Integration**: Direct cloud backup capability for encrypted remote sync.
+* **Optional Cloud Backup**: Optional Google Drive sync when internet connection is available.
 
-### 📱 8. Progressive Web App (PWA) & Modern Glassmorphism Design
+### 📱 9. Progressive Web App (PWA) & Modern Glassmorphism Design
 * **Installable App Experience**: Add DailyHishab directly to your iOS / Android home screen or Desktop for a native app feel.
 * **Fluid Dark & Light Themes**: Carefully selected color palettes (Light, Dark, and System Auto) featuring glassmorphism accents and responsive mobile tab bars.
 
@@ -177,7 +186,8 @@ Data & Storage Layer
 
 Data Visualization & Export
 ├── Recharts          # SVG visual analytics and comparison charts
-├── html2canvas       # High-DPI canvas rendering for JPG statement shares
+├── html-to-image     # Primary SVG foreignObject canvas renderer for JPG statement shares
+├── html2canvas       # Fallback canvas rendering for cross-browser support
 ├── jspdf             # Vector PDF document generation
 └── xlsx (SheetJS)    # Native Excel spreadsheet compilation
 ```
