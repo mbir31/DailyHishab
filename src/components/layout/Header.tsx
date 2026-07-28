@@ -28,25 +28,26 @@ export const Header: React.FC = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass-header rounded-b-[24px] px-4 py-3 sm:px-6 sm:py-4 transition-all duration-300">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-        {/* Left: Brand AppLogo & Custom Title */}
+        {/* Left: User Profile Photo / Default App Icon & Custom Title */}
         <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
-          {userProfile.logoVariant === 'badge' ? (
-            <AppLogo variant="badge" size="sm" showTagline={true} />
-          ) : userProfile.logoVariant === 'full' ? (
-            <AppLogo variant="full" size="sm" showTagline={false} />
+          {userProfile.photoURL ? (
+            <img
+              src={userProfile.photoURL}
+              alt={userProfile.username || 'Profile'}
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-blue-500/30 dark:border-blue-400/30 shadow-sm shrink-0"
+            />
           ) : (
-            <>
-              <AppLogo variant={userProfile.logoVariant || 'icon-only'} size="md" animated={true} />
-              <div className="flex flex-col min-w-0">
-                <h1 className="text-lg sm:text-2xl font-black text-gray-900 dark:text-white truncate tracking-tight leading-tight">
-                  {userProfile.mainTitle || (userProfile.language === 'bn' ? t.app.name : 'DailyHishab')}
-                </h1>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate font-medium">
-                  {userProfile.subtitle || (userProfile.language === 'bn' ? t.app.subtitleDefault : 'Personal & Business Ledger')}
-                </p>
-              </div>
-            </>
+            <AppLogo variant={userProfile.logoVariant || 'icon-only'} size="md" animated={true} />
           )}
+
+          <div className="flex flex-col min-w-0">
+            <h1 className="text-lg sm:text-2xl font-black text-gray-900 dark:text-white truncate tracking-tight leading-tight">
+              {userProfile.mainTitle || (userProfile.language === 'bn' ? t.app.name : 'DailyHishab')}
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate font-medium">
+              {userProfile.subtitle || (userProfile.language === 'bn' ? t.app.subtitleDefault : 'Personal & Business Ledger')}
+            </p>
+          </div>
         </div>
 
         {/* Right: Quick Controls & Status */}
