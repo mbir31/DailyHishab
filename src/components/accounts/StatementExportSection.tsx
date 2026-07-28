@@ -5,7 +5,7 @@ import { formatDDMMYYYY, formatDateWithDay } from '../../utils/dateHelpers';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
-import { FileSpreadsheet, FileText, CheckCircle2, Share2, Loader2, Send, ShieldCheck, Download } from 'lucide-react';
+import { FileSpreadsheet, FileText, CheckCircle2, Share2, Loader2, Send, ShieldCheck, Download, Award, Stamp } from 'lucide-react';
 import { shareStatementAsImage } from '../../utils/exportService';
 
 interface StatementExportSectionProps {
@@ -25,8 +25,30 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
   const [isSharingWhatsApp, setIsSharingWhatsApp] = useState<boolean>(false);
   const [isExportingPDF, setIsExportingPDF] = useState<boolean>(false);
 
+  // Digital Seal & Watermark customization state
+  const [enableStamp, setEnableStamp] = useState<boolean>(true);
+  const [stampText, setStampText] = useState<string>(
+    userProfile.language === 'bn' ? 'যাচাইকৃত ও অনুমোদিত' : 'PAID & VERIFIED'
+  );
+  const [stampStyle, setStampStyle] = useState<'circular' | 'rectangular' | 'badge'>('circular');
+  const [stampColor, setStampColor] = useState<'bluish-purple' | 'classic-red' | 'emerald-green' | 'dark-navy'>('bluish-purple');
+  const [enableBackgroundWatermark, setEnableBackgroundWatermark] = useState<boolean>(false);
+  const [watermarkText, setWatermarkText] = useState<string>(
+    userProfile.language === 'bn' ? 'অফিসিয়াল নথি' : 'OFFICIAL STATEMENT'
+  );
+
   const currencySymbol = userProfile.currency || (userProfile.language === 'bn' ? '৳' : '₹');
   const appTitle = userProfile.mainTitle || 'DailyHishab';
+
+  // Ink hex color mapper for realistic rubber stamp simulation
+  const inkHexColor =
+    stampColor === 'classic-red'
+      ? '#c62828'
+      : stampColor === 'emerald-green'
+      ? '#2e7d32'
+      : stampColor === 'dark-navy'
+      ? '#0f172a'
+      : '#283593'; // Classic bluish-purple rubber stamp ink
 
   // Filter out blank / unfilled entries (entries with 0 or empty amount AND blank description)
   const validEntries = entries.filter((e) => {
@@ -195,6 +217,156 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
         </div>
       )}
 
+      {/* Custom Watermark & Digital Stamp Customization Panel */}
+      <div className="bg-slate-50 dark:bg-gray-800/80 p-4 rounded-2xl border border-gray-200 dark:border-gray-700/80 space-y-3.5 text-left transition-all">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <Award className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <span className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+              {userProfile.language === 'bn' ? 'ডিজিটাল সিল ও ওয়াটারমার্ক সেটিংস' : 'Digital Seal & Watermark Options'}
+            </span>
+          </div>
+
+          {/* Toggle Button */}
+          <label className="inline-flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={enableStamp}
+              onChange={(e) => setEnableStamp(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600 relative"></div>
+            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+              {enableStamp ? (userProfile.language === 'bn' ? 'সিল সক্রিয়' : 'Seal Enabled') : (userProfile.language === 'bn' ? 'সিল বন্ধ' : 'Seal Disabled')}
+            </span>
+          </label>
+        </div>
+
+        {enableStamp && (
+          <div className="space-y-3 pt-1 border-t border-gray-200 dark:border-gray-700 animate-fade-in text-xs">
+            {/* Input Field & Presets */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
+                {userProfile.language === 'bn' ? 'সিল / স্ট্যাম্পের লেখা (কাস্টমাইজ করুন):' : 'Custom Stamp / Seal Text:'}
+              </label>
+              <input
+                type="text"
+                value={stampText}
+                onChange={(e) => setStampText(e.target.value)}
+                placeholder="e.g. PAID & VERIFIED"
+                className="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-indigo-500 font-bold"
+              />
+
+              {/* Preset Chips */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="text-[10px] text-gray-400 font-medium">{userProfile.language === 'bn' ? 'দ্রুত বাছাই:' : 'Presets:'}</span>
+                {(userProfile.language === 'bn'
+                  ? ['যাচাইকৃত ও অনুমোদিত', 'পরিশোধিত (PAID)', 'অফিসিয়াল সিল', 'অডিট সম্পন্ন', 'গোপনীয় তথ্য']
+                  : ['PAID & VERIFIED', 'APPROVED & SIGNED', 'OFFICIAL SEAL', 'AUDITED & RECORDED', 'CONFIDENTIAL']
+                ).map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setStampText(preset)}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
+                      stampText === preset
+                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Design & Color Options Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              {/* Stamp Design Style */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
+                  {userProfile.language === 'bn' ? 'স্ট্যাম্প আকার / শেপ:' : 'Stamp Shape & Design:'}
+                </label>
+                <div className="flex items-center gap-1.5">
+                  {[
+                    { id: 'circular', label: userProfile.language === 'bn' ? 'গোল সিল' : 'Circular' },
+                    { id: 'rectangular', label: userProfile.language === 'bn' ? 'চৌকো বক্স' : 'Rectangular' },
+                    { id: 'badge', label: userProfile.language === 'bn' ? 'সিগনেচার ব্যাজ' : 'Signature Seal' },
+                  ].map((st) => (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => setStampStyle(st.id as any)}
+                      className={`flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold border text-center transition-all cursor-pointer ${
+                        stampStyle === st.id
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                          : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      {st.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Ink Color Selector */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
+                  {userProfile.language === 'bn' ? 'সিলের কালি (ইঙ্ক কালার):' : 'Stamp Ink Color:'}
+                </label>
+                <div className="flex items-center gap-1.5">
+                  {[
+                    { id: 'bluish-purple', label: 'Indigo Ink', colorBg: 'bg-[#283593]' },
+                    { id: 'classic-red', label: 'Red Ink', colorBg: 'bg-[#c62828]' },
+                    { id: 'emerald-green', label: 'Green Ink', colorBg: 'bg-[#2e7d32]' },
+                    { id: 'dark-navy', label: 'Navy Ink', colorBg: 'bg-[#0f172a]' },
+                  ].map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setStampColor(c.id as any)}
+                      className={`flex-1 py-1 px-1.5 rounded-xl text-[10px] font-bold border flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                        stampColor === c.id
+                          ? 'border-indigo-600 ring-2 ring-indigo-500/30 bg-white dark:bg-gray-900 text-gray-900 dark:text-white'
+                          : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400'
+                      }`}
+                    >
+                      <span className={`w-2.5 h-2.5 rounded-full ${c.colorBg}`} />
+                      <span className="truncate">{c.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Background Diagonal Watermark Toggle */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-gray-200/60 dark:border-gray-700/60">
+              <label className="inline-flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={enableBackgroundWatermark}
+                  onChange={(e) => setEnableBackgroundWatermark(e.target.checked)}
+                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+                  {userProfile.language === 'bn' ? 'ব্যাকগ্রাউন্ড ডায়াগনাল ওয়াটারমার্ক যুক্ত করুন' : 'Add Diagonal Background Watermark'}
+                </span>
+              </label>
+
+              {enableBackgroundWatermark && (
+                <input
+                  type="text"
+                  value={watermarkText}
+                  onChange={(e) => setWatermarkText(e.target.value)}
+                  placeholder="Watermark Text"
+                  className="px-2.5 py-1 text-[11px] rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-bold outline-none"
+                />
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Primary Action Buttons */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-1">
         {/* Share JPG via Web Share / Apps */}
@@ -258,8 +430,20 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
       <div style={{ position: 'absolute', left: '-9999px', top: '0px', width: '820px', pointerEvents: 'none' }}>
         <div
           id="statement-image-export-card"
-          className="w-[820px] p-8 bg-white text-slate-800 font-sans space-y-5 rounded-3xl border border-slate-200 shadow-2xl relative"
+          className="w-[820px] p-8 bg-white text-slate-800 font-sans space-y-5 rounded-3xl border border-slate-200 shadow-2xl relative overflow-hidden"
         >
+          {/* Diagonal Background Watermark (if enabled) */}
+          {enableBackgroundWatermark && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden z-0 opacity-[0.06] -rotate-30 select-none">
+              <span
+                className="text-7xl font-black uppercase tracking-widest whitespace-nowrap"
+                style={{ color: inkHexColor }}
+              >
+                {watermarkText || stampText || 'OFFICIAL STATEMENT'}
+              </span>
+            </div>
+          )}
+
           {/* Top Decorative Gradient Accent Bar */}
           <div className="h-2 w-full bg-gradient-to-r from-blue-700 via-indigo-600 to-teal-500 rounded-t-3xl -mt-8 -mx-8 mb-4" />
 
@@ -494,16 +678,94 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
               </p>
             </div>
 
-            {/* Official Stamp Graphic */}
-            <div className="flex items-center gap-3 shrink-0">
-              <div className="w-20 h-20 rounded-full border-2 border-dashed border-blue-600/40 p-1 flex items-center justify-center text-center">
-                <div className="w-full h-full rounded-full bg-blue-50/80 border border-blue-600/60 p-1 flex flex-col items-center justify-center leading-none text-[8px] font-black text-blue-800 uppercase tracking-tighter">
-                  <span className="text-[7px] text-blue-600">★ OFFICIAL ★</span>
-                  <span className="my-0.5 text-blue-900 font-extrabold">VERIFIED</span>
-                  <span className="text-[7px] text-emerald-600">AUDIT READY</span>
-                </div>
+            {/* Dynamic Official Stamp Graphic */}
+            {enableStamp && (
+              <div className="flex items-center justify-center shrink-0">
+                {stampStyle === 'circular' && (
+                  <div
+                    className="relative inline-flex items-center justify-center p-1 rounded-full transform -rotate-12 select-none"
+                    style={{ color: inkHexColor }}
+                  >
+                    <div
+                      className="w-24 h-24 rounded-full border-4 border-double flex flex-col items-center justify-center text-center p-1 leading-none relative overflow-hidden bg-white/40"
+                      style={{ borderColor: inkHexColor }}
+                    >
+                      {/* Inner dashed circle */}
+                      <div
+                        className="absolute inset-1 rounded-full border border-dashed pointer-events-none opacity-80"
+                        style={{ borderColor: inkHexColor }}
+                      />
+
+                      <span className="text-[7px] font-black uppercase tracking-widest opacity-90">
+                        ★ {appTitle.substring(0, 14).toUpperCase()} ★
+                      </span>
+
+                      <span
+                        className="text-[10px] font-black my-1 uppercase tracking-tight px-1 font-sans border-y py-0.5 w-full truncate"
+                        style={{ borderColor: inkHexColor }}
+                      >
+                        {stampText || 'VERIFIED'}
+                      </span>
+
+                      <span className="text-[7px] font-extrabold uppercase tracking-wider opacity-85">
+                        {fromDate.replace(/-/g, '.')}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {stampStyle === 'rectangular' && (
+                  <div
+                    className="relative inline-block p-1 transform -rotate-6 select-none"
+                    style={{ color: inkHexColor }}
+                  >
+                    <div
+                      className="px-3.5 py-1.5 border-4 border-double rounded-md flex flex-col items-center justify-center text-center leading-none min-w-[140px] bg-white/40"
+                      style={{ borderColor: inkHexColor }}
+                    >
+                      <div
+                        className="text-[7px] font-black uppercase tracking-widest border-b pb-0.5 mb-1 w-full"
+                        style={{ borderColor: inkHexColor }}
+                      >
+                        ★ OFFICIAL LEDGER SEAL ★
+                      </div>
+                      <div className="text-[12px] font-black uppercase tracking-wider py-0.5 font-sans truncate max-w-[150px]">
+                        {stampText || 'PAID & VERIFIED'}
+                      </div>
+                      <div
+                        className="text-[7px] font-bold uppercase tracking-tight pt-0.5 border-t mt-1 w-full opacity-85"
+                        style={{ borderColor: inkHexColor }}
+                      >
+                        REF: DH-{fromDate.replace(/-/g, '')}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {stampStyle === 'badge' && (
+                  <div
+                    className="relative inline-flex flex-col items-center transform -rotate-6 select-none"
+                    style={{ color: inkHexColor }}
+                  >
+                    <div
+                      className="px-3 py-1.5 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center text-center space-y-0.5 bg-white/40"
+                      style={{ borderColor: inkHexColor }}
+                    >
+                      <span className="text-[7px] font-extrabold uppercase tracking-widest">DIGITALLY SIGNED</span>
+                      <span
+                        className="text-[11px] font-black uppercase tracking-tight px-2 py-0.5 rounded border"
+                        style={{ borderColor: inkHexColor }}
+                      >
+                        {stampText || 'APPROVED'}
+                      </span>
+                      <span className="text-[7px] font-mono opacity-80 uppercase">
+                        BY: {userProfile.username || appTitle}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </div>
 
           {/* Bottom Copyright bar */}
