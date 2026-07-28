@@ -59,11 +59,11 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({
         {typeof count === 'number' && (
           <div className="text-right">
             <span className="text-[11px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-full block">
-              {count} {count === 1 ? 'entry' : 'entries'}
+              {count} {userProfile.language === 'bn' ? 'টি হিসাব' : count === 1 ? 'entry' : 'entries'}
             </span>
             {count > 0 && (
               <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium block mt-0.5">
-                Avg: {formatCurrency(avgValue, userProfile.language, userProfile.currency)}
+                {userProfile.language === 'bn' ? 'গড়: ' : 'Avg: '}{formatCurrency(avgValue, userProfile.language, userProfile.currency)}
               </span>
             )}
           </div>

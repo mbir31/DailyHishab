@@ -220,10 +220,10 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
       <div className="flex flex-col items-center space-y-1">
         <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
           <Download className="w-4 h-4 text-blue-500" />
-          <span>Financial Statements Export & Sharing</span>
+          <span>{userProfile.language === 'bn' ? 'আর্থিক স্টেটমেন্ট রিপোর্ট ও শেয়ার' : 'Financial Statements Export & Sharing'}</span>
         </h3>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Share as JPG image to WhatsApp / chat apps or download Excel & PDF statements ({fromDate} to {toDate})
+          {userProfile.language === 'bn' ? `হোয়াটসঅ্যাপে ছবি শেয়ার অথবা এক্সেল ও পিডিএফ রিপোর্ট ডাউনলোড করুন (${fromDate} থেকে ${toDate})` : `Share as JPG image to WhatsApp / chat apps or download Excel & PDF statements (${fromDate} to ${toDate})`}
         </p>
       </div>
 
@@ -248,7 +248,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
           ) : (
             <Share2 className="w-4 h-4" />
           )}
-          <span>Share as JPG Image</span>
+          <span>{userProfile.language === 'bn' ? 'ছবি হিসেবে শেয়ার' : 'Share as JPG Image'}</span>
         </button>
 
         {/* Direct Share on WhatsApp */}
@@ -263,7 +263,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
           ) : (
             <Send className="w-4 h-4" />
           )}
-          <span>Share to WhatsApp</span>
+          <span>{userProfile.language === 'bn' ? 'হোয়াটসঅ্যাপে পাঠান' : 'Share to WhatsApp'}</span>
         </button>
 
         {/* Excel Button */}
@@ -273,7 +273,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
           className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs sm:text-sm active:scale-95 transition-all shadow-md cursor-pointer"
         >
           <FileSpreadsheet className="w-4 h-4" />
-          <span>Export Excel (.XLSX)</span>
+          <span>{userProfile.language === 'bn' ? 'এক্সেল ফাইলেই ডাউনলোড' : 'Export Excel (.XLSX)'}</span>
         </button>
 
         {/* PDF Button */}
@@ -283,7 +283,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
           className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm active:scale-95 transition-all shadow-md cursor-pointer"
         >
           <FileText className="w-4 h-4" />
-          <span>Export PDF Statement</span>
+          <span>{userProfile.language === 'bn' ? 'পিডিএফ স্টেটমেন্ট' : 'Export PDF Statement'}</span>
         </button>
       </div>
 

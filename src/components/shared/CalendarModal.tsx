@@ -73,7 +73,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose })
         {/* Custom HTML5 Date Input */}
         <div className="mb-6">
           <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">
-            Pick Custom Date
+            {userProfile.language === 'bn' ? 'কাস্টম তারিখ বেছে নিন' : 'Pick Custom Date'}
           </label>
           <input
             type="date"

@@ -18,7 +18,7 @@ export const TimeFilter: React.FC<TimeFilterProps> = ({
   customTo,
   onCustomRangeChange,
 }) => {
-  const { t } = useApp();
+  const { t, userProfile } = useApp();
 
   const filters: { id: TimeFilterType; label: string }[] = [
     { id: 'day', label: t.accounts.timeFilters.day },
@@ -55,7 +55,7 @@ export const TimeFilter: React.FC<TimeFilterProps> = ({
         <div className="glass-card p-3 sm:p-4 rounded-2xl grid grid-cols-1 sm:grid-cols-2 gap-3 animate-fade-in max-w-md mx-auto">
           <div>
             <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
-              From Date
+              {t.dateSelector ? (t.accounts?.timeFilters ? (userProfile?.language === 'bn' ? 'তারিখ হতে' : 'From Date') : 'From Date') : 'From Date'}
             </label>
             <input
               type="date"
@@ -66,7 +66,7 @@ export const TimeFilter: React.FC<TimeFilterProps> = ({
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
-              To Date
+              {userProfile?.language === 'bn' ? 'তারিখ পর্যন্ত' : 'To Date'}
             </label>
             <input
               type="date"

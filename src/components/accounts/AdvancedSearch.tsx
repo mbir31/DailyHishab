@@ -126,10 +126,10 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
-              Advanced Search & Filters
+              {userProfile.language === 'bn' ? 'উন্নত অনুসন্ধান ও ফিল্টার' : 'Advanced Search & Filters'}
             </h2>
             <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
-              Filter entries by keyword, tags, category, amount, or custom date range
+              {userProfile.language === 'bn' ? 'কীওয়ার্ড, ট্যাগ, ক্যাটাগরি, টাকার পরিমাণ বা তারিখ অনুযায়ী খুঁজুন' : 'Filter entries by keyword, tags, category, amount, or custom date range'}
             </p>
           </div>
         </div>
@@ -140,7 +140,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 text-gray-700 dark:text-gray-300 text-xs font-bold transition-all active:scale-95 cursor-pointer"
         >
           <RotateCcw className="w-3.5 h-3.5" />
-          <span>Reset</span>
+          <span>{userProfile.language === 'bn' ? 'রিসেট' : 'Reset'}</span>
         </button>
       </div>
 
@@ -153,7 +153,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by customer, note, category or #tag..."
+            placeholder={userProfile.language === 'bn' ? 'গ্রাহক, বিবরণ, ক্যাটাগরি বা #ট্যাগ লিখে খুঁজুন...' : 'Search by customer, note, category or #tag...'}
             className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-300 dark:border-gray-700 text-xs sm:text-sm font-medium text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
           />
           {searchQuery && (
@@ -174,9 +174,9 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
             onChange={(e) => setSelectedType(e.target.value as any)}
             className="w-full px-3 py-2.5 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-300 dark:border-gray-700 text-xs sm:text-sm font-semibold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
           >
-            <option value="all">All Types (Income & Expense)</option>
-            <option value="income">Income Only</option>
-            <option value="expense">Expense Only</option>
+            <option value="all">{userProfile.language === 'bn' ? 'সকল প্রকার (আয় ও খরচ)' : 'All Types (Income & Expense)'}</option>
+            <option value="income">{userProfile.language === 'bn' ? 'শুধুমাত্র আয়' : 'Income Only'}</option>
+            <option value="expense">{userProfile.language === 'bn' ? 'শুধুমাত্র খরচ' : 'Expense Only'}</option>
           </select>
         </div>
 
@@ -187,7 +187,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="w-full px-3 py-2.5 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-300 dark:border-gray-700 text-xs sm:text-sm font-semibold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
           >
-            <option value="all">All Categories</option>
+            <option value="all">{userProfile.language === 'bn' ? 'সকল ক্যাটাগরি' : 'All Categories'}</option>
             {allCategories.map((cat) => (
               <option key={cat} value={cat}>
                 {cat}
@@ -199,7 +199,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
         {/* Date From */}
         <div>
           <label className="block text-[10px] font-extrabold uppercase text-gray-500 dark:text-gray-400 mb-1">
-            Date From
+            {userProfile.language === 'bn' ? 'তারিখ হতে' : 'Date From'}
           </label>
           <input
             type="date"
@@ -212,7 +212,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
         {/* Date To */}
         <div>
           <label className="block text-[10px] font-extrabold uppercase text-gray-500 dark:text-gray-400 mb-1">
-            Date To
+            {userProfile.language === 'bn' ? 'তারিখ পর্যন্ত' : 'Date To'}
           </label>
           <input
             type="date"
@@ -225,7 +225,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
         {/* Min Amount */}
         <div>
           <label className="block text-[10px] font-extrabold uppercase text-gray-500 dark:text-gray-400 mb-1">
-            Min Amount ({currencySymbol})
+            {userProfile.language === 'bn' ? 'সর্বনিম্ন পরিমাণ' : 'Min Amount'} ({currencySymbol})
           </label>
           <input
             type="number"
@@ -239,13 +239,13 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ entries }) => {
         {/* Max Amount */}
         <div>
           <label className="block text-[10px] font-extrabold uppercase text-gray-500 dark:text-gray-400 mb-1">
-            Max Amount ({currencySymbol})
+            {userProfile.language === 'bn' ? 'সর্বোচ্চ পরিমাণ' : 'Max Amount'} ({currencySymbol})
           </label>
           <input
             type="number"
             value={maxAmount}
             onChange={(e) => setMaxAmount(e.target.value)}
-            placeholder="Any"
+            placeholder={userProfile.language === 'bn' ? 'যেকোনো' : 'Any'}
             className="w-full px-3 py-2 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-300 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>

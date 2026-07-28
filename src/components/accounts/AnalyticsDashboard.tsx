@@ -35,7 +35,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ entries 
 
   // 1. Monthly Breakdown Data (January to December)
   const monthlyData = useMemo(() => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const enMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const bnMonths = ['জানু', 'ফেব্রু', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টে', 'অক্টো', 'নভে', 'ডিসে'];
+    const months = userProfile.language === 'bn' ? bnMonths : enMonths;
     const currentYear = new Date().getFullYear();
 
     const monthMap: Record<number, { month: string; income: number; expense: number; net: number; cumulative: number }> = {};
@@ -116,10 +118,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ entries 
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
-              Financial Analytics & Trends
+              {userProfile.language === 'bn' ? 'আর্থিক বিশ্লেষণ ও ট্রেন্ডস' : 'Financial Analytics & Trends'}
             </h2>
             <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
-              Interactive monthly & yearly insights with category breakdown
+              {userProfile.language === 'bn' ? 'মাসিক ও বাৎসরিক ক্যাশ ফ্লো এবং ক্যাটাগরিভিত্তিক চিত্র' : 'Interactive monthly & yearly insights with category breakdown'}
             </p>
           </div>
         </div>
@@ -135,7 +137,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ entries 
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
-            Monthly Cash Flow
+            {userProfile.language === 'bn' ? 'মাসিক ক্যাশ ফ্লো' : 'Monthly Cash Flow'}
           </button>
           <button
             type="button"
@@ -146,7 +148,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ entries 
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
-            Cumulative Net Trajectory
+            {userProfile.language === 'bn' ? 'সঞ্চিত পথরেখা' : 'Cumulative Net Trajectory'}
           </button>
           <button
             type="button"
@@ -157,7 +159,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ entries 
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
-            Categories
+            {userProfile.language === 'bn' ? 'ক্যাটাগরি পাই-চার্ট' : 'Categories'}
           </button>
         </div>
       </div>

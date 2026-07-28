@@ -39,10 +39,10 @@ export const Header: React.FC = () => {
               <AppLogo variant={userProfile.logoVariant || 'icon-only'} size="md" animated={true} />
               <div className="flex flex-col min-w-0">
                 <h1 className="text-lg sm:text-2xl font-black text-gray-900 dark:text-white truncate tracking-tight leading-tight">
-                  {userProfile.mainTitle || 'DailyHishab'}
+                  {userProfile.mainTitle || (userProfile.language === 'bn' ? t.app.name : 'DailyHishab')}
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate font-medium">
-                  {userProfile.subtitle || 'Personal & Business Ledger'}
+                  {userProfile.subtitle || (userProfile.language === 'bn' ? t.app.subtitleDefault : 'Personal & Business Ledger')}
                 </p>
               </div>
             </>
@@ -67,11 +67,13 @@ export const Header: React.FC = () => {
           <button
             onClick={handleShareApp}
             className="relative p-2 sm:p-2.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 transition-all active:scale-95 border border-blue-500/20 flex items-center gap-1 text-xs font-bold cursor-pointer"
-            title="Share Live PWA Link"
+            title={userProfile.language === 'bn' ? 'লাইভ অ্যাপ শেয়ার' : 'Share Live PWA Link'}
             aria-label="Share App Link"
           >
             {shareToast ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
-            <span className="hidden lg:inline">{shareToast || 'Share App'}</span>
+            <span className="hidden lg:inline">
+              {shareToast || (userProfile.language === 'bn' ? 'শেয়ার অ্যাপ' : 'Share App')}
+            </span>
           </button>
 
           {/* Theme Quick Toggle */}

@@ -88,7 +88,7 @@ export const AccountsPage: React.FC = () => {
           }`}
         >
           <LayoutDashboard className="w-4 h-4" />
-          <span>Overview</span>
+          <span>{userProfile.language === 'bn' ? 'সংক্ষিপ্ত রূপ' : 'Overview'}</span>
         </button>
 
         <button
@@ -101,7 +101,7 @@ export const AccountsPage: React.FC = () => {
           }`}
         >
           <BarChart3 className="w-4 h-4" />
-          <span>Analytics & Trends</span>
+          <span>{userProfile.language === 'bn' ? 'এনালাইটিক্স ও ট্রেন্ডস' : 'Analytics & Trends'}</span>
         </button>
 
         <button
@@ -114,7 +114,7 @@ export const AccountsPage: React.FC = () => {
           }`}
         >
           <Search className="w-4 h-4" />
-          <span>Search & Filters</span>
+          <span>{userProfile.language === 'bn' ? 'অনুসন্ধান ও ফিল্টার' : 'Search & Filters'}</span>
         </button>
 
         <button
@@ -127,7 +127,7 @@ export const AccountsPage: React.FC = () => {
           }`}
         >
           <FileSpreadsheet className="w-4 h-4" />
-          <span>Export PDF & Excel</span>
+          <span>{userProfile.language === 'bn' ? 'স্টেটমেন্ট ও রিপোর্ট' : 'Export PDF & Excel'}</span>
         </button>
       </div>
 
@@ -154,7 +154,7 @@ export const AccountsPage: React.FC = () => {
               count={incomeCount}
               type="income"
               icon={<ArrowUpRight className="w-5 h-5 text-emerald-500" />}
-              subtitle={`${incomePercent}% of volume`}
+              subtitle={userProfile.language === 'bn' ? `মোটের ${incomePercent}%` : `${incomePercent}% of volume`}
             />
 
             <SummaryCard
@@ -163,7 +163,7 @@ export const AccountsPage: React.FC = () => {
               count={expenseCount}
               type="expense"
               icon={<ArrowDownRight className="w-5 h-5 text-rose-500" />}
-              subtitle={`${expensePercent}% of volume`}
+              subtitle={userProfile.language === 'bn' ? `মোটের ${expensePercent}%` : `${expensePercent}% of volume`}
             />
 
             <SummaryCard
@@ -172,7 +172,7 @@ export const AccountsPage: React.FC = () => {
               count={incomeCount + expenseCount}
               type="balance"
               icon={<Wallet className="w-5 h-5 text-blue-500" />}
-              subtitle={netBalance >= 0 ? 'Surplus' : 'Deficit'}
+              subtitle={netBalance >= 0 ? (userProfile.language === 'bn' ? 'উদ্বৃত্ত' : 'Surplus') : (userProfile.language === 'bn' ? 'ঘাটতি' : 'Deficit')}
             />
           </div>
 
