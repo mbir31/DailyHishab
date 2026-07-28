@@ -11,6 +11,8 @@ const STORAGE_KEYS = {
 export const DEFAULT_PROFILE: UserProfile = {
   username: 'Admin',
   pinHash: '', // Set on first welcome screen
+  userId: '01712345678', // Default 11-digit User ID
+  pin: '1234', // Default 4-digit PIN
   mainTitle: 'DailyHishab',
   subtitle: 'Personal & Business Ledger',
   photoURL: null,
@@ -28,10 +30,23 @@ export const DEFAULT_PROFILE: UserProfile = {
   autoLockMinutes: 15,
   lastActiveTimestamp: Date.now(),
   backupMode: 'both',
+  backupStorageMode: 'both',
   offlineAutoBackup: true,
   onlineAutoBackup: true,
+  lastCloudBackupTime: null,
   logoVariant: 'full',
 };
+
+// Strict Validation Helpers
+export function isValidUserId(id: string): boolean {
+  if (!id) return false;
+  return /^\d{11}$/.test(id.trim());
+}
+
+export function isValidPin(pin: string): boolean {
+  if (!pin) return false;
+  return /^\d{4}$/.test(pin.trim());
+}
 
 // Simple cryptographic PIN hash function using Web Crypto API
 export async function hashPin(pin: string): Promise<string> {
@@ -207,22 +222,85 @@ export function createBackupObject(): BackupData {
   };
 }
 
-export function restoreFromBackupObject(backup: BackupData): boolean {
+export function restoreFromBackupObject(
+  backup: BackupData,
+  options: { mode?: 'replace' | 'merge' } = { mode: 'replace' }
+): boolean {
   if (!backup || !Array.isArray(backup.entries)) {
     return false;
   }
+
+  const mode = options.mode || 'replace';
+
   if (backup.profile) {
     const currentProfile = loadUserProfile();
     saveUserProfile({
       ...currentProfile,
       ...backup.profile,
-      pinHash: currentProfile.pinHash, // preserve current user PIN unless empty
+      userId: currentProfile.userId, // preserve current device user ID unless empty
+      pin: currentProfile.pin, // preserve current user PIN
+      pinHash: currentProfile.pinHash,
     });
   }
-  saveAllEntriesSync(backup.entries);
-  if (Array.isArray(backup.notes)) {
-    localStorage.setItem(STORAGE_KEYS.NOTES, JSON.stringify(backup.notes));
+
+  if (mode === 'replace') {
+    saveAllEntriesSync(backup.entries);
+    if (Array.isArray(backup.notes)) {
+      localStorage.setItem(STORAGE_KEYS.NOTES, JSON.stringify(backup.notes));
+    }
+  } else {
+    // Merge mode
+    const existingEntries = loadAllEntriesSync();
+    const entryMap = new Map<string, Entry>();
+
+    existingEntries.forEach((e) => entryMap.set(e.id, e));
+
+    backup.entries.forEach((r) => {
+      if (entryMap.has(r.id)) {
+        const cur = entryMap.get(r.id)!;
+        if ((r.updatedAt || 0) > (cur.updatedAt || 0)) {
+          entryMap.set(r.id, r);
+        }
+      } else {
+        // Check duplicate matching entry
+        const dup = existingEntries.find(
+          (e) =>
+            e.date === r.date &&
+            e.type === r.type &&
+            Number(e.amount) === Number(r.amount) &&
+            e.description.trim() === r.description.trim()
+        );
+        if (!dup) {
+          entryMap.set(r.id, r);
+        }
+      }
+    });
+
+    const mergedEntries = Array.from(entryMap.values());
+    saveAllEntriesSync(mergedEntries);
+
+    // Merge notes
+    if (Array.isArray(backup.notes)) {
+      const existingNotes = loadAllNotesSync();
+      const noteMap = new Map<string, UserNote>();
+      existingNotes.forEach((n) => noteMap.set(`${n.dateFrom}_${n.dateTo}`, n));
+
+      backup.notes.forEach((rn) => {
+        const key = `${rn.dateFrom}_${rn.dateTo}`;
+        if (!noteMap.has(key)) {
+          noteMap.set(key, rn);
+        } else {
+          const cur = noteMap.get(key)!;
+          if ((rn.updatedAt || 0) > (cur.updatedAt || 0)) {
+            noteMap.set(key, rn);
+          }
+        }
+      });
+
+      localStorage.setItem(STORAGE_KEYS.NOTES, JSON.stringify(Array.from(noteMap.values())));
+    }
   }
+
   return true;
 }
 
@@ -265,11 +343,11 @@ export function getContinuousOfflineBackup(): (BackupData & { autoBackupTimestam
 // Sequence trigger invoked on data entries / notes changes
 export function triggerAutoBackupSequence(profile?: UserProfile): void {
   const currentProfile = profile || loadUserProfile();
-  const mode = currentProfile.backupMode || 'both';
-  const isOfflineEnabled = mode === 'both' || mode === 'offline';
-  const isOnlineEnabled = mode === 'both' || mode === 'online';
+  const storageMode = currentProfile.backupStorageMode || (currentProfile.backupMode as any) || 'both';
+  const isOfflineEnabled = storageMode === 'both' || storageMode === 'local' || storageMode === 'offline';
+  const isCloudEnabled = storageMode === 'both' || storageMode === 'cloud' || storageMode === 'online';
 
-  // 1. Continuous Offline Auto-Backup
+  // 1. Continuous Local Device Auto-Backup
   if (isOfflineEnabled && currentProfile.offlineAutoBackup !== false) {
     const ts = performContinuousOfflineBackup();
     if (ts && currentProfile.lastOfflineAutoBackupTime !== ts) {
@@ -277,23 +355,30 @@ export function triggerAutoBackupSequence(profile?: UserProfile): void {
     }
   }
 
-  // 2. Continuous Online Auto-Backup to Google Drive
-  if (isOnlineEnabled && currentProfile.onlineAutoBackup !== false) {
+  // 2. Continuous Cloud Auto-Backup
+  if (isCloudEnabled && currentProfile.onlineAutoBackup !== false) {
     try {
       const backupData = createBackupObject();
-      fetch('/api/drive/backup', {
+      fetch('/api/central-backup/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ backupData }),
+        body: JSON.stringify({
+          userId: currentProfile.userId || '01712345678',
+          pin: currentProfile.pin || '1234',
+          payload: backupData,
+        }),
       })
         .then((res) => res.json())
         .then((data) => {
           if (data && data.success) {
-            console.log('Online auto-backup synced to Google Drive:', data.modifiedTime);
+            saveUserProfile({
+              ...loadUserProfile(),
+              lastCloudBackupTime: data.lastSync || new Date().toISOString(),
+            });
           }
         })
         .catch(() => {
-          // Silent catch when offline or not connected
+          // Silent catch when offline
         });
     } catch (err) {
       // Ignore network errors

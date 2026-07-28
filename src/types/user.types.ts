@@ -1,6 +1,7 @@
 export type Language = 'en' | 'bn';
 export type ThemeMode = 'light' | 'dark' | 'system';
-export type BackupMode = 'both' | 'online' | 'offline';
+export type BackupMode = 'both' | 'cloud' | 'local' | 'online' | 'offline';
+export type BackupStorageMode = 'cloud' | 'local' | 'both';
 
 export interface CustomNavLabels {
   entryPlus?: string;
@@ -20,6 +21,8 @@ export interface CustomNavLabels {
 export interface UserProfile {
   username: string;
   pinHash: string; // Hashed or encoded local PIN
+  userId: string; // 11-digit numeric User ID (phone number or auto ID e.g. 01712345678)
+  pin: string; // 4-digit security PIN (default '1234')
   mainTitle: string;
   subtitle: string;
   photoURL: string | null;
@@ -31,10 +34,12 @@ export interface UserProfile {
   isFirstSetupCompleted: boolean;
   autoLockMinutes: number; // default 15
   lastActiveTimestamp: number;
-  backupMode?: BackupMode; // 'both' | 'online' | 'offline' (default 'both')
+  backupMode?: BackupMode; // 'both' | 'cloud' | 'local'
+  backupStorageMode?: BackupStorageMode; // 'cloud' | 'local' | 'both'
   offlineAutoBackup?: boolean; // default true
   onlineAutoBackup?: boolean; // default true
   lastOfflineAutoBackupTime?: string;
+  lastCloudBackupTime?: string | null;
   logoVariant?: 'full' | 'badge' | 'stacked' | 'icon-only';
 }
 

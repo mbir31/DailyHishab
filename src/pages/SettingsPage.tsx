@@ -8,7 +8,6 @@ import { ThemeSelector } from '../components/settings/ThemeSelector';
 import { LanguageSelector } from '../components/settings/LanguageSelector';
 import { AuthSettingsModal } from '../components/settings/AuthSettingsModal';
 import { BackupSection } from '../components/settings/BackupSection';
-import { GoogleDriveSection } from '../components/settings/GoogleDriveSection';
 import { BrandShowcaseSection } from '../components/settings/BrandShowcaseSection';
 import { ShieldCheck, UserCheck, KeyRound, Lock, Smartphone, CheckCircle, Monitor, ExternalLink, Download, Share2, Copy, Check, MessageSquare } from 'lucide-react';
 import { getAppUrl, shareAppUrl, shareAppToWhatsApp, copyAppUrlToClipboard } from '../utils/shareApp';
@@ -68,9 +67,6 @@ export const SettingsPage: React.FC = () => {
 
       {/* Section 3: Currency Symbol Settings */}
       <CurrencySection />
-
-      {/* Section 3: Google Drive Cloud Storage */}
-      <GoogleDriveSection />
 
       {/* Section 4: Customizable Navigation & Table Labels */}
       <NavLabelsSection />

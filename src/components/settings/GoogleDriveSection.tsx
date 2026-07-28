@@ -35,10 +35,12 @@ export const GoogleDriveSection: React.FC = () => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [driveUser, setDriveUser] = useState<DriveUser | null>(null);
   const [lastSync, setLastSync] = useState<string | null>(null);
+  const [centralLastSync, setCentralLastSync] = useState<string | null>(null);
   const [autoSync, setAutoSync] = useState<boolean>(true);
 
   const [isLoadingStatus, setIsLoadingStatus] = useState<boolean>(true);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [isCentralSyncing, setIsCentralSyncing] = useState<boolean>(false);
   const [statusMsg, setStatusMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   // Restore Modal State
@@ -49,7 +51,7 @@ export const GoogleDriveSection: React.FC = () => {
   const [confirmPinInput, setConfirmPinInput] = useState<string>('');
   const [pinError, setPinError] = useState<string | null>(null);
 
-  // Check Drive Connection Status
+  // Check Central Vault & Drive Connection Status
   const checkDriveStatus = useCallback(async () => {
     try {
       const res = await fetch('/api/drive/status');
@@ -63,12 +65,84 @@ export const GoogleDriveSection: React.FC = () => {
         setIsConnected(false);
         setDriveUser(null);
       }
+
+      // Check central cloud vault status
+      const vaultRes = await fetch('/api/cloud-vault/backups');
+      const vaultData = await vaultRes.json();
+      if (vaultData.files && vaultData.files.length > 0) {
+        setCentralLastSync(vaultData.files[0].modifiedTime);
+      }
     } catch (err) {
       console.error('Failed to fetch Drive status:', err);
     } finally {
       setIsLoadingStatus(false);
     }
   }, []);
+
+  // Central Developer Cloud Vault Backup
+  const handleCentralBackup = async () => {
+    setIsCentralSyncing(true);
+    setStatusMsg(null);
+    try {
+      const backupData = createBackupObject();
+      const res = await fetch('/api/cloud-vault/backup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          backupData,
+          userIdentifier: userProfile.pinHash || 'central_user',
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setCentralLastSync(data.lastSync);
+        setStatusMsg({ text: 'Backed up to Central Developer Cloud Storage!', type: 'success' });
+      } else {
+        setStatusMsg({ text: data.error || 'Central Cloud backup failed', type: 'error' });
+      }
+    } catch (err) {
+      console.error('Central cloud backup error:', err);
+      setStatusMsg({ text: 'Failed to sync with Central Cloud Storage', type: 'error' });
+    } finally {
+      setIsCentralSyncing(false);
+      setTimeout(() => setStatusMsg(null), 4000);
+    }
+  };
+
+  // Central Developer Cloud Vault Restore
+  const handleCentralRestore = async () => {
+    setIsCentralSyncing(true);
+    setStatusMsg(null);
+    try {
+      const res = await fetch('/api/cloud-vault/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userIdentifier: userProfile.pinHash || 'central_user',
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success && data.data) {
+        const ok = restoreFromBackupObject(data.data);
+        if (ok) {
+          reloadState();
+          setStatusMsg({ text: 'Restored successfully from Central Cloud Vault!', type: 'success' });
+        } else {
+          setStatusMsg({ text: 'Invalid backup format received from Cloud Vault', type: 'error' });
+        }
+      } else {
+        setStatusMsg({ text: data.error || 'No backup found in Central Cloud Storage', type: 'error' });
+      }
+    } catch (err) {
+      console.error('Central cloud restore error:', err);
+      setStatusMsg({ text: 'Failed to restore from Central Cloud Vault', type: 'error' });
+    } finally {
+      setIsCentralSyncing(false);
+      setTimeout(() => setStatusMsg(null), 4000);
+    }
+  };
 
   useEffect(() => {
     checkDriveStatus();
@@ -308,122 +382,191 @@ export const GoogleDriveSection: React.FC = () => {
         </div>
       )}
 
-      {/* Main Content Area */}
-      {isLoadingStatus ? (
-        <div className="flex items-center justify-center py-6 text-gray-400 gap-2 text-xs font-semibold">
-          <RefreshCw className="w-4 h-4 animate-spin" />
-          <span>Checking Google Drive connection...</span>
-        </div>
-      ) : isConnected && driveUser ? (
-        /* CONNECTED STATE */
-        <div className="space-y-4">
-          {/* Linked Account Card */}
-          <div className="flex items-center justify-between p-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10">
-            <div className="flex items-center gap-3">
-              {driveUser.picture ? (
-                <img
-                  src={driveUser.picture}
-                  alt={driveUser.name}
-                  className="w-10 h-10 rounded-full border-2 border-white/80 dark:border-gray-700 shadow-sm"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
-                  {driveUser.name ? driveUser.name.charAt(0).toUpperCase() : 'G'}
-                </div>
-              )}
+      {/* MAIN CONTENT AREA */}
+      <div className="space-y-6">
+        {/* 1. CENTRAL DEVELOPER CLOUD VAULT (ZERO OAUTH / 1-CLICK BACKUP) */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-indigo-500/10 via-blue-500/5 to-purple-500/10 border border-indigo-500/20 dark:border-indigo-400/20 space-y-3.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-indigo-600 text-white shadow-md">
+                <Sparkles className="w-4 h-4" />
+              </div>
               <div>
-                <span className="block text-xs font-semibold text-gray-500 dark:text-gray-400">
-                  {t.settings.drive.connectedAs}
-                </span>
-                <span className="block text-sm font-bold text-gray-900 dark:text-white">
-                  {driveUser.email}
-                </span>
+                <h4 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                  <span>Central Cloud Storage Vault</span>
+                  <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-indigo-600 text-white">
+                    Recommended
+                  </span>
+                </h4>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Instant 1-click ledger backup to developer cloud storage. Zero Google login required.
+                </p>
               </div>
             </div>
-
-            <button
-              onClick={handleDisconnect}
-              className="p-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors"
-              title={t.settings.drive.disconnectBtn}
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
           </div>
 
-          {/* Sync Information */}
-          <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 flex items-center justify-between px-1">
-            <span>{t.settings.drive.lastSyncLabel}</span>
-            <span className="font-bold text-gray-900 dark:text-gray-200">
-              {lastSync ? new Date(lastSync).toLocaleString() : t.settings.drive.neverSynced}
+          <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 flex items-center justify-between px-1 bg-white/60 dark:bg-black/20 p-2.5 rounded-xl border border-black/5 dark:border-white/5">
+            <span>Central Vault Status:</span>
+            <span className="font-bold text-indigo-600 dark:text-indigo-400">
+              {centralLastSync ? `Last synced: ${new Date(centralLastSync).toLocaleString()}` : 'Ready for 1-Click Sync'}
             </span>
           </div>
 
-          {/* Action Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
             <button
-              onClick={handleBackupNow}
-              disabled={isSyncing}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs sm:text-sm shadow-md transition-all disabled:opacity-50"
+              onClick={handleCentralBackup}
+              disabled={isCentralSyncing}
+              className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs shadow-md transition-all disabled:opacity-50"
             >
-              {isSyncing ? (
+              {isCentralSyncing ? (
                 <RefreshCw className="w-4 h-4 animate-spin" />
               ) : (
                 <CloudUpload className="w-4 h-4" />
               )}
-              <span>{isSyncing ? t.settings.drive.syncing : t.settings.drive.backupNowBtn}</span>
+              <span>{isCentralSyncing ? 'Syncing...' : '1-Click Cloud Backup'}</span>
             </button>
 
             <button
-              onClick={handleOpenRestoreModal}
-              disabled={isSyncing}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs sm:text-sm shadow-md transition-all disabled:opacity-50"
+              onClick={handleCentralRestore}
+              disabled={isCentralSyncing}
+              className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-900 hover:bg-black dark:bg-gray-800 dark:hover:bg-gray-700 active:scale-95 text-white font-bold text-xs shadow-md transition-all disabled:opacity-50"
             >
-              <CloudDownload className="w-4 h-4" />
-              <span>{t.settings.drive.restoreDriveBtn}</span>
+              <CloudDownload className="w-4 h-4 text-indigo-400" />
+              <span>Restore from Central Vault</span>
             </button>
           </div>
+        </div>
 
-          {/* Auto Sync Toggle */}
-          <div className="flex items-center justify-between p-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 mt-2">
+        {/* 2. PERSONAL GOOGLE DRIVE (INDIVIDUAL OAUTH ACCOUNT) */}
+        <div className="pt-2 border-t border-gray-200/60 dark:border-gray-800 space-y-4">
+          <div className="flex items-center justify-between">
             <div>
-              <span className="block text-xs font-bold text-gray-900 dark:text-white">
-                {t.settings.drive.autoSyncTitle}
-              </span>
-              <span className="block text-[11px] font-medium text-gray-500 dark:text-gray-400">
-                {t.settings.drive.autoSyncDesc}
-              </span>
+              <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+                Personal Google Drive Account
+              </h4>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Optionally link your personal Google Drive account to store backups in your personal Drive folder.
+              </p>
             </div>
-
-            <button
-              onClick={handleToggleAutoSync}
-              className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${
-                autoSync ? 'bg-blue-600 justify-end' : 'bg-gray-300 dark:bg-gray-700 justify-start'
-              }`}
-            >
-              <div className="w-4 h-4 rounded-full bg-white shadow-md" />
-            </button>
-          </div>
-        </div>
-      ) : (
-        /* DISCONNECTED STATE */
-        <div className="text-center py-4 space-y-4">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-inner">
-            <Cloud className="w-7 h-7" />
           </div>
 
-          <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-            {t.settings.drive.subtitle}
-          </p>
+          {isLoadingStatus ? (
+            <div className="flex items-center justify-center py-6 text-gray-400 gap-2 text-xs font-semibold">
+              <RefreshCw className="w-4 h-4 animate-spin" />
+              <span>Checking Google Drive connection...</span>
+            </div>
+          ) : isConnected && driveUser ? (
+            /* CONNECTED STATE */
+            <div className="space-y-4">
+              {/* Linked Account Card */}
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10">
+                <div className="flex items-center gap-3">
+                  {driveUser.picture ? (
+                    <img
+                      src={driveUser.picture}
+                      alt={driveUser.name}
+                      className="w-10 h-10 rounded-full border-2 border-white/80 dark:border-gray-700 shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+                      {driveUser.name ? driveUser.name.charAt(0).toUpperCase() : 'G'}
+                    </div>
+                  )}
+                  <div>
+                    <span className="block text-xs font-semibold text-gray-500 dark:text-gray-400">
+                      {t.settings.drive.connectedAs}
+                    </span>
+                    <span className="block text-sm font-bold text-gray-900 dark:text-white">
+                      {driveUser.email}
+                    </span>
+                  </div>
+                </div>
 
-          <button
-            onClick={handleConnectGoogle}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>{t.settings.drive.connectBtn}</span>
-          </button>
+                <button
+                  onClick={handleDisconnect}
+                  className="p-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                  title={t.settings.drive.disconnectBtn}
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Sync Information */}
+              <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 flex items-center justify-between px-1">
+                <span>{t.settings.drive.lastSyncLabel}</span>
+                <span className="font-bold text-gray-900 dark:text-gray-200">
+                  {lastSync ? new Date(lastSync).toLocaleString() : t.settings.drive.neverSynced}
+                </span>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <button
+                  onClick={handleBackupNow}
+                  disabled={isSyncing}
+                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs sm:text-sm shadow-md transition-all disabled:opacity-50"
+                >
+                  {isSyncing ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <CloudUpload className="w-4 h-4" />
+                  )}
+                  <span>{isSyncing ? t.settings.drive.syncing : t.settings.drive.backupNowBtn}</span>
+                </button>
+
+                <button
+                  onClick={handleOpenRestoreModal}
+                  disabled={isSyncing}
+                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs sm:text-sm shadow-md transition-all disabled:opacity-50"
+                >
+                  <CloudDownload className="w-4 h-4" />
+                  <span>{t.settings.drive.restoreDriveBtn}</span>
+                </button>
+              </div>
+
+              {/* Auto Sync Toggle */}
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 mt-2">
+                <div>
+                  <span className="block text-xs font-bold text-gray-900 dark:text-white">
+                    {t.settings.drive.autoSyncTitle}
+                  </span>
+                  <span className="block text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                    {t.settings.drive.autoSyncDesc}
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleToggleAutoSync}
+                  className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${
+                    autoSync ? 'bg-blue-600 justify-end' : 'bg-gray-300 dark:bg-gray-700 justify-start'
+                  }`}
+                >
+                  <div className="w-4 h-4 rounded-full bg-white shadow-md" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* DISCONNECTED STATE */
+            <div className="text-center py-4 space-y-4">
+              <div className="w-12 h-12 mx-auto rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-inner">
+                <Cloud className="w-6 h-6" />
+              </div>
+
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+                Sign in with Google to grant personal Google Drive storage permissions. Note: If using inside an iframe or blocked popups browser window, use Central Cloud Storage above for 1-click instant backup.
+              </p>
+
+              <button
+                onClick={handleConnectGoogle}
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-lg shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Link Personal Google Account</span>
+              </button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Restore Confirmation Modal */}
       {isRestoreModalOpen && (
