@@ -85,7 +85,7 @@ Whether you're tracking daily household expenses, managing shop cash-in/cash-out
 * **Bilingual Date Display**: Fully formats dates in standard `DD-MM-YYYY (Weekday)` format in both English (e.g. `27-07-2026 (Monday)`) and Bengali (e.g. `২৭-০৭-২০২৬ (সোমবার)`).
 
 ### 🌐 5. Complete Bilingual (English & বাংলা) & Currency Flexibility
-* **Native English & Bengali (বাংলা) Localization**: Complete interface translation including full support for Bengali numerals (`১, ২, ৩, ৪...`).
+* **Native English & Bengali (বাংলা) Full Translation**: Complete translation of every title, header, tab, filter, button, summary card, calendar, export option, and analytic chart for smooth native comprehension. Includes full support for Bengali numerals (`১, ২, ৩, ৪...`).
 * **Custom Currency Selector**: Toggle between local currencies (৳ BDT, ₹ INR, $ USD, € EUR, £ GBP, or custom symbols) with configurable formatting.
 
 ### 🔐 6. App Lock PIN Security & Privacy Shield
