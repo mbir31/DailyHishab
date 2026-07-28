@@ -175,6 +175,14 @@ export async function exportElementToImage(options: ExportReportOptions): Promis
     const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
     const dataUrl = canvas.toDataURL(mimeType, 0.95);
 
+    // Always trigger direct download to save a copy to device storage/gallery
+    const link = document.createElement('a');
+    link.download = `${filename}.${format}`;
+    link.href = dataUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
     // Check Web Share API with File support
     if (navigator.share && navigator.canShare) {
       try {
@@ -183,6 +191,7 @@ export async function exportElementToImage(options: ExportReportOptions): Promis
         const file = new File([blob], `${filename}.${format}`, { type: mimeType });
 
         if (navigator.canShare({ files: [file] })) {
+          await new Promise((resolve) => setTimeout(resolve, 150));
           await navigator.share({
             title: options.title || 'DailyHishab Financial Statement',
             text: 'Financial Summary from DailyHishab',
@@ -191,17 +200,10 @@ export async function exportElementToImage(options: ExportReportOptions): Promis
           return true;
         }
       } catch (shareErr) {
-        console.warn('Web Share failed or cancelled, falling back to download:', shareErr);
+        console.warn('Web Share failed or cancelled (copy already saved to device):', shareErr);
       }
     }
 
-    // Fallback standard download trigger
-    const link = document.createElement('a');
-    link.download = `${filename}.${format}`;
-    link.href = dataUrl;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
     return true;
   } catch (err) {
     console.error('Error rendering image report:', err);
@@ -234,9 +236,18 @@ export async function shareStatementAsImage(options: {
     const blob = await response.blob();
     const file = new File([blob], `${filename}.jpg`, { type: mimeType });
 
+    // Always trigger direct download to guarantee a copy is saved to device storage/gallery
+    const link = document.createElement('a');
+    link.download = `${filename}.jpg`;
+    link.href = dataUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
     // Try Web Share API (native share drawer to WhatsApp, Telegram, etc.)
     if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
+        await new Promise((resolve) => setTimeout(resolve, 150));
         await navigator.share({
           title: title,
           text: textSummary,
@@ -245,23 +256,15 @@ export async function shareStatementAsImage(options: {
         return { success: true, method: 'web-share' };
       } catch (shareErr: any) {
         if (shareErr.name === 'AbortError') {
-          return { success: false, method: 'web-share', error: 'Share cancelled' };
+          return { success: true, method: 'web-share', error: 'Share modal dismissed, copy saved to gallery' };
         }
         console.warn('Web Share failed, falling back to direct download & chat link:', shareErr);
       }
     }
 
-    // Fallback: Trigger direct image download
-    const link = document.createElement('a');
-    link.download = `${filename}.jpg`;
-    link.href = dataUrl;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
     // If targeted for WhatsApp specifically or fallback mode
     if (targetApp === 'whatsapp') {
-      const waText = encodeURIComponent(`${textSummary}\n\n*(JPG Statement image downloaded - attach it to your message)*`);
+      const waText = encodeURIComponent(`${textSummary}\n\n*(JPG Statement image saved to device gallery - attach it to your message)*`);
       window.open(`https://api.whatsapp.com/send?text=${waText}`, '_blank');
       return { success: true, method: 'whatsapp' };
     }

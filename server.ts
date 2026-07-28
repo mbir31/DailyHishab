@@ -943,7 +943,21 @@ app.post('/api/central-backup/verify-and-restore', async (req, res) => {
       }
     }
 
-    // Fallback: check Google Drive if local record missing
+    // Fallback 1: check most recent backup file in user folder
+    if (!record && fs.existsSync(userDir)) {
+      try {
+        const files = fs.readdirSync(userDir).filter((f) => f.endsWith('.json') && f !== 'latest.json');
+        if (files.length > 0) {
+          files.sort((a, b) => b.localeCompare(a)); // newest timestamp first
+          const raw = fs.readFileSync(path.join(userDir, files[0]), 'utf-8');
+          record = JSON.parse(raw);
+        }
+      } catch (e) {
+        record = null;
+      }
+    }
+
+    // Fallback 2: check Google Drive if local record missing
     if (!record && driveSession && driveSession.tokens) {
       const driveRecord = await fetchBackupFromGoogleDrive(cleanUserId);
       if (driveRecord) {
@@ -959,12 +973,13 @@ app.post('/api/central-backup/verify-and-restore', async (req, res) => {
       return res.status(404).json({
         success: false,
         notFound: true,
-        error: `No central cloud backup found for User ID ${cleanUserId}. Please check your 11-digit ID or perform a backup first.`,
+        error: `No central cloud backup found for User ID ${cleanUserId}. Please check your 11-digit phone number or perform a backup first.`,
       });
     }
 
     // Verify PIN if stored
-    if (record.pin && record.pin !== cleanPin) {
+    const expectedPin = record.pin || record.payload?.profile?.pin;
+    if (expectedPin && expectedPin !== cleanPin) {
       return res.status(401).json({
         success: false,
         invalidPin: true,

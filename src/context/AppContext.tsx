@@ -10,6 +10,7 @@ import {
   clearAllAppData,
   loadAllEntriesSync,
   triggerAutoBackupSequence,
+  restoreFromBackupObject,
 } from '../utils/storage';
 import { getTodayDateString, shiftDateString } from '../utils/dateHelpers';
 import { getTranslation } from '../i18n/translations';
@@ -29,6 +30,7 @@ interface AppContextType {
   // Auth
   loginWithPin: (pin: string) => Promise<boolean>;
   setupNewUser: (username: string, userId: string, pin: string) => Promise<boolean>;
+  recoverCloudBackup: (userId: string, pin: string) => Promise<{ success: boolean; error?: string; entryCount?: number }>;
   lockApp: () => void;
   
   // Entries for selected date
@@ -194,6 +196,68 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
+  const recoverCloudBackup = async (
+    userId: string,
+    pin: string
+  ): Promise<{ success: boolean; error?: string; entryCount?: number }> => {
+    const cleanUserId = userId.trim();
+    const cleanPin = pin.trim();
+
+    try {
+      const res = await fetch('/api/central-backup/verify-and-restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: cleanUserId, pin: cleanPin }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        return {
+          success: false,
+          error: data.error || 'Failed to verify or restore cloud backup',
+        };
+      }
+
+      if (!data.backupData) {
+        return { success: false, error: 'Cloud backup record was empty or invalid.' };
+      }
+
+      const hashed = await hashPin(cleanPin);
+
+      // Restore entries & notes from backup
+      restoreFromBackupObject(data.backupData, { mode: 'replace' });
+
+      // Update local profile with restored values & credentials
+      const current = loadUserProfile();
+      const updatedProfile: UserProfile = {
+        ...current,
+        ...(data.backupData.profile || {}),
+        userId: cleanUserId,
+        pin: cleanPin,
+        pinHash: hashed,
+        isFirstSetupCompleted: true,
+        isLoggedIn: true,
+        username: data.backupData.profile?.username || current.username || 'Admin',
+        lastActiveTimestamp: Date.now(),
+      };
+
+      saveUserProfile(updatedProfile);
+      reloadState();
+
+      return {
+        success: true,
+        entryCount: data.entryCount || (data.backupData.entries ? data.backupData.entries.length : 0),
+      };
+    } catch (err: any) {
+      console.error('Recover cloud backup error:', err);
+      return {
+        success: false,
+        error: 'Network error connecting to Cloud Vault. Please check your internet connection.',
+      };
+    }
+  };
+
   const lockApp = () => {
     updateUserProfile({ isLoggedIn: false });
   };
@@ -244,6 +308,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateUserProfile,
         loginWithPin,
         setupNewUser,
+        recoverCloudBackup,
         lockApp,
         currentIncomeEntries,
         currentExpenseEntries,

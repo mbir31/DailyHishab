@@ -162,7 +162,15 @@ export const BackupSection: React.FC = () => {
       if (data.backupData) {
         const ok = restoreFromBackupObject(data.backupData, { mode: restoreMode });
         if (ok) {
-          updateUserProfile({ userId: cleanId, pin: cleanPin });
+          const hashedPin = await hashPin(cleanPin);
+          updateUserProfile({
+            userId: cleanId,
+            pin: cleanPin,
+            pinHash: hashedPin,
+            isFirstSetupCompleted: true,
+            isLoggedIn: true,
+            username: data.backupData.profile?.username || userProfile.username || 'Admin',
+          });
           reloadState();
           setStatusMsg({
             text: `Successfully restored cloud data (${restoreMode === 'merge' ? 'Merged with local entries' : 'Replaced local ledger'})!`,

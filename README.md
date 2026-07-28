@@ -2,204 +2,190 @@
 
 <div align="center">
 
-![DailyHishab Logo](https://img.shields.io/badge/DailyHishab-Smart_Financial_Ledger-3B82F6?style=for-the-badge&logo=wallet&logoColor=white)
+![DailyHishab Banner](https://img.shields.io/badge/DailyHishab-Smart_Financial_Ledger-3B82F6?style=for-the-badge&logo=wallet&logoColor=white)
 
-[![Deployed on Vercel](https://img.shields.io/badge/Hosted_on-Vercel-000000.svg?style=flat-square&logo=vercel&logoColor=white)](https://dailyhishab.vercel.app/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![React 19](https://img.shields.io/badge/React-19.0-61DAFB.svg?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6.svg?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4.0-06B6D4.svg?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![PWA Ready](https://img.shields.io/badge/PWA-Installable-5A0FC8.svg?style=flat-square&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
-[![Offline First](https://img.shields.io/badge/Offline-100%25_Functional-10B981.svg?style=flat-square&logo=sqlite&logoColor=white)](#-7-100-offline-first--google-drive-sync)
+[![Hosted on Vercel](https://img.shields.io/badge/Hosted_on-Vercel_Edge-000000.svg?style=for-the-badge&logo=vercel&logoColor=white)](https://dailyhishab.vercel.app/)
+[![PWA Ready](https://img.shields.io/badge/PWA-Installable-5A0FC8.svg?style=for-the-badge&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
+[![100% Offline First](https://img.shields.io/badge/Offline-100%25_Functional-10B981.svg?style=for-the-badge&logo=sqlite&logoColor=white)](#-100-offline-first-architecture)
+[![Bilingual EN/BN](https://img.shields.io/badge/Language-English_%7C_%E0%A6%AC%E0%A6%BE%E0%A6%82%E0%A6%B2%E0%A6%BE-FF6B6B.svg?style=for-the-badge)](#-complete-bilingual-english--বাংলা-flexibility)
+
+<br/>
+
+```
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │                     DailyHishab (দৈনিক হিসাব)                           │
+ │        Modern Daily Cash Ledger • Monthly Reports • Cloud Backup        │
+ ├────────────────────────────────────────────────────────────────────────┤
+ │ [💵 Daily Ledger]  [📋 Monthly Summary]  [📊 Analytics]  [📤 Export]  │
+ └────────────────────────────────────────────────────────────────────────┘
+```
 
 <p align="center">
-  <b>A professional-grade, high-performance daily financial ledger hosted globally on Vercel Edge Network. Replace messy paper notebooks (খাতা) and complex accounting tools with a sleek, private, zero-latency cash manager.</b>
+  <b>A professional-grade, high-performance daily financial ledger hosted globally on Vercel Edge Network. Replace messy paper notebooks (খাতা) and complex accounting software with a sleek, private, zero-latency cash manager.</b>
 </p>
 
-### 🚀 [**Click Here to Open & Use DailyHishab Live on Vercel**](https://dailyhishab.vercel.app/)
-*(Deployed on Vercel Global Edge Network • Works 100% offline & keeps your financial data 100% private on your device!)*
+### 🚀 [**Click Here to Launch DailyHishab Live on Vercel**](https://dailyhishab.vercel.app/)
+*(Deployed on Vercel Edge CDN • Works 100% offline • Zero data leaves your device unless backed up)*
 
 </div>
 
 ---
 
+## 📸 App Architecture & Visual Navigation Overview
+
+DailyHishab provides a clean, tabbed multi-view layout designed for maximum speed and readability:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 📅 28-07-2026 (Tuesday)                       [🔒 Lock]  [👁️ Hide Balances] │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  💵 TODAY'S INCOME       💸 TODAY'S EXPENSE      ⚖️ CUMULATIVE NET BALANCE │
+│     ৳ 25,000.00             ৳ 8,450.00               ৳ 16,550.00           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 📂 Ledger Tabs: [💵 Today's Entries] [📋 Monthly Summary] [📊 Analytics]    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  📋 MONTHLY EXECUTIVE SUMMARY (JULY 2026)                                   │
+│  • Total Income: ৳ 145,000.00  | Total Expense: ৳ 48,200.00                │
+│  • Net Surplus:  ৳  96,800.00  | Savings Rate:  66.8%                     │
+│  • MoM Variance: +12.4% Income | Top Expense:   Rent & Utilities (40%)    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 📤 Statement Studio: [WhatsApp JPG Card] [Excel .XLSX] [Print-Ready PDF]    │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## ⚡ Global Deployment & Infrastructure Highlights
 
-**DailyHishab** is deployed directly on **Vercel Global Edge Infrastructure**, offering enterprise-level availability, ultra-fast global CDN routing, SSL encryption, and automated continuous deployment (CI/CD) from GitHub:
+**DailyHishab** is deployed on **Vercel Edge CDN Infrastructure**, guaranteeing enterprise availability, global edge routing, SSL encryption, and continuous deployment from GitHub:
 
 * **🌐 Production Live URL:** [https://dailyhishab.vercel.app/](https://dailyhishab.vercel.app/)
-* **⚡ Sub-Second Load Times:** Served via Vercel's global edge network with instant global availability.
-* **🔒 Automatic SSL & Security:** Protected with HTTPS and client-side end-to-end data privacy.
-* **🔄 CI/CD Auto-Sync:** Any code updates pushed to GitHub trigger automated instant rebuilds and deployments on Vercel.
+* **⚡ Sub-Second Load Times:** Served via Vercel Edge Network with instant global availability.
+* **🔒 Automatic SSL & Security:** End-to-end encrypted protocol with client-side data privacy.
+* **🔄 Continuous Deployment (CI/CD):** Instant GitHub commits auto-build and deploy to Vercel within seconds.
 
 ---
 
-## 📱 Easy 1-Minute Setup (No Technical Skills Needed!)
+## 📱 Quick 1-Minute Setup Guide (Install on Any Device)
 
-You don't need any technical skills, commands, or terminal to use **DailyHishab**. Access it directly in your browser or install it as a native app on your mobile phone or desktop!
+No technical skills required. Open DailyHishab in your web browser or install it as a standalone app on your mobile device or computer!
 
-### 🌐 Option A: Use Directly in Web Browser
-1. Click the production app link: **[https://dailyhishab.vercel.app/](https://dailyhishab.vercel.app/)**
-2. Start adding income & expense entries right away! Everything is saved safely on your device.
-
----
-
-### 📲 Option B: Install as Mobile App on your Phone (PWA)
-
-#### 🤖 On Android (Google Chrome / Brave / Edge):
-1. Open **[https://dailyhishab.vercel.app/](https://dailyhishab.vercel.app/)** in Google Chrome.
-2. Tap the **3 dots menu (⋮)** in the top-right corner.
-3. Tap **"Install App"** or **"Add to Home Screen"**.
-4. Confirm by tapping **Install**. A **DailyHishab** icon will appear on your phone's home screen just like an app from the Play Store!
-
-#### 🍏 On iPhone / iPad (Apple Safari):
-1. Open **[https://dailyhishab.vercel.app/](https://dailyhishab.vercel.app/)** in Safari.
-2. Tap the **Share button** (square icon with an arrow pointing up at the bottom bar).
-3. Scroll down and tap **"Add to Home Screen"**.
-4. Tap **Add** in the top right corner. The **DailyHishab** app icon is now ready on your iPhone!
+| Platform | Setup Steps |
+| :--- | :--- |
+| **🌐 Web Browser** | Open **[dailyhishab.vercel.app](https://dailyhishab.vercel.app/)** and start managing your cash book instantly. |
+| **🤖 Android (PWA)** | Open Chrome ➔ Tap **3 dots (⋮)** ➔ Tap **"Install App"** / **"Add to Home Screen"**. |
+| **🍏 iPhone / iPad** | Open Safari ➔ Tap **Share Button (↑)** ➔ Scroll & tap **"Add to Home Screen"**. |
+| **💻 Desktop / PC** | Open Chrome or Edge ➔ Click **Install Icon (🖥️)** in address bar ➔ Launch from Desktop! |
 
 ---
 
-### 💻 Option C: Install on Desktop / Laptop Computer
-1. Open **[https://dailyhishab.vercel.app/](https://dailyhishab.vercel.app/)** in Google Chrome, Microsoft Edge, or Brave.
-2. Look at the address bar on the top right — click the **Install icon** (monitor with a small down-arrow) OR click **3 dots (⋮) ➔ Save and share ➔ Install DailyHishab**.
-3. Launch DailyHishab anytime directly from your Desktop or Start Menu!
+## ✨ Key Features & Capability Matrix
+
+### ⚡ 1. Rapid Cash-In (+) & Cash-Out (-) Ledger
+* **Streamlined Daily Entries**: Add income and expense items in seconds with auto-suggest categories, payment modes, notes, and custom tags.
+* **Real-time Totals**: Instant subtotal and net balance calculations as you type.
+* **Single-Tap Actions**: Duplicate, edit, or delete transactions with instant state updates.
+
+### 📋 2. Dedicated Monthly Summary Dashboard
+* **Full Financial Health Metrics**: Calculates total monthly cash flow, net surplus/deficit, savings retention rate, and expense-to-income ratio.
+* **Executive Summary Narrative**: Auto-generates a human-readable performance narrative in English and Bengali (বাংলা).
+* **Month-over-Month (MoM) Analytics**: Side-by-side comparison with the previous month including variance amounts and percentage changes.
+* **Category Progress & Highlights**: Visual breakdown of top spending categories, highest single transaction, and active transaction days count.
+
+### 🩺 3. Financial Health Scorecard
+* **Dynamic Scorecard (0–100)**: Evaluates financial stability based on savings rate, expense ratios, consistency, and cash reserves.
+* **Smart Financial Guidance**: Provides actionable advice on expense management and budget allocation.
+
+### 📊 4. Visual Analytics & Trend Charts
+* **Interactive Recharts Engine**: High-performance bar charts for daily, monthly, and annual cash flow trends.
+* **Category Breakdown Charts**: Interactive donut and pie charts to pinpoint primary spending areas.
+* **Advanced Multi-Filter Search**: Search by keywords, date ranges, categories, payment types, or exact amount limits.
+
+### 📤 5. Dual-Engine Statement Exporting & WhatsApp Sharing
+* **WhatsApp JPG Statement Cards**: Generates high-resolution JPG summary images formatted for instant sharing on WhatsApp, Messenger, or email.
+* **Dual-Engine Canvas Renderer**: Powered by `html-to-image` (SVG foreignObject) with an automatic `html2canvas` fallback for cross-browser stability.
+* **Excel (.XLSX) Worksheets**: Export clean, structured spreadsheets with itemized entries, timestamps, and subtotals.
+* **Print-Ready PDF Reports**: Download formatted PDF financial statements ideal for tax filing or physical archives.
+
+### 🌐 6. Complete Bilingual (English & বাংলা) Flexibility
+* **Native Translation**: Complete interface localization for English and Bengali (বাংলা).
+* **Bengali Numeral Support**: Toggle full support for Bengali numerals (`১, ২, ৩, ৪...`).
+* **Multi-Currency Support**: Switch seamlessly between ৳ (BDT), ₹ (INR), $ (USD), € (EUR), £ (GBP), or custom currency symbols.
+
+### 🔐 7. PIN Security & Cross-Device Cloud Recovery
+* **4-Digit Security PIN**: Protect sensitive ledger data with salted, hashed PIN authentication and automatic lock timeouts.
+* **Instant Cross-Device Recovery**: Seamlessly recover your entire financial history on a new phone or laptop using your **11-digit Phone Number (User ID)** and **4-digit PIN**.
+* **One-Tap Privacy Mask**: Hide balances with an eye-icon toggle when using the app in public spaces.
+
+### 💾 8. 100% Offline-First Architecture
+* **Works Offline**: All core functions—including entry logging, monthly reports, search, and image statement rendering—work 100% offline without internet.
+* **Local Persistence**: Instant zero-latency updates powered by browser `LocalStorage`.
+* **JSON Backup & Cloud Sync**: Download encrypted JSON backups or sync to Central Cloud Storage / Google Drive when connected.
 
 ---
 
-## 🌟 Why DailyHishab?
+## ⚡ Comparison: DailyHishab vs. Traditional Methods
 
-**DailyHishab (দৈনিক হিসাব)** is an intelligent, high-performance financial tracking application crafted for individuals, shopkeepers, traders, freelancers, and small businesses. It combines the tactile simplicity of traditional cash-books with modern web technology—giving you total control over daily cash flow, instant mathematical accuracy, visual financial insights, and secure multi-format report sharing.
-
-Whether you're tracking daily household expenses, managing shop cash-in/cash-out, or archiving client transaction histories, **DailyHishab makes financial bookkeeping effortless, private, and delightful.**
-
----
-
-## 🔥 Key Features & Capabilities
-
-### ⚡ 1. Ultra-Fast Daily Bookkeeping
-* **Dedicated Cash-In (+) & Cash-Out (-) Ledger**: Dedicated screens tailored for rapid entry creation with category tagging, payment methods, note attachments, and timestamps.
-* **Instant Calculations**: Automatic real-time recalculation of daily subtotals, cumulative net balance, and entry volume.
-* **Smart Categorization & Custom Tags**: Pre-configured with essential categories (Salary, Business, Groceries, Rent, Utilities, Transport, etc.) plus complete freedom to add custom tags.
-
-### 📋 2. Dedicated Monthly Financial Summary View
-* **Comprehensive Monthly Dashboard**: Dedicated text-based dashboard calculates total income, total expenses, net balance (surplus/deficit), savings retention rate, and expense-to-income ratio for any selected month and year.
-* **Executive Summary Narrative**: Automatically generates an executive text summary of the selected month's financial performance in both English and Bengali (বাংলা).
-* **Month-over-Month (MoM) Variance**: Compare current month against the previous month with side-by-side variance amounts and percentage changes.
-* **Category Distribution & Highlights**: Detailed breakdown of top income and expense categories with percentage progress bars, top single transaction highlights, and active entry days count.
-* **Interactive Month Picker**: Quick navigation controls to switch months, view past ledger histories, or reset to the current month in one click.
-
-### 📊 3. Visual Analytics & Financial Reports
-* **Interactive Recharts Graphs**: View income vs. expense trends over daily, monthly, and annual timeframes with fluid bar charts.
-* **Category Breakdown Charts**: Analyze spending patterns through intuitive donut and pie charts to identify cash leaks.
-* **Advanced Filter Engine**: Search and filter ledger history by exact date ranges, categories, keywords, tags, or min/max amount thresholds.
-
-### 📤 4. Dual-Engine Exporting & One-Click Sharing
-* **WhatsApp & Social Media JPG Summaries**: Built-in dual-engine renderer (`html-to-image` SVG foreignObject canvas + `html2canvas` fallback) produces high-resolution, crash-free JPG statement cards for one-tap Web Share or direct WhatsApp sending.
-* **Cross-Browser OKLCH-to-RGB Fallback**: Features automatic RGB color resolution and standard HEX fallback maps to ensure 100% reliable canvas generation across all browsers.
-* **Excel (.XLSX) Worksheets**: Export clean, structured spreadsheet statements complete with formulas, dates, and itemized entry logs.
-* **Print-Ready PDF Reports**: Generate styled, client-ready PDF financial statements for accounting records or tax filing.
-
-### 📅 5. Localized Date Navigation (`DD-MM-YYYY` & Day Names)
-* **Express Navigation Bar**: Seamlessly switch between *Yesterday*, *Today*, *Tomorrow*, or select any custom calendar date via an interactive modal picker.
-* **Bilingual Date Display**: Fully formats dates in standard `DD-MM-YYYY (Weekday)` format in both English (e.g. `27-07-2026 (Monday)`) and Bengali (e.g. `২৭-০৭-২০২৬ (সোমবার)`).
-
-### 🌐 6. Complete Bilingual (English & বাংলা) & Currency Flexibility
-* **Native English & Bengali (বাংলা) Full Translation**: Complete translation of every title, header, tab, filter, button, summary card, calendar, export option, and analytic chart for smooth native comprehension. Includes full support for Bengali numerals (`১, ২, ৩, ৪...`).
-* **Custom Currency Selector**: Toggle between local currencies (৳ BDT, ₹ INR, $ USD, € EUR, £ GBP, or custom symbols) with configurable formatting.
-
-### 🔐 7. App Lock PIN Security & Privacy Shield
-* **4-Digit Security PIN**: Safeguard sensitive financial records with salted hashed PIN authentication and automatic inactivity auto-lock.
-* **One-Tap Privacy Masking**: Hide account balances and cash totals with an eye-icon toggle for safe usage in public places.
-
-### 💾 8. 100% Offline-First Architecture (Works Without Internet!)
-* **Fully Functional Offline**: All core features—including entry management, monthly summaries, calculations, local searches, and canvas JPG statement generation—run 100% locally on your browser/device without requiring an internet connection.
-* **Zero-Latency LocalStorage**: Operates with instant response times and zero server dependency.
-* **JSON Backup & Restore**: One-click data download and restoration to ensure zero data loss when switching devices.
-* **Optional Cloud Backup**: Optional Google Drive sync when internet connection is available.
-
-### 📱 9. Progressive Web App (PWA) & Modern Glassmorphism Design
-* **Installable App Experience**: Add DailyHishab directly to your iOS / Android home screen or Desktop for a native app feel.
-* **Fluid Dark & Light Themes**: Carefully selected color palettes (Light, Dark, and System Auto) featuring glassmorphism accents and responsive mobile tab bars.
-
----
-
-## ⚡ Comparison: DailyHishab vs. Alternatives
-
-| Feature | Paper Notebook (খাতা) | Complex Accounting Apps | DailyHishab 📊 |
+| Feature | Paper Notebook (খাতা) | Complex ERP Software | DailyHishab 📊 |
 | :--- | :---: | :---: | :---: |
-| **Setup Time** | Instant | Hours of configuration | **0 Seconds (Direct Link)** |
-| **Hosting & Speed** | Physical book | Heavy server loads | **Vercel Global Edge CDN** |
-| **Offline Support** | Yes | Often requires login/cloud | **100% Offline-First** |
-| **Automated Totals** | ❌ Manual calculation | Yes | **Instant Real-Time** |
-| **WhatsApp Image Export** | ❌ Take photos | ❌ Rare | **One-Tap HD Render** |
-| **Excel & PDF Statements** | ❌ Impossible | Paid feature | **Free & Built-in** |
-| **Privacy & Security** | ❌ Easily misplaced | Data sent to servers | **Local Storage & PIN** |
-| **Bengali Numeral Support** | Manual | ❌ English only | **Full `১, ২, ৩` Support** |
+| **Setup Time** | Instant | Hours / Days | **0 Seconds (Direct Web Link)** |
+| **Offline Performance** | Physical book required | Requires server access | **100% Offline-First** |
+| **Calculations** | Manual error-prone | Automatic | **Real-Time Instant** |
+| **WhatsApp JPG Export** | Photos of paper pages | Not available | **1-Tap HD Image Generation** |
+| **Excel & PDF Statements** | N/A | Paid enterprise add-on | **Built-in & Free** |
+| **Cross-Device Cloud Recovery** | Lost if book is misplaced | Complex login credentials | **11-Digit Phone + PIN Restore** |
+| **Bengali Numeral Support** | Manual writing | N/A | **Full `১, ২, ৩` Support** |
+| **Hosting Infrastructure** | Physical | Enterprise servers | **Vercel Edge Global Network** |
 
 ---
 
-## 💻 Developers / Local Terminal Installation
+## 🛠️ Technology Stack & Architecture
 
-If you wish to run or customize DailyHishab locally using the command line:
+```
+Frontend Architecture
+├── React 19          # Modern UI library with concurrent features
+├── TypeScript 5.8    # Strict type safety and robust data models
+├── Tailwind CSS v4   # Utility-first CSS framework with custom glassmorphism
+├── Motion (Framer)   # Smooth view transitions and interactive micro-animations
+└── Lucide React      # Clean, vector iconography
+
+Data & Storage Layer
+├── LocalStorage API  # Instant client-side persistence
+├── Central Cloud API # Encrypted JSON backup vault & cross-device restore
+└── Google GenAI SDK  # Server-proxied financial analysis engine
+
+Export & Media Generation
+├── html-to-image     # Primary SVG foreignObject canvas renderer for JPG shares
+├── html2canvas       # High-DPI fallback canvas renderer
+├── jspdf             # Styled client-side PDF document compiler
+└── xlsx (SheetJS)    # Native Excel spreadsheet generator
+```
+
+---
+
+## 💻 Developer Guide & Local Setup
+
+To run or customize **DailyHishab** locally:
 
 ### Prerequisites
 * **Node.js**: `v18.0.0` or higher
 * **npm**: `v9.0.0` or higher
 
 ```bash
-# 1. Clone the Repository
+# 1. Clone the repository
 git clone https://github.com/your-username/daily-hishab.git
 cd daily-hishab
 
-# 2. Install Dependencies
+# 2. Install dependencies
 npm install
 
-# 3. Start Development Server
+# 3. Start local dev server
 npm run dev
 
-# 4. Build for Production
+# 4. Build for production
 npm run build
 npm start
 ```
-
----
-
-## 🛠️ Technology Stack
-
-```
-Frontend Architecture
-├── React 19          # Modern UI library with concurrent rendering
-├── TypeScript 5.8    # Strict type safety and clear schema definitions
-├── Tailwind CSS v4   # High-performance utility styling & responsive design
-├── Motion (Framer)   # Smooth route transitions and micro-interactions
-└── Lucide React      # Clean, accessible vector icons
-
-Infrastructure & Deployment
-├── Vercel Platform   # Edge Network deployment & automatic CI/CD
-├── Vercel Rewrites   # SPA routing for single page web application
-└── Express Server    # Server proxy fallback
-
-Data & Storage Layer
-├── LocalStorage API  # Instant client-side persistence
-└── Google GenAI SDK  # Optional smart financial insights proxy
-
-Data Visualization & Export
-├── Recharts          # SVG visual analytics and comparison charts
-├── html-to-image     # Primary SVG foreignObject canvas renderer for JPG statement shares
-├── html2canvas       # Fallback canvas rendering for cross-browser support
-├── jspdf             # Vector PDF document generation
-└── xlsx (SheetJS)    # Native Excel spreadsheet compilation
-```
-
----
-
-## 🎯 Use Cases
-
-* **🏬 Retail & Shopkeepers (দোকানদার)**: Track daily sales, cash balances, supplier expenses, and generate instant WhatsApp receipt summaries for customers.
-* **💼 Freelancers & Consultants**: Log project income, keep track of software subscriptions, and export monthly itemized Excel reports for tax filing.
-* **🏠 Household & Personal Budgeting**: Maintain family expense ledgers, categorize grocery/rent costs, and analyze monthly savings trends.
-* **🚕 Small Service Businesses**: Keep track of daily operational expenses, fuel costs, and driver allowances with clean PDF downloads.
 
 ---
 
@@ -211,9 +197,8 @@ Distributed under the **MIT License**. See `LICENSE` for details.
 
 <div align="center">
 
-**Made with ❤️ for simple, clear, and secure daily financial management.**
+**Crafted with ❤️ for effortless, private, and precise daily financial tracking.**
 
 [🚀 Open Live App on Vercel](https://dailyhishab.vercel.app/) • [⭐ Star on GitHub](https://github.com/your-username/daily-hishab) • [🐛 Report Bug](https://github.com/your-username/daily-hishab/issues)
 
 </div>
-
