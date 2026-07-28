@@ -53,137 +53,177 @@ export const AppLogo: React.FC<AppLogoProps> = ({
       }`}
     >
       <defs>
-        {/* Background Squircle Gradient */}
+        {/* Background Squircle Gradient (Sapphire Blue to Deep Emerald/Teal) */}
         <linearGradient id="dh_bg_grad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#1E3A8A" />
-          <stop offset="50%" stopColor="#2563EB" />
-          <stop offset="100%" stopColor="#0D9488" />
+          <stop offset="45%" stopColor="#2563EB" />
+          <stop offset="100%" stopColor="#0F766E" />
         </linearGradient>
 
-        {/* Monogram 'D' Accent Gradient */}
-        <linearGradient id="dh_accent_grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#60A5FA" />
+        {/* Ledger Page Gradient */}
+        <linearGradient id="dh_ledger_page" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FFFFFF" />
+          <stop offset="100%" stopColor="#E2E8F0" />
+        </linearGradient>
+
+        {/* BDT Currency Symbol (৳) Gold Gradient */}
+        <linearGradient id="dh_bdt_gold" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FDE047" />
+          <stop offset="50%" stopColor="#F59E0B" />
+          <stop offset="100%" stopColor="#D97706" />
+        </linearGradient>
+
+        {/* Ascending Growth Arrow Gradient (Emerald-Cyan) */}
+        <linearGradient id="dh_growth_grad" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#10B981" />
+          <stop offset="50%" stopColor="#06B6D4" />
           <stop offset="100%" stopColor="#38BDF8" />
         </linearGradient>
 
-        {/* Arrow Growth Gradient */}
-        <linearGradient id="dh_arrow_grad" x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#34D399" />
-          <stop offset="100%" stopColor="#10B981" />
+        {/* Bar Chart Gradients */}
+        <linearGradient id="dh_bar1" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#60A5FA" stopOpacity="0.8" />
+        </linearGradient>
+        <linearGradient id="dh_bar2" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stopColor="#10B981" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#34D399" stopOpacity="0.9" />
         </linearGradient>
 
-        {/* Gold Coin / Currency Node Gradient */}
-        <linearGradient id="dh_gold_grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#FCD34D" />
-          <stop offset="100%" stopColor="#F59E0B" />
-        </linearGradient>
-
-        {/* Premium Shadow Effect */}
+        {/* Premium Glow Shadows */}
         <filter id="dh_glow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="#2563EB" floodOpacity="0.35" />
+          <feDropShadow dx="0" dy="14" stdDeviation="18" floodColor="#1E40AF" floodOpacity="0.4" />
           <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#000000" floodOpacity="0.25" />
         </filter>
 
-        <filter id="dh_inner_shadow" x="-10%" y="-10%" width="120%" height="120%">
-          <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="0.25" />
+        <filter id="dh_gold_glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#F59E0B" floodOpacity="0.5" />
         </filter>
       </defs>
 
-      {/* 1. Base Squircle Badge with Glow */}
+      {/* 1. Outer Squircle Badge with Glow */}
       <rect
         x="16"
         y="16"
         width="480"
         height="480"
-        rx="128"
+        rx="124"
         fill="url(#dh_bg_grad)"
         filter="url(#dh_glow)"
       />
 
-      {/* Subtle Inner Glass Ring Border */}
+      {/* Inner Metallic Glass Border */}
       <rect
         x="24"
         y="24"
         width="464"
         height="464"
-        rx="120"
+        rx="116"
         fill="none"
         stroke="#FFFFFF"
         strokeOpacity="0.2"
         strokeWidth="6"
       />
 
-      {/* 2. Abstract Ledger Lines in Background */}
+      {/* 2. Open Ledger Book Foundation (Left & Right Pages) */}
+      {/* Left Page */}
       <path
-        d="M120 140 H392 M120 200 H392 M120 260 H300"
-        stroke="#FFFFFF"
-        strokeOpacity="0.12"
-        strokeWidth="16"
+        d="M96 360 C 140 340, 210 340, 248 356 V 200 C 210 184, 140 184, 96 204 Z"
+        fill="url(#dh_ledger_page)"
+        fillOpacity="0.95"
+      />
+      {/* Right Page */}
+      <path
+        d="M416 360 C 372 340, 302 340, 264 356 V 200 C 302 184, 372 184, 416 204 Z"
+        fill="url(#dh_ledger_page)"
+        fillOpacity="0.85"
+      />
+      {/* Book Spine Center Line */}
+      <path
+        d="M256 190 V 368"
+        stroke="#1E293B"
+        strokeWidth="8"
         strokeLinecap="round"
       />
 
-      {/* 3. Interlocking 'D' Monogram Spine (Left Binding of Ledger) */}
+      {/* Ledger Page Lines (Subtle rulings) */}
       <path
-        d="M140 120 V392"
-        stroke="#FFFFFF"
-        strokeWidth="44"
+        d="M120 236 C 160 224, 210 224, 236 234 M120 272 C 160 260, 210 260, 236 270 M120 308 C 160 296, 210 296, 236 306"
+        stroke="#94A3B8"
+        strokeWidth="5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M392 236 C 352 224, 302 224, 276 234 M392 272 C 352 260, 302 260, 276 270 M392 308 C 352 296, 302 296, 276 306"
+        stroke="#94A3B8"
+        strokeWidth="5"
         strokeLinecap="round"
       />
 
-      {/* 'D' Curved Loop */}
+      {/* 3. Ascending Financial Growth Bar Chart */}
+      <rect x="136" y="270" width="22" height="50" rx="6" fill="url(#dh_bar1)" />
+      <rect x="172" y="240" width="22" height="80" rx="6" fill="url(#dh_bar1)" />
+      <rect x="318" y="220" width="22" height="100" rx="6" fill="url(#dh_bar2)" />
+      <rect x="354" y="180" width="22" height="140" rx="6" fill="url(#dh_bar2)" />
+
+      {/* 4. Prominent BDT Currency Symbol (৳) in Center Gold Glow */}
+      <g filter="url(#dh_gold_glow)">
+        {/* Bengali Taka (৳) Loop & Stem Geometry */}
+        {/* Top Arc & Loop */}
+        <path
+          d="M228 170 C210 150, 180 160, 180 186 C180 210, 205 218, 236 220"
+          stroke="url(#dh_bdt_gold)"
+          strokeWidth="28"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+        {/* Vertical Main Stem */}
+        <path
+          d="M236 140 V 330"
+          stroke="url(#dh_bdt_gold)"
+          strokeWidth="30"
+          strokeLinecap="round"
+        />
+        {/* Horizontal Taka Slash Accent */}
+        <path
+          d="M200 248 H 272"
+          stroke="url(#dh_bdt_gold)"
+          strokeWidth="26"
+          strokeLinecap="round"
+        />
+        {/* Bottom Curve Tail of BDT Symbol */}
+        <path
+          d="M236 330 C236 355, 275 355, 290 330"
+          stroke="url(#dh_bdt_gold)"
+          strokeWidth="26"
+          strokeLinecap="round"
+          fill="none"
+        />
+      </g>
+
+      {/* 5. Ascending Growth Trend Arrow (Sweeping Up & Right) */}
       <path
-        d="M140 120 H250 C340 120, 380 180, 380 256 C380 332, 340 392, 250 392 H140"
-        stroke="url(#dh_accent_grad)"
-        strokeWidth="40"
+        d="M110 330 Q 230 260, 390 120"
+        stroke="url(#dh_growth_grad)"
+        strokeWidth="32"
+        strokeLinecap="round"
+        fill="none"
+      />
+      {/* Arrowhead */}
+      <path
+        d="M320 120 H 390 V 190"
+        stroke="url(#dh_growth_grad)"
+        strokeWidth="32"
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
       />
 
-      {/* 4. Interlocking 'H' Right Pillar */}
-      <path
-        d="M320 160 V392"
-        stroke="#FFFFFF"
-        strokeWidth="36"
-        strokeLinecap="round"
-      />
-
-      {/* 5. Central 'H' Crossbar & Rising Financial Growth Arrow (+45deg trend) */}
-      <path
-        d="M140 256 H270 L380 146"
-        stroke="url(#dh_arrow_grad)"
-        strokeWidth="42"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-
-      {/* Arrowhead Cap */}
-      <path
-        d="M310 146 H380 V216"
-        stroke="url(#dh_arrow_grad)"
-        strokeWidth="42"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-
-      {/* 6. Precision Golden Currency/Financial Balance Accent Circle */}
-      <circle
-        cx="236"
-        cy="312"
-        r="32"
-        fill="url(#dh_gold_grad)"
-        filter="url(#dh_inner_shadow)"
-      />
-      {/* Taka / Dollar Symbol overlay inside coin */}
-      <path
-        d="M236 294 V330 M224 304 H248 C252 304 252 312 236 312 C220 312 220 320 224 320 H248"
-        stroke="#78350F"
-        strokeWidth="6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      {/* Sparkling Financial Nodes */}
+      <circle cx="390" cy="120" r="16" fill="#FDE047" />
+      <circle cx="270" cy="235" r="10" fill="#38BDF8" />
+      <circle cx="170" cy="295" r="8" fill="#34D399" />
     </svg>
   );
 

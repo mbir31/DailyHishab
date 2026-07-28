@@ -27,6 +27,17 @@ interface DriveSession {
 
 let driveSession: DriveSession | null = null;
 
+// Load firebase config fallback for OAuth Client ID if present
+let firebaseConfig: any = null;
+try {
+  const fbPath = path.join(process.cwd(), 'firebase-applet-config.json');
+  if (fs.existsSync(fbPath)) {
+    firebaseConfig = JSON.parse(fs.readFileSync(fbPath, 'utf-8'));
+  }
+} catch (err) {
+  console.warn('Could not read firebase-applet-config.json:', err);
+}
+
 // Load existing session if saved on disk
 try {
   if (fs.existsSync(TOKEN_FILE_PATH)) {
@@ -50,8 +61,14 @@ function saveDriveSession(session: DriveSession | null) {
 
 // Get Google OAuth2 Client
 function getOAuth2Client(req?: express.Request) {
-  const clientId = process.env.GOOGLE_CLIENT_ID || process.env.CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET || process.env.CLIENT_SECRET;
+  const clientId =
+    process.env.GOOGLE_CLIENT_ID ||
+    process.env.CLIENT_ID ||
+    firebaseConfig?.oAuthClientId;
+  const clientSecret =
+    process.env.GOOGLE_CLIENT_SECRET ||
+    process.env.CLIENT_SECRET ||
+    '';
 
   let redirectUri = process.env.APP_URL
     ? `${process.env.APP_URL.replace(/\/$/, '')}/api/auth/google/callback`
@@ -83,6 +100,32 @@ function getDriveClient(oauth2Client: any) {
 }
 
 // --- API ROUTES ---
+
+// Endpoint for direct client-side Google Drive token connection (Firebase Auth)
+app.post('/api/drive/connect-token', (req, res) => {
+  try {
+    const { accessToken, user } = req.body;
+    if (!accessToken) {
+      return res.status(400).json({ error: 'Access token missing' });
+    }
+
+    const session: DriveSession = {
+      tokens: { access_token: accessToken },
+      user: {
+        email: user?.email || 'user@gmail.com',
+        name: user?.displayName || user?.name || 'Google User',
+        picture: user?.photoURL || user?.picture || undefined,
+      },
+      autoSync: true,
+    };
+
+    saveDriveSession(session);
+    res.json({ success: true, connected: true, user: session.user });
+  } catch (err: any) {
+    console.error('Error connecting token to drive session:', err);
+    res.status(500).json({ error: err.message || 'Failed to connect Drive token' });
+  }
+});
 
 // 1. Get Google OAuth Authorization URL
 app.get('/api/auth/google/url', (req, res) => {

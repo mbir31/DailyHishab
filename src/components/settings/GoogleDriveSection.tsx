@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 import { createBackupObject, restoreFromBackupObject, hashPin } from '../../utils/storage';
+import { googleSignIn } from '../../lib/firebaseAuth';
 import {
   Cloud,
   CloudCheck,
@@ -89,10 +90,42 @@ export const GoogleDriveSection: React.FC = () => {
     return () => window.removeEventListener('message', handleMessage);
   }, [checkDriveStatus]);
 
-  // Initiate OAuth Popup
+  // Initiate Google OAuth Connection via Firebase Sign-In popup with fallback to URL endpoint
   const handleConnectGoogle = async () => {
     try {
       setStatusMsg(null);
+      // Attempt Firebase Google Sign-In popup with Drive scopes first
+      try {
+        const { user, accessToken } = await googleSignIn();
+        if (accessToken) {
+          const res = await fetch('/api/drive/connect-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              accessToken,
+              user: {
+                email: user.email,
+                displayName: user.displayName,
+                photoURL: user.photoURL,
+              },
+            }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            checkDriveStatus();
+            setStatusMsg({
+              text: `Connected to ${user.email}`,
+              type: 'success',
+            });
+            setTimeout(() => setStatusMsg(null), 4000);
+            return;
+          }
+        }
+      } catch (firebaseErr: any) {
+        console.warn('Firebase sign-in popup bypassed or failed, trying server OAuth url:', firebaseErr);
+      }
+
+      // Fallback: Server-side OAuth redirect popup
       const res = await fetch('/api/auth/google/url');
       const data = await res.json();
       if (data.url) {
@@ -105,8 +138,10 @@ export const GoogleDriveSection: React.FC = () => {
           'google_drive_auth',
           `width=${width},height=${height},left=${left},top=${top},status=no,toolbar=no,menubar=no`
         );
+      } else {
+        setStatusMsg({ text: data.error || 'Failed to connect to Google Drive', type: 'error' });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to initiate Google OAuth:', err);
       setStatusMsg({ text: 'Failed to connect to Google Drive', type: 'error' });
     }
