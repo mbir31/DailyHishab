@@ -1,96 +1,155 @@
 import html2canvas from 'html2canvas';
+import * as htmlToImage from 'html-to-image';
 
-const oklchCache = new Map<string, string>();
+// Offscreen 1x1 canvas for resolving ANY CSS color string (oklch, oklab, color(srgb...), etc.) to RGB/HEX natively
+const colorCanvas = typeof document !== 'undefined' ? document.createElement('canvas') : null;
+if (colorCanvas) {
+  colorCanvas.width = 1;
+  colorCanvas.height = 1;
+}
+const colorCtx = colorCanvas ? colorCanvas.getContext('2d', { willReadFrequently: true }) : null;
 
-function convertSingleOklchToRgb(match: string): string {
-  if (oklchCache.has(match)) {
-    return oklchCache.get(match)!;
+export function resolveCssColorToRgb(colorStr: string): string {
+  if (!colorStr || colorStr === 'transparent' || colorStr === 'inherit' || colorStr === 'initial' || colorStr === 'none') {
+    return colorStr;
   }
+  if (!colorCtx) return colorStr;
 
   try {
-    const div = document.createElement('div');
-    div.style.color = match;
-    document.body.appendChild(div);
-    const computed = window.getComputedStyle(div).color;
-    document.body.removeChild(div);
+    colorCtx.clearRect(0, 0, 1, 1);
+    colorCtx.fillStyle = '#000000';
+    colorCtx.fillStyle = colorStr;
 
-    if (computed && !computed.includes('oklch') && computed !== '') {
-      oklchCache.set(match, computed);
-      return computed;
+    const fill = colorCtx.fillStyle;
+    if (fill.startsWith('#')) {
+      const hex = fill.slice(1);
+      const num = parseInt(hex, 16);
+      const r = (num >> 16) & 255;
+      const g = (num >> 8) & 255;
+      const b = num & 255;
+      return `rgb(${r}, ${g}, ${b})`;
     }
+    return fill;
   } catch (e) {
-    // ignore
+    return colorStr;
   }
-
-  const fallback = 'rgb(100, 116, 139)';
-  oklchCache.set(match, fallback);
-  return fallback;
 }
 
-export function replaceOklchInCssText(cssText: string): string {
-  if (!cssText || typeof cssText !== 'string') return cssText;
-  if (!cssText.includes('oklch') && !cssText.includes('oklab')) return cssText;
+// Deep clone element & recursively replace all computed colors with explicit RGB/RGBA values
+function cloneAndNormalizeElement(
+  originalElement: HTMLElement,
+  backgroundColor?: string | null
+): { tempContainer: HTMLDivElement; tempClone: HTMLElement } {
+  const tempContainer = document.createElement('div');
+  tempContainer.style.position = 'fixed';
+  tempContainer.style.left = '0px';
+  tempContainer.style.top = '0px';
+  tempContainer.style.zIndex = '-9999';
+  tempContainer.style.opacity = '1';
+  tempContainer.style.pointerEvents = 'none';
+  tempContainer.style.overflow = 'visible';
+  tempContainer.style.background = backgroundColor || '#FFFFFF';
 
-  return cssText
-    .replace(/oklch\([^)]+\)/gi, (m) => convertSingleOklchToRgb(m))
-    .replace(/oklab\([^)]+\)/gi, (m) => convertSingleOklchToRgb(m));
-}
+  const tempClone = originalElement.cloneNode(true) as HTMLElement;
+  tempClone.style.position = 'relative';
+  tempClone.style.left = '0px';
+  tempClone.style.top = '0px';
+  tempClone.style.margin = '0px';
+  tempClone.style.transform = 'none';
 
-export function sanitizeClonedDocForCanvas(clonedDoc: Document, targetElementId?: string) {
-  try {
-    // 1. Sanitize all <style> elements
-    const styleElements = clonedDoc.querySelectorAll('style');
-    styleElements.forEach((style) => {
-      if (style.textContent && (style.textContent.includes('oklch') || style.textContent.includes('oklab'))) {
-        style.textContent = replaceOklchInCssText(style.textContent);
+  tempContainer.appendChild(tempClone);
+  document.body.appendChild(tempContainer);
+
+  // Walk nodes in parallel to compute and set explicit RGB values
+  const origNodes = Array.from(originalElement.querySelectorAll<HTMLElement>('*'));
+  const cloneNodes = Array.from(tempClone.querySelectorAll<HTMLElement>('*'));
+
+  // Also include root nodes
+  const allOrig: HTMLElement[] = [originalElement, ...origNodes];
+  const allClone: HTMLElement[] = [tempClone, ...cloneNodes];
+
+  for (let i = 0; i < allOrig.length; i++) {
+    const orig = allOrig[i];
+    const clone = allClone[i];
+    if (!orig || !clone) continue;
+
+    try {
+      const computed = window.getComputedStyle(orig);
+      if (computed.color) clone.style.color = resolveCssColorToRgb(computed.color);
+      if (computed.backgroundColor && computed.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+        clone.style.backgroundColor = resolveCssColorToRgb(computed.backgroundColor);
       }
-    });
-
-    // 2. Sanitize inline style attributes
-    const elements = clonedDoc.querySelectorAll('*');
-    elements.forEach((el) => {
-      const htmlEl = el as HTMLElement;
-      if (htmlEl.getAttribute) {
-        const inlineStyle = htmlEl.getAttribute('style');
-        if (inlineStyle && (inlineStyle.includes('oklch') || inlineStyle.includes('oklab'))) {
-          htmlEl.setAttribute('style', replaceOklchInCssText(inlineStyle));
-        }
-      }
-    });
-
-    // 3. Ensure target container in cloned doc is positioned correctly if offscreen
-    if (targetElementId) {
-      const clonedTarget = clonedDoc.getElementById(targetElementId);
-      if (clonedTarget) {
-        clonedTarget.style.position = 'relative';
-        clonedTarget.style.left = '0';
-        clonedTarget.style.top = '0';
-        if (clonedTarget.parentElement) {
-          clonedTarget.parentElement.style.position = 'relative';
-          clonedTarget.parentElement.style.left = '0';
-          clonedTarget.parentElement.style.top = '0';
-        }
-      }
+      if (computed.borderColor) clone.style.borderColor = resolveCssColorToRgb(computed.borderColor);
+      if (computed.borderTopColor) clone.style.borderTopColor = resolveCssColorToRgb(computed.borderTopColor);
+      if (computed.borderRightColor) clone.style.borderRightColor = resolveCssColorToRgb(computed.borderRightColor);
+      if (computed.borderBottomColor) clone.style.borderBottomColor = resolveCssColorToRgb(computed.borderBottomColor);
+      if (computed.borderLeftColor) clone.style.borderLeftColor = resolveCssColorToRgb(computed.borderLeftColor);
+      if (computed.fill && computed.fill !== 'none') clone.style.fill = resolveCssColorToRgb(computed.fill);
+      if (computed.stroke && computed.stroke !== 'none') clone.style.stroke = resolveCssColorToRgb(computed.stroke);
+    } catch (e) {
+      // ignore individual node failure
     }
-  } catch (err) {
-    console.warn('Error sanitizing cloned doc for html2canvas:', err);
   }
+
+  return { tempContainer, tempClone };
 }
 
 export async function renderElementToCanvas(
   element: HTMLElement,
   options?: { backgroundColor?: string | null }
 ): Promise<HTMLCanvasElement> {
-  return await html2canvas(element, {
-    scale: 2, // 2x resolution for crisp high-DPI retina rendering
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: options?.backgroundColor !== undefined ? options.backgroundColor : '#FFFFFF',
-    logging: false,
-    onclone: (clonedDoc) => {
-      sanitizeClonedDocForCanvas(clonedDoc, element.id);
-    },
-  });
+  const bgVal = options?.backgroundColor !== undefined && options.backgroundColor !== null ? options.backgroundColor : '#FFFFFF';
+
+  const { tempContainer, tempClone } = cloneAndNormalizeElement(element, bgVal);
+
+  // Give browser a quick tick to resolve fonts and layout
+  await new Promise((r) => setTimeout(r, 60));
+
+  try {
+    // Primary Renderer: html-to-image (Uses native browser SVG foreignObject rendering, no JS color parser crashes)
+    const canvas = await htmlToImage.toCanvas(tempClone, {
+      quality: 0.98,
+      pixelRatio: 2,
+      backgroundColor: bgVal,
+      cacheBust: true,
+    });
+
+    if (canvas && canvas.width > 0 && canvas.height > 0) {
+      document.body.removeChild(tempContainer);
+      return canvas;
+    }
+  } catch (htmlToImageErr) {
+    console.warn('html-to-image rendering encountered an issue, running html2canvas fallback:', htmlToImageErr);
+  }
+
+  // Secondary Fallback: html2canvas with sanitized styles
+  try {
+    const canvas = await html2canvas(tempClone, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: bgVal,
+      logging: false,
+      onclone: (clonedDoc) => {
+        // Strip or convert any remaining raw <style> tags containing oklch
+        const styleElements = clonedDoc.querySelectorAll('style');
+        styleElements.forEach((style) => {
+          if (style.textContent && (style.textContent.includes('oklch') || style.textContent.includes('oklab') || style.textContent.includes('@theme'))) {
+            style.textContent = style.textContent
+              .replace(/oklch\([^)]+\)/gi, (m) => resolveCssColorToRgb(m))
+              .replace(/oklab\([^)]+\)/gi, (m) => resolveCssColorToRgb(m));
+          }
+        });
+      },
+    });
+
+    document.body.removeChild(tempContainer);
+    return canvas;
+  } catch (html2canvasErr) {
+    document.body.removeChild(tempContainer);
+    console.error('html2canvas fallback failed:', html2canvasErr);
+    throw html2canvasErr;
+  }
 }
 
 export interface ExportReportOptions {
@@ -122,7 +181,7 @@ export async function exportElementToImage(options: ExportReportOptions): Promis
         const response = await fetch(dataUrl);
         const blob = await response.blob();
         const file = new File([blob], `${filename}.${format}`, { type: mimeType });
-        
+
         if (navigator.canShare({ files: [file] })) {
           await navigator.share({
             title: options.title || 'DailyHishab Financial Statement',
@@ -213,4 +272,3 @@ export async function shareStatementAsImage(options: {
     return { success: false, method: 'error', error: err.message || 'Image generation failed' };
   }
 }
-

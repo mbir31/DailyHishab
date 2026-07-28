@@ -9,15 +9,16 @@ import { AnalyticsDashboard } from '../components/accounts/AnalyticsDashboard';
 import { AdvancedSearch } from '../components/accounts/AdvancedSearch';
 import { StatementExportSection } from '../components/accounts/StatementExportSection';
 import { FinancialHealthCard } from '../components/accounts/FinancialHealthCard';
+import { MonthlySummaryDashboard } from '../components/accounts/MonthlySummaryDashboard';
 import { TimeFilterType } from '../types/entry.types';
 import { getDateRangeForFilter } from '../utils/dateHelpers';
 import { getEntriesForRange, getNoteForRange, getAllEntries } from '../utils/storage';
-import { ArrowUpRight, ArrowDownRight, Wallet, Scale, BarChart3, Search, FileSpreadsheet, LayoutDashboard, Activity } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Wallet, Scale, BarChart3, Search, FileSpreadsheet, LayoutDashboard, Calendar, Activity } from 'lucide-react';
 
 export const AccountsPage: React.FC = () => {
   const { selectedDate, userProfile, t } = useApp();
 
-  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'analytics' | 'search' | 'export'>('overview');
+  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'monthly' | 'analytics' | 'search' | 'export'>('overview');
 
   const [activeFilter, setActiveFilter] = useState<TimeFilterType>('day');
   const [customFrom, setCustomFrom] = useState<string>(selectedDate);
@@ -89,6 +90,19 @@ export const AccountsPage: React.FC = () => {
         >
           <LayoutDashboard className="w-4 h-4" />
           <span>{userProfile.language === 'bn' ? 'সংক্ষিপ্ত রূপ' : 'Overview'}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('monthly')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'monthly'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+          }`}
+        >
+          <Calendar className="w-4 h-4" />
+          <span>{userProfile.language === 'bn' ? 'মাসিক সামারি' : 'Monthly Summary'}</span>
         </button>
 
         <button
@@ -227,7 +241,12 @@ export const AccountsPage: React.FC = () => {
         </div>
       )}
 
-      {/* VIEW 2: ANALYTICS & TRENDS */}
+      {/* VIEW 2: MONTHLY SUMMARY DASHBOARD */}
+      {activeSubTab === 'monthly' && (
+        <MonthlySummaryDashboard entries={allTimeEntries} />
+      )}
+
+      {/* VIEW 3: ANALYTICS & TRENDS */}
       {activeSubTab === 'analytics' && (
         <AnalyticsDashboard entries={allTimeEntries} />
       )}
