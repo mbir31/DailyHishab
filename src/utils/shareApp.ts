@@ -7,7 +7,7 @@ export function getAppUrl(): string {
     // Strip trailing slashes
     return window.location.origin.replace(/\/$/, '');
   }
-  return 'https://dailyhishab.vercel.app';
+  return 'https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app';
 }
 
 export async function copyAppUrlToClipboard(): Promise<boolean> {

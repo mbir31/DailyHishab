@@ -92,13 +92,22 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         >
           {/* Header Branding */}
           <div className="flex items-center justify-between border-b border-gray-200 pb-5">
-            <div>
-              <h1 className="text-2xl font-black text-blue-600 tracking-tight">
-                {userProfile.mainTitle || 'DailyHishab'}
-              </h1>
-              <p className="text-xs text-gray-500 font-medium">
-                {userProfile.subtitle || 'Personal & Business Ledger'}
-              </p>
+            <div className="flex items-center gap-3">
+              {userProfile.photoUrl ? (
+                <img
+                  src={userProfile.photoUrl}
+                  alt={userProfile.username || 'User Profile'}
+                  className="w-10 h-10 rounded-xl object-cover border border-gray-200 shadow-sm shrink-0"
+                />
+              ) : null}
+              <div>
+                <h1 className="text-2xl font-black text-blue-600 tracking-tight">
+                  {userProfile.mainTitle || 'DailyHishab'}
+                </h1>
+                <p className="text-xs text-gray-500 font-medium">
+                  {userProfile.subtitle || (userProfile.language === 'bn' ? 'ব্যক্তিগত ও বাণিজ্যিক হিসাব' : 'Personal & Business Ledger')}
+                </p>
+              </div>
             </div>
             <div className="text-right">
               <span className="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-bold text-xs border border-blue-200">

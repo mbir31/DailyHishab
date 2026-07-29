@@ -4,7 +4,7 @@
 
 ![DailyHishab Banner](https://img.shields.io/badge/DailyHishab-Smart_Financial_Ledger-3B82F6?style=for-the-badge&logo=wallet&logoColor=white)
 
-[![Hosted Live](https://img.shields.io/badge/Hosted_Live-Vercel_Edge-000000.svg?style=for-the-badge&logo=vercel&logoColor=white)](https://dailyhishab.vercel.app/)
+[![Hosted Live](https://img.shields.io/badge/Hosted_Live-Cloud_Run-3B82F6.svg?style=for-the-badge&logo=googlecloud&logoColor=white)](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app)
 [![1-Tap Install & Shortcut](https://img.shields.io/badge/1--Tap_Install-Add_Shortcut_to_Home_Screen-10B981.svg?style=for-the-badge&logo=android&logoColor=white)](#-1-tap-install--add-shortcut-to-home-screen)
 [![PWA Ready](https://img.shields.io/badge/PWA-Installable_App-5A0FC8.svg?style=for-the-badge&logo=pwa&logoColor=white)](#-quick-setup--installation-guide)
 [![100% Offline First](https://img.shields.io/badge/Offline-100%25_Functional-10B981.svg?style=for-the-badge&logo=sqlite&logoColor=white)](#-100-offline-first--privacy)
@@ -29,7 +29,7 @@
   <i>Replace messy paper notebooks (হিসাবের খাতা) and heavy accounting tools with a zero-latency, elegant daily financial ledger. Designed for personal budgeting, small business cash flow, and multi-device cloud synchronization.</i>
 </p>
 
-### 🚀 [**Click Here to Open DailyHishab Live App & Add Home Screen Shortcut**](https://dailyhishab.vercel.app/)
+### 🚀 [**Click Here to Open DailyHishab Live App & Add Home Screen Shortcut**](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app)
 *(Works 100% offline • Direct 1-Tap Home Screen Shortcut • Firebase Encrypted Cloud Vault • PWA Installable)*
 
 </div>
@@ -153,7 +153,7 @@ DailyHishab provides an intuitive single-screen workspace with fluid tab navigat
 DailyHishab is a **Progressive Web App (PWA)** that can be installed on any smartphone, tablet, or desktop computer in under 1 minute.
 
 ### 🚀 Live App URL
-* **Live App:** [https://dailyhishab.vercel.app/](https://dailyhishab.vercel.app/)
+* **Live App:** [https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app)
 
 ### 📱 Installation Steps (1-Tap & Manual)
 | Platform | Direct 1-Tap Option | Manual Step Instructions |
@@ -240,6 +240,6 @@ Distributed under the **MIT License**. See `LICENSE` for details.
 
 **Crafted with ❤️ for fast, private, and smart financial tracking.**
 
-[🚀 Open Live App & Add Shortcut](https://dailyhishab.vercel.app/) • [⭐ Star on GitHub](https://github.com/your-username/daily-hishab) • [🐛 Report Bug](https://github.com/your-username/daily-hishab/issues)
+[🚀 Open Live App & Add Shortcut](https://ais-pre-43fuxb4i4jesdkqxrh5td2-1074731241775.asia-southeast1.run.app) • [⭐ Star on GitHub](https://github.com/your-username/daily-hishab) • [🐛 Report Bug](https://github.com/your-username/daily-hishab/issues)
 
 </div>

@@ -125,13 +125,22 @@ export const ExportStatementModal: React.FC<ExportStatementModalProps> = ({
         {/* Statement Preview Card */}
         <div className="p-4 rounded-2xl bg-white/80 dark:bg-gray-900/80 border border-gray-200 dark:border-gray-800 space-y-3 print:p-0 print:border-none print:shadow-none">
           <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-800">
-            <div>
-              <h3 className="text-base font-black text-gray-900 dark:text-white">
-                {userProfile.mainTitle || 'DailyHishab'}
-              </h3>
-              <p className="text-xs text-gray-500 font-medium">
-                Official Financial Statement • {userProfile.username}
-              </p>
+            <div className="flex items-center gap-3">
+              {userProfile.photoUrl ? (
+                <img
+                  src={userProfile.photoUrl}
+                  alt={userProfile.username || 'User Profile'}
+                  className="w-10 h-10 rounded-xl object-cover border border-gray-200 shadow-sm shrink-0"
+                />
+              ) : null}
+              <div>
+                <h3 className="text-base font-black text-gray-900 dark:text-white">
+                  {userProfile.mainTitle || 'DailyHishab'}
+                </h3>
+                <p className="text-xs text-gray-500 font-medium">
+                  {userProfile.language === 'bn' ? 'অফিসিয়াল আর্থিক বিবরণী' : 'Official Financial Statement'} • {userProfile.username}
+                </p>
+              </div>
             </div>
             <div className="text-right text-xs font-bold text-gray-500">
               <div>{fromDate} ~ {toDate}</div>
@@ -140,19 +149,25 @@ export const ExportStatementModal: React.FC<ExportStatementModalProps> = ({
 
           <div className="grid grid-cols-3 gap-2 text-center py-2 bg-black/5 dark:bg-white/5 rounded-xl">
             <div>
-              <div className="text-[10px] uppercase font-bold text-gray-500">Income</div>
+              <div className="text-[10px] uppercase font-bold text-gray-500">
+                {userProfile.language === 'bn' ? 'মোট আয়' : 'Income'}
+              </div>
               <div className="text-sm font-black text-emerald-600 dark:text-emerald-400">
                 {currency} {totalIncome.toLocaleString()}
               </div>
             </div>
             <div>
-              <div className="text-[10px] uppercase font-bold text-gray-500">Expense</div>
+              <div className="text-[10px] uppercase font-bold text-gray-500">
+                {userProfile.language === 'bn' ? 'মোট ব্যয়' : 'Expense'}
+              </div>
               <div className="text-sm font-black text-rose-600 dark:text-rose-400">
                 {currency} {totalExpense.toLocaleString()}
               </div>
             </div>
             <div>
-              <div className="text-[10px] uppercase font-bold text-gray-500">Net Balance</div>
+              <div className="text-[10px] uppercase font-bold text-gray-500">
+                {userProfile.language === 'bn' ? 'জমা / ব্যালেন্স' : 'Net Balance'}
+              </div>
               <div className="text-sm font-black text-blue-600 dark:text-blue-400">
                 {currency} {netBalance.toLocaleString()}
               </div>

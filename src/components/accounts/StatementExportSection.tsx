@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Entry } from '../../types/entry.types';
 import { useApp } from '../../context/AppContext';
 import { formatDDMMYYYY, formatDateWithDay } from '../../utils/dateHelpers';
+import { formatCurrency, formatNumberOnly } from '../../utils/numberFormat';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -446,11 +447,19 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
           {/* Statement Header Banner */}
           <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-900 text-white rounded-2xl p-6 shadow-md border border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-teal-400 p-0.5 shadow-lg flex items-center justify-center shrink-0">
-                <div className="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center text-white font-black text-lg tracking-wider">
-                  DH
+              {userProfile.photoUrl ? (
+                <img
+                  src={userProfile.photoUrl}
+                  alt={userProfile.username || 'User Profile'}
+                  className="w-12 h-12 rounded-2xl object-cover shadow-lg border-2 border-white/30 shrink-0"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-teal-400 p-0.5 shadow-lg flex items-center justify-center shrink-0">
+                  <div className="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center text-white font-black text-lg tracking-wider">
+                    DH
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div>
                 <div className="flex items-center gap-2">
@@ -458,24 +467,25 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                     {appTitle}
                   </h1>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold uppercase tracking-wider">
-                    Verified Ledger
+                    {userProfile.language === 'bn' ? 'যাচাইকৃত খাতা' : 'Verified Ledger'}
                   </span>
                 </div>
                 <p className="text-xs text-slate-300 font-medium mt-0.5">
-                  {userProfile.subtitle || 'Personal & Business General Financial Statement'}
+                  {userProfile.subtitle || (userProfile.language === 'bn' ? 'ব্যক্তিগত ও বাণিজ্যিক আর্থিক হিসাব বিবরণী' : 'Personal & Business General Financial Statement')}
                 </p>
               </div>
             </div>
 
+            {/* Upper Right Header Texts (Always in English as requested) */}
             <div className="text-right space-y-1">
               <span className="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-extrabold border border-blue-400/30 uppercase tracking-widest">
                 OFFICIAL STATEMENT
               </span>
-              <div className="text-xs font-bold text-slate-200">
+              <div className="text-xs font-bold text-slate-200 font-mono">
                 Ref: DH-{fromDate.replace(/-/g, '')}-{toDate.replace(/-/g, '')}
               </div>
-              <p className="text-[11px] text-slate-400 font-medium">
-                Period: {formatDDMMYYYY(fromDate, userProfile.language)} to {formatDDMMYYYY(toDate, userProfile.language)}
+              <p className="text-[11px] text-slate-400 font-medium font-mono">
+                Period: {formatDDMMYYYY(fromDate, 'en')} to {formatDDMMYYYY(toDate, 'en')}
               </p>
             </div>
           </div>
@@ -484,89 +494,111 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
           <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200 text-xs text-slate-600 font-medium grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <div>
-                <span className="text-slate-400 font-normal">Account Holder: </span>
-                <strong className="text-slate-900 font-bold">{userProfile.username || 'Valued Account Owner'}</strong>
+                <span className="text-slate-400 font-normal">{userProfile.language === 'bn' ? 'হিসাব মালিক: ' : 'Account Holder: '}</span>
+                <strong className="text-slate-900 font-bold">{userProfile.username || (userProfile.language === 'bn' ? 'সম্মানিত হিসাব মালিক' : 'Valued Account Owner')}</strong>
               </div>
               <div>
-                <span className="text-slate-400 font-normal">Currency & Format: </span>
-                <strong className="text-slate-900 font-bold">{userProfile.currency || (userProfile.language === 'bn' ? 'BDT (৳)' : 'INR (₹)')} • Standard Accounting</strong>
+                <span className="text-slate-400 font-normal">{userProfile.language === 'bn' ? 'মুদ্রা ও ফরম্যাট: ' : 'Currency & Format: '}</span>
+                <strong className="text-slate-900 font-bold">{currencySymbol} • {userProfile.language === 'bn' ? 'স্ট্যান্ডার্ড একাউন্টিং' : 'Standard Accounting'}</strong>
               </div>
             </div>
 
             <div className="space-y-1 text-right">
               <div>
-                <span className="text-slate-400 font-normal">Issued On: </span>
-                <strong className="text-slate-900 font-bold">{new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong>
+                <span className="text-slate-400 font-normal">{userProfile.language === 'bn' ? 'ইস্যুর তারিখ: ' : 'Issued On: '}</span>
+                <strong className="text-slate-900 font-bold">{new Date().toLocaleDateString(userProfile.language === 'bn' ? 'bn-BD' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong>
               </div>
               <div>
-                <span className="text-slate-400 font-normal">Total Filled Records: </span>
-                <strong className="text-blue-600 font-black">{validEntries.length} Transactions</strong>
+                <span className="text-slate-400 font-normal">{userProfile.language === 'bn' ? 'মোট লেনদেন সংখ্যা: ' : 'Total Filled Records: '}</span>
+                <strong className="text-blue-600 font-black">
+                  {userProfile.language === 'bn' ? `${formatNumberOnly(validEntries.length, 'bn')} টি লেনদেন` : `${validEntries.length} Transactions`}
+                </strong>
               </div>
             </div>
           </div>
 
-          {/* 4 KPI Financial Summary Cards Grid */}
-          <div className="grid grid-cols-4 gap-3">
-            {/* Income Card */}
-            <div className="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 flex flex-col justify-between">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">
-                Total Income
-              </span>
-              <div className="text-lg font-black text-emerald-700 font-tabular my-1">
-                {currencySymbol} {totalIncome.toLocaleString()}
-              </div>
-              <span className="text-[10px] font-semibold text-emerald-600">
-                {validEntries.filter((e) => e.type === 'income').length} Revenue Records
-              </span>
-            </div>
+          {/* KPI Financial Summary Cards Grid */}
+          {(() => {
+            const isMonthlyOrYearly = (() => {
+              if (!fromDate || !toDate) return false;
+              const dFrom = new Date(fromDate);
+              const dTo = new Date(toDate);
+              const diffDays = Math.round((dTo.getTime() - dFrom.getTime()) / (1000 * 3600 * 24)) + 1;
+              return diffDays >= 27;
+            })();
 
-            {/* Expense Card */}
-            <div className="p-3.5 rounded-2xl bg-rose-50/80 border border-rose-200/80 flex flex-col justify-between">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-800">
-                Total Expense
-              </span>
-              <div className="text-lg font-black text-rose-700 font-tabular my-1">
-                {currencySymbol} {totalExpense.toLocaleString()}
-              </div>
-              <span className="text-[10px] font-semibold text-rose-600">
-                {validEntries.filter((e) => e.type === 'expense').length} Expense Records
-              </span>
-            </div>
+            return (
+              <div className={`grid ${isMonthlyOrYearly ? 'grid-cols-4' : 'grid-cols-3'} gap-3`}>
+                {/* Income Card */}
+                <div className="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 flex flex-col justify-between">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">
+                    {userProfile.language === 'bn' ? 'মোট আয়' : 'Total Income'}
+                  </span>
+                  <div className="text-lg font-black text-emerald-700 font-tabular my-1">
+                    {formatCurrency(totalIncome, userProfile.language, currencySymbol)}
+                  </div>
+                  <span className="text-[10px] font-semibold text-emerald-600">
+                    {userProfile.language === 'bn'
+                      ? `${formatNumberOnly(validEntries.filter((e) => e.type === 'income').length, 'bn')} টি আয় রেকর্ড`
+                      : `${validEntries.filter((e) => e.type === 'income').length} Revenue Records`}
+                  </span>
+                </div>
 
-            {/* Net Balance Card */}
-            <div className={`p-3.5 rounded-2xl border flex flex-col justify-between ${netBalance >= 0 ? 'bg-blue-50/80 border-blue-200/80' : 'bg-amber-50/80 border-amber-200/80'}`}>
-              <span className={`text-[10px] font-extrabold uppercase tracking-wider ${netBalance >= 0 ? 'text-blue-800' : 'text-amber-800'}`}>
-                Net Balance
-              </span>
-              <div className={`text-lg font-black font-tabular my-1 ${netBalance >= 0 ? 'text-blue-700' : 'text-amber-700'}`}>
-                {currencySymbol} {netBalance.toLocaleString()}
-              </div>
-              <span className={`text-[10px] font-bold ${netBalance >= 0 ? 'text-blue-600' : 'text-amber-600'}`}>
-                {netBalance >= 0 ? '🟢 Surplus' : '🔴 Deficit'}
-              </span>
-            </div>
+                {/* Expense Card */}
+                <div className="p-3.5 rounded-2xl bg-rose-50/80 border border-rose-200/80 flex flex-col justify-between">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-800">
+                    {userProfile.language === 'bn' ? 'মোট ব্যয়' : 'Total Expense'}
+                  </span>
+                  <div className="text-lg font-black text-rose-700 font-tabular my-1">
+                    {formatCurrency(totalExpense, userProfile.language, currencySymbol)}
+                  </div>
+                  <span className="text-[10px] font-semibold text-rose-600">
+                    {userProfile.language === 'bn'
+                      ? `${formatNumberOnly(validEntries.filter((e) => e.type === 'expense').length, 'bn')} টি ব্যয় রেকর্ড`
+                      : `${validEntries.filter((e) => e.type === 'expense').length} Expense Records`}
+                  </span>
+                </div>
 
-            {/* Profit Margin / Retention */}
-            <div className="p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200/80 flex flex-col justify-between">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-800">
-                Profit Margin
-              </span>
-              <div className="text-lg font-black text-indigo-700 font-tabular my-1">
-                {totalIncome > 0 ? Math.round((netBalance / totalIncome) * 100) : 0}%
+                {/* Net Balance Card */}
+                <div className={`p-3.5 rounded-2xl border flex flex-col justify-between ${netBalance >= 0 ? 'bg-blue-50/80 border-blue-200/80' : 'bg-amber-50/80 border-amber-200/80'}`}>
+                  <span className={`text-[10px] font-extrabold uppercase tracking-wider ${netBalance >= 0 ? 'text-blue-800' : 'text-amber-800'}`}>
+                    {userProfile.language === 'bn' ? 'জমা / ব্যালেন্স' : 'Net Balance'}
+                  </span>
+                  <div className={`text-lg font-black font-tabular my-1 ${netBalance >= 0 ? 'text-blue-700' : 'text-amber-700'}`}>
+                    {formatCurrency(netBalance, userProfile.language, currencySymbol)}
+                  </div>
+                  <span className={`text-[10px] font-bold ${netBalance >= 0 ? 'text-blue-600' : 'text-amber-600'}`}>
+                    {netBalance >= 0 ? (userProfile.language === 'bn' ? '🟢 উদ্ধৃত্ত' : '🟢 Surplus') : (userProfile.language === 'bn' ? '🔴 ঘাটতি' : '🔴 Deficit')}
+                  </span>
+                </div>
+
+                {/* Profit Margin / Retention Card (ONLY shown on Monthly or Yearly Statements) */}
+                {isMonthlyOrYearly && (
+                  <div className="p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200/80 flex flex-col justify-between">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-800">
+                      {userProfile.language === 'bn' ? 'প্রফিট মার্জিন' : 'Profit Margin'}
+                    </span>
+                    <div className="text-lg font-black text-indigo-700 font-tabular my-1">
+                      {formatNumberOnly(totalIncome > 0 ? Math.round((netBalance / totalIncome) * 100) : 0, userProfile.language)}%
+                    </div>
+                    <span className="text-[10px] font-semibold text-indigo-600">
+                      {userProfile.language === 'bn' ? 'শুদ্ধ মুনাফা হার' : 'Net Cash Retention'}
+                    </span>
+                  </div>
+                )}
               </div>
-              <span className="text-[10px] font-semibold text-indigo-600">
-                Net Cash Retention
-              </span>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* Itemized Transactions Table */}
           <div className="space-y-2 pt-1">
             <div className="flex items-center justify-between text-xs font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-200">
               <span>
-                {userProfile.language === 'bn' ? 'বিস্তারিত লেনদেন বিবরণী' : 'Itemized Balance Statement Records'} ({validEntries.length} {userProfile.language === 'bn' ? 'টি লেনদেন' : 'entries'})
+                {userProfile.language === 'bn' ? 'বিস্তারিত লেনদেন বিবরণী' : 'Itemized Balance Statement Records'} ({userProfile.language === 'bn' ? `${formatNumberOnly(validEntries.length, 'bn')} টি লেনদেন` : `${validEntries.length} entries`})
               </span>
-              <span className="text-slate-500 font-normal normal-case text-[11px]">Amounts in {currencySymbol}</span>
+              <span className="text-slate-500 font-normal normal-case text-[11px]">
+                {userProfile.language === 'bn' ? 'টাকার পরিমাণ' : 'Amounts in'} {currencySymbol}
+              </span>
             </div>
 
             {validEntries.length === 0 ? (
@@ -575,19 +607,19 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                   {userProfile.language === 'bn' ? 'নির্দিষ্ট তারিখে কোনো লেনদেন রেকর্ড নেই' : 'No transactions recorded for this date / period'}
                 </p>
                 <p className="text-[10px] text-slate-400 font-medium">
-                  {userProfile.language === 'bn' ? 'মোট আয়: ৳ 0.00 • মোট ব্যয়: ৳ 0.00 • জের: ৳ 0.00' : 'Total Income: 0.00 • Total Expense: 0.00 • Net Balance: 0.00'}
+                  {userProfile.language === 'bn' ? 'মোট আয়: ৳ ০.০০ • মোট ব্যয়: ৳ ০.০০ • জের: ৳ ০.০০' : 'Total Income: 0.00 • Total Expense: 0.00 • Net Balance: 0.00'}
                 </p>
               </div>
             ) : (
               <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
                 {/* Table Header */}
                 <div className="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider py-2.5 px-3 grid grid-cols-12 gap-2 items-center">
-                  <div className="col-span-1 text-center">SL</div>
-                  <div className="col-span-2">Date</div>
-                  <div className="col-span-2">Category</div>
-                  <div className="col-span-4">Description</div>
-                  <div className="col-span-1 text-center">Type</div>
-                  <div className="col-span-2 text-right">Amount ({currencySymbol})</div>
+                  <div className="col-span-1 text-center">{userProfile.language === 'bn' ? 'ক্রম' : 'SL'}</div>
+                  <div className="col-span-2">{userProfile.language === 'bn' ? 'তারিখ' : 'Date'}</div>
+                  <div className="col-span-2">{userProfile.language === 'bn' ? 'ক্যাটাগরি' : 'Category'}</div>
+                  <div className="col-span-4">{userProfile.language === 'bn' ? 'বর্ণনা' : 'Description'}</div>
+                  <div className="col-span-1 text-center">{userProfile.language === 'bn' ? 'ধরণ' : 'Type'}</div>
+                  <div className="col-span-2 text-right">{userProfile.language === 'bn' ? 'টাকা' : 'Amount'} ({currencySymbol})</div>
                 </div>
 
                 {/* Table Rows - ONLY filled validEntries */}
@@ -600,7 +632,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                       }`}
                     >
                       <div className="col-span-1 text-center font-bold text-slate-400 text-[11px]">
-                        {idx + 1}
+                        {formatNumberOnly(idx + 1, userProfile.language)}
                       </div>
 
                       <div className="col-span-2 font-medium text-slate-700 text-[11px]">
@@ -609,13 +641,13 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
 
                       <div className="col-span-2">
                         <span className="inline-block px-2 py-0.5 rounded-md bg-slate-200/70 text-slate-700 text-[10px] font-bold truncate max-w-[100px]">
-                          {e.category || 'General'}
+                          {e.category || (userProfile.language === 'bn' ? 'সাধারণ' : 'General')}
                         </span>
                       </div>
 
                       <div className="col-span-4 space-y-0.5 min-w-0">
                         <div className="font-bold text-slate-900 truncate text-xs">
-                          {e.description || e.category || 'Transaction Record'}
+                          {e.description || e.category || (userProfile.language === 'bn' ? 'লেনদেন হিসাব' : 'Transaction Record')}
                         </div>
                       </div>
 
@@ -627,13 +659,13 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                               : 'bg-rose-100 text-rose-800'
                           }`}
                         >
-                          {e.type === 'income' ? 'INC' : 'EXP'}
+                          {e.type === 'income' ? (userProfile.language === 'bn' ? 'আয়' : 'INC') : (userProfile.language === 'bn' ? 'খরচ' : 'EXP')}
                         </span>
                       </div>
 
                       <div className="col-span-2 text-right font-black font-tabular text-xs">
                         <span className={e.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}>
-                          {e.type === 'income' ? '+' : '-'}{currencySymbol} {(e.amount || 0).toLocaleString()}
+                          {e.type === 'income' ? '+' : '-'}{formatCurrency(e.amount || 0, userProfile.language, currencySymbol)}
                         </span>
                       </div>
                     </div>
@@ -642,12 +674,18 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
 
                 {/* Subtotal Summary Row */}
                 <div className="bg-slate-100 border-t border-slate-300 py-2.5 px-3 flex items-center justify-between text-xs font-bold text-slate-800">
-                  <span>Period Totals ({validEntries.length} items)</span>
+                  <span>
+                    {userProfile.language === 'bn' ? 'সাময়িক হিসাব মোট' : 'Period Totals'} ({formatNumberOnly(validEntries.length, userProfile.language)} {userProfile.language === 'bn' ? 'টি' : 'items'})
+                  </span>
                   <div className="flex items-center gap-4 font-tabular text-[11px]">
-                    <span className="text-emerald-700 font-black">Total In: +{currencySymbol} {totalIncome.toLocaleString()}</span>
-                    <span className="text-rose-700 font-black">Total Out: -{currencySymbol} {totalExpense.toLocaleString()}</span>
+                    <span className="text-emerald-700 font-black">
+                      {userProfile.language === 'bn' ? 'মোট জমা: ' : 'Total In: +'}{formatCurrency(totalIncome, userProfile.language, currencySymbol)}
+                    </span>
+                    <span className="text-rose-700 font-black">
+                      {userProfile.language === 'bn' ? 'মোট খরচ: ' : 'Total Out: -'}{formatCurrency(totalExpense, userProfile.language, currencySymbol)}
+                    </span>
                     <span className={`font-black text-xs ${netBalance >= 0 ? 'text-blue-700' : 'text-amber-700'}`}>
-                      Net Balance: {currencySymbol} {netBalance.toLocaleString()}
+                      {userProfile.language === 'bn' ? 'জমা / ব্যালেন্স: ' : 'Net Balance: '}{formatCurrency(netBalance, userProfile.language, currencySymbol)}
                     </span>
                   </div>
                 </div>
@@ -656,7 +694,9 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
 
             {validEntries.length > 50 && (
               <p className="text-[10px] text-slate-400 text-center pt-0.5 italic">
-                + {validEntries.length - 50} additional itemized entries saved in database
+                {userProfile.language === 'bn'
+                  ? `+ আরও ${formatNumberOnly(validEntries.length - 50, 'bn')} টি লেনদেন ডাটাবেজে সংরক্ষিত রয়েছে`
+                  : `+ ${validEntries.length - 50} additional itemized entries saved in database`}
               </p>
             )}
           </div>
@@ -667,10 +707,12 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
             <div className="space-y-1 text-[10px] text-slate-500 max-w-[500px]">
               <div className="flex items-center gap-1.5 text-slate-800 font-bold">
                 <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-                <span>Digitally Authenticated Ledger Statement</span>
+                <span>{userProfile.language === 'bn' ? 'ডিজিটালভাবে সত্যায়িত লেজার বিবরণী' : 'Digitally Authenticated Ledger Statement'}</span>
               </div>
               <p className="leading-tight text-slate-400">
-                This document is generated automatically by {appTitle} double-entry accounting engine. Verified for accuracy, tax estimation, and audit documentation.
+                {userProfile.language === 'bn'
+                  ? 'এই বিবরণীটি ডেইলি হিসাব অ্যাপ দ্বারা স্বয়ংক্রিয়ভাবে তৈরি করা হয়েছে। তথ্যগত সঠিকতা ও অডিটের জন্য নির্ভরযোগ্য নথি।'
+                  : `This document is generated automatically by ${appTitle} double-entry accounting engine. Verified for accuracy, tax estimation, and audit documentation.`}
               </p>
             </div>
 
@@ -766,7 +808,11 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
 
           {/* Bottom Copyright bar */}
           <div className="text-[9px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-100">
-            <span>Powered by {appTitle} • Smart Personal & Business Ledger</span>
+            <span>
+              {userProfile.language === 'bn'
+                ? 'ডেইলি হিসাব দ্বারা পরিচালিত • স্মার্ট পার্সোনাল ও বিজনেস লেজার'
+                : `Powered by ${appTitle} • Smart Personal & Business Ledger`}
+            </span>
             <span>Ref ID: DH-STMT-{fromDate.replace(/-/g, '')}</span>
           </div>
         </div>
