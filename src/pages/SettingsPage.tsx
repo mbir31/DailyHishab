@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { ProfileSection } from '../components/settings/ProfileSection';
+import { PwaInstallSection } from '../components/settings/PwaInstallSection';
 import { CurrencySection } from '../components/settings/CurrencySection';
 import { NavLabelsSection } from '../components/settings/NavLabelsSection';
 import { CustomDropdownSection } from '../components/settings/CustomDropdownSection';
@@ -62,7 +63,10 @@ export const SettingsPage: React.FC = () => {
       {/* Section 1: Profile */}
       <ProfileSection />
 
-      {/* Section 2: App Brand & Commercial Logo Showcase */}
+      {/* Section 2: 1-Tap PWA Install & Add Shortcut Card */}
+      <PwaInstallSection />
+
+      {/* Section 3: App Brand & Commercial Logo Showcase */}
       <BrandShowcaseSection />
 
       {/* Section 3: Currency Symbol Settings */}

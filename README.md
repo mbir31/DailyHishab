@@ -5,6 +5,7 @@
 ![DailyHishab Banner](https://img.shields.io/badge/DailyHishab-Smart_Financial_Ledger-3B82F6?style=for-the-badge&logo=wallet&logoColor=white)
 
 [![Hosted Live](https://img.shields.io/badge/Hosted_Live-Vercel_Edge-000000.svg?style=for-the-badge&logo=vercel&logoColor=white)](https://dailyhishab.vercel.app/)
+[![1-Tap Install & Shortcut](https://img.shields.io/badge/1--Tap_Install-Add_Shortcut_to_Home_Screen-10B981.svg?style=for-the-badge&logo=android&logoColor=white)](#-1-tap-install--add-shortcut-to-home-screen)
 [![PWA Ready](https://img.shields.io/badge/PWA-Installable_App-5A0FC8.svg?style=for-the-badge&logo=pwa&logoColor=white)](#-quick-setup--installation-guide)
 [![100% Offline First](https://img.shields.io/badge/Offline-100%25_Functional-10B981.svg?style=for-the-badge&logo=sqlite&logoColor=white)](#-100-offline-first--privacy)
 [![Firebase Cloud Vault](https://img.shields.io/badge/Cloud_Vault-Firebase_Firestore-FFCA28.svg?style=for-the-badge&logo=firebase&logoColor=black)](#-firebase-cloud-vault--master-recovery-key)
@@ -18,6 +19,8 @@
  │      Simple yet Feature-Rich • Classic yet Modern • Offline-First     │
  ├────────────────────────────────────────────────────────────────────────┤
  │ [💵 Daily Ledger]  [📋 Monthly Summary]  [📊 Analytics]  [📤 Export]  │
+ ├────────────────────────────────────────────────────────────────────────┤
+ │ 📲 [1-Tap Install & Add App Shortcut directly to Home Screen]          │
  └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -26,17 +29,44 @@
   <i>Replace messy paper notebooks (হিসাবের খাতা) and heavy accounting tools with a zero-latency, elegant daily financial ledger. Designed for personal budgeting, small business cash flow, and multi-device cloud synchronization.</i>
 </p>
 
-### 🚀 [**Click Here to Open DailyHishab Live App**](https://dailyhishab.vercel.app/)
-*(Works 100% offline • Instant zero-latency UI • Firebase Encrypted Cloud Vault • PWA Installable)*
+### 🚀 [**Click Here to Open DailyHishab Live App & Add Home Screen Shortcut**](https://dailyhishab.vercel.app/)
+*(Works 100% offline • Direct 1-Tap Home Screen Shortcut • Firebase Encrypted Cloud Vault • PWA Installable)*
 
 </div>
 
 ---
 
+## 📲 1-Tap Install & Add Shortcut to Home Screen
+
+DailyHishab features a built-in **1-Tap Direct Install & Add Shortcut** engine accessible right inside the **App Settings** page and directly from the web browser:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+ │ 📲 Install & Add Shortcut to Home Screen                    [⚡ 1-Tap Access]│
+ ├─────────────────────────────────────────────────────────────────────────────┤
+ │ Access DailyHishab in 1-tap directly from your phone's home screen or PC   │
+ │                                                                             │
+ │ [ 🚀 Add Shortcut / Install App ]  <-- (Tap directly in App Settings)      │
+ ├─────────────────────────────────────────────────────────────────────────────┤
+ │ 🤖 Android Chrome  : Tap "Add Shortcut" above or 3-dots (⋮) ➔ Add to Home  │
+ │ 🍏 iPhone Safari   : Tap Share (↑) ➔ Scroll down & tap Add to Home Screen   │
+ │ 💻 PC Desktop      : Click Install Icon (🖥️ / ➕) in browser address bar     │
+ └─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 🌟 Why Add DailyHishab to Your Home Screen?
+* **Zero Browser Hassle**: No need to open your browser, search history, or re-type URLs every day.
+* **Instant Launcher Icon**: Appears with custom brand icon directly on your smartphone app drawer/home screen.
+* **Full-Screen App Mode**: Opens in dedicated windowed application view without browser address bars.
+* **100% Offline Launch**: Works instantly even when mobile data or Wi-Fi is turned off.
+
+---
+
 ## 🌟 Why Choose DailyHishab?
 
-> *"Designed to feel as natural as writing in a physical cash book, yet powered by modern cloud database security, visual charts, and dual-engine statement exports."*
+> *"Designed to feel as natural as writing in a physical cash book, yet powered by modern cloud database security, visual charts, 1-tap home screen shortcuts, and dual-engine statement exports."*
 
+* **📱 1-Tap Home Screen Shortcut**: Tap **"Add Shortcut / Install App"** in App Settings to place DailyHishab directly on your phone's home screen.
 * **⚡ Instant Zero-Latency Response**: No slow page reloads. Everything updates in real time as you type.
 * **🔒 Firebase Secure Cloud Vault**: Cloud backups locked by your 11-digit User ID and 4-digit PIN.
 * **🔑 16-Character Master Security Recovery Key**: Zero-knowledge vault protection (`DH-XXXX-XXXX-XXXX`) ensures you can recover your records even if you lose your PIN.
@@ -59,6 +89,8 @@ DailyHishab provides an intuitive single-screen workspace with fluid tab navigat
  ├─────────────────────────────────────────────────────────────────────────────┤
  │ 📂 Ledger Views: [💵 Daily Ledger] [📋 Monthly Summary] [📊 Visual Analytics]│
  ├─────────────────────────────────────────────────────────────────────────────┤
+ │ 📲 HOME SCREEN SHORTCUT: [ 🚀 Add Shortcut / Install App ]                   │
+ ├─────────────────────────────────────────────────────────────────────────────┤
  │  📋 MONTHLY EXECUTIVE SUMMARY (JULY 2026)                                   │
  │  • Total Income: ৳ 145,000.00  | Total Expense: ৳ 48,200.00                │
  │  • Net Surplus:  ৳  96,800.00  | Savings Rate:  66.8%                     │
@@ -74,37 +106,42 @@ DailyHishab provides an intuitive single-screen workspace with fluid tab navigat
 
 ## ✨ Core Features & Highlights
 
-### 💵 1. Rapid Cash-In (+) & Cash-Out (-) Ledger
+### 📲 1. Direct 1-Tap Install & Add Home Screen Shortcut
+* **Direct App Settings Integration**: Tap the glowing **"Add Shortcut / Install App"** button inside Settings for instant installation.
+* **Native PWA Prompt Engine**: Uses web standard `beforeinstallprompt` API to launch the native installation dialog directly.
+* **Device-Aware Manual Guides**: Interactive step-by-step guidance for iOS Safari, Android Chrome, and Desktop PC.
+
+### 💵 2. Rapid Cash-In (+) & Cash-Out (-) Ledger
 * **Streamlined Entry**: Log income and expenses in seconds with custom categories, payment modes (Cash, Bkash, Nagad, Card, Bank), and notes.
 * **Dynamic Totals**: Subtotals and net balances recalculate instantly without refreshing.
 * **One-Tap Actions**: Easily duplicate, edit, or remove entries with full undo history.
 
-### 📋 2. Monthly Executive Summary Dashboard
+### 📋 3. Monthly Executive Summary Dashboard
 * **Comprehensive Metrics**: View total income, total expenses, net surplus/deficit, savings rate, and expense-to-income ratios.
 * **Automated Narrative**: Generates human-readable financial insights in English and Bengali.
 * **Month-over-Month (MoM) Variance**: Side-by-side performance comparison against previous months.
 
-### 🩺 3. Financial Health Scorecard (0–100)
+### 🩺 4. Financial Health Scorecard (0–100)
 * **Smart Evaluation**: Assesses cash flow stability, reserve strength, and spending patterns.
 * **Actionable Guidance**: Receives real-time tips on budget allocation and expense reduction.
 
-### 📊 4. Interactive Recharts Analytics & Search
+### 📊 5. Interactive Recharts Analytics & Search
 * **Visual Cash Flow Charts**: Interactive bar and area charts for daily, monthly, and yearly cash flow.
 * **Category Donut Breakdown**: Pinpoint top spending categories effortlessly.
 * **Multi-Filter Search**: Filter transactions by keywords, date ranges, categories, or payment methods.
 
-### 🔐 5. Firebase Cloud Vault & 16-Char Master Recovery Key
+### 🔐 6. Firebase Cloud Vault & 16-Char Master Recovery Key
 * **Individual Cloud Storage**: Backups stored securely in Firebase Firestore (`user_backups/{userId}`).
 * **PIN Authorization**: Protected by salted 4-digit PIN authentication.
 * **16-Character Master Recovery Key**: Auto-assigned `DH-XXXX-XXXX-XXXX` master key enables zero-knowledge account recovery if PIN is lost.
 * **Vault Inspector**: Verify cloud snapshot health, entry counts, and sync timestamps directly in Settings.
 
-### 📤 6. Dual-Engine Statement Studio & WhatsApp Sharing
+### 📤 7. Dual-Engine Statement Studio & WhatsApp Sharing
 * **WhatsApp JPG Image Cards**: Generate styled summary images for direct sharing on WhatsApp, Messenger, or Email.
 * **Excel (.XLSX) Worksheets**: Export itemized spreadsheets with headers and totals.
 * **Print-Ready PDF Reports**: Download formatted PDF financial statements ideal for physical archiving.
 
-### 🌐 7. Complete Bilingual (English & বাংলা) Engine
+### 🌐 8. Complete Bilingual (English & বাংলা) Engine
 * **Full Translation**: Effortlessly switch between English and Bengali (বাংলা).
 * **Bengali Numeral Support**: Toggle full support for Bengali numerals (`১, ২, ৩, ৪...`).
 * **Multi-Currency Support**: Switch between ৳ (BDT), ₹ (INR), $ (USD), € (EUR), £ (GBP), or custom currency symbols.
@@ -115,16 +152,16 @@ DailyHishab provides an intuitive single-screen workspace with fluid tab navigat
 
 DailyHishab is a **Progressive Web App (PWA)** that can be installed on any smartphone, tablet, or desktop computer in under 1 minute.
 
-### 🚀 Live URLs
+### 🚀 Live App URL
 * **Live App:** [https://dailyhishab.vercel.app/](https://dailyhishab.vercel.app/)
 
-### 📱 Installation Steps
-| Platform | Installation Instructions |
-| :--- | :--- |
-| **🌐 Any Web Browser** | Open **[dailyhishab.vercel.app](https://dailyhishab.vercel.app/)** directly and start recording entries. |
-| **🤖 Android (Chrome)** | Open URL ➔ Tap **3 dots (⋮)** ➔ Select **"Install App"** or **"Add to Home Screen"**. |
-| **🍏 iPhone / iPad (Safari)** | Open URL ➔ Tap **Share Button (↑)** ➔ Scroll down & select **"Add to Home Screen"**. |
-| **💻 Desktop (Chrome/Edge)** | Open URL ➔ Click the **Install Icon (🖥️)** in the right side of the address bar. |
+### 📱 Installation Steps (1-Tap & Manual)
+| Platform | Direct 1-Tap Option | Manual Step Instructions |
+| :--- | :--- | :--- |
+| **📱 In-App Settings (All Platforms)** | **Tap "Add Shortcut / Install App"** inside App Settings | Triggers native installation dialog automatically. |
+| **🤖 Android (Chrome)** | **Direct 1-Tap Web Prompt** | Open URL ➔ Tap **3 dots (⋮)** ➔ Select **"Add to Home Screen"** or **"Install App"**. |
+| **🍏 iPhone / iPad (Safari)** | **1-Tap Share Sheet Guide** | Open URL in Safari ➔ Tap **Share Button (↑)** ➔ Scroll down & select **"Add to Home Screen"**. |
+| **💻 Desktop (Chrome/Edge)** | **Direct Desktop App Install** | Open URL ➔ Click the **Install Icon (🖥️ / ➕)** in browser address bar. |
 
 ---
 
@@ -132,6 +169,7 @@ DailyHishab is a **Progressive Web App (PWA)** that can be installed on any smar
 
 | Feature | Paper Notebook (খাতা) | Generic Spreadsheet | DailyHishab 📊 |
 | :--- | :---: | :---: | :---: |
+| **Home Screen Shortcut** | N/A | Manual bookmarking | **1-Tap Direct Install** |
 | **Setup Time** | Instant | 15+ minutes | **0 Seconds (Direct Link)** |
 | **Offline Operation** | Physical book required | Limited | **100% Offline First** |
 | **Calculations** | Manual & error-prone | Requires formulas | **Instant & Automated** |
@@ -151,6 +189,11 @@ Frontend Core
 ├── Tailwind CSS          # Responsive, modern UI styling
 ├── Motion (Framer)       # Smooth view animations & modal transitions
 └── Lucide React          # Vector icons
+
+PWA & Shortcut Engine
+├── Web Manifest         # Native app metadata, icons, and display mode
+├── Service Worker (sw.js)# Offline asset caching & instant launcher support
+└── beforeinstallprompt  # Native 1-tap browser prompt integration
 
 Backend & Persistence
 ├── Firebase Firestore    # Encrypted Cloud Backup Vault
@@ -197,6 +240,6 @@ Distributed under the **MIT License**. See `LICENSE` for details.
 
 **Crafted with ❤️ for fast, private, and smart financial tracking.**
 
-[🚀 Open Live App](https://dailyhishab.vercel.app/) • [⭐ Star on GitHub](https://github.com/your-username/daily-hishab) • [🐛 Report Bug](https://github.com/your-username/daily-hishab/issues)
+[🚀 Open Live App & Add Shortcut](https://dailyhishab.vercel.app/) • [⭐ Star on GitHub](https://github.com/your-username/daily-hishab) • [🐛 Report Bug](https://github.com/your-username/daily-hishab/issues)
 
 </div>
