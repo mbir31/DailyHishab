@@ -36,6 +36,17 @@
 
 ---
 
+## 🔥 What's New in the Latest Update
+
+* ☀️ **High-Contrast Light Theme & Legibility Refresh**: Completely updated lock screen, setup modals, and input fields with crisp high-contrast text (`slate-900`), high-visibility labels, and slate-50/100 cards for maximum readability under any lighting.
+* 🔒 **Enhanced Multi-Option Account Recovery**: Added 3 distinct ways to recover lost PINs and cloud vaults—16-character Master Recovery Key (`DH-XXXX-XXXX-XXXX`), JSON backup file restore, or trusted local device restoration.
+* 🏷️ **Customizable Navigation Bar Labels**: Personalize tab names (Ledger, Summary, Analytics, Settings) to suit individual preferences or Bengali localization needs.
+* 🗂️ **Custom Dropdown Manager**: Add, edit, or reorganize transaction categories and payment options (Bkash, Nagad, Cash, Card, Bank) dynamically in App Settings.
+* 📲 **Optimized 1-Tap Home Screen Shortcut Engine**: Instant PWA install prompts with platform-specific guidance for Android, iOS Safari, and Desktop Chrome.
+* 🛡️ **Firebase Live Vault Inspector**: Inspect cloud backup status, entry counts, and exact synchronization timestamps directly from the settings drawer.
+
+---
+
 ## 📲 1-Tap Install & Add Shortcut to Home Screen
 
 DailyHishab features a built-in **1-Tap Direct Install & Add Shortcut** engine accessible right inside the **App Settings** page and directly from the web browser:
@@ -64,21 +75,22 @@ DailyHishab features a built-in **1-Tap Direct Install & Add Shortcut** engine a
 
 ## 🌟 Why Choose DailyHishab?
 
-> *"Designed to feel as natural as writing in a physical cash book, yet powered by modern cloud database security, visual charts, 1-tap home screen shortcuts, and dual-engine statement exports."*
+> *"Designed to feel as natural as writing in a physical cash book, yet powered by modern cloud database security, visual charts, 1-tap home screen shortcuts, custom dropdown managers, and dual-engine statement exports."*
 
 * **📱 1-Tap Home Screen Shortcut**: Tap **"Add Shortcut / Install App"** in App Settings to place DailyHishab directly on your phone's home screen.
 * **⚡ Instant Zero-Latency Response**: No slow page reloads. Everything updates in real time as you type.
-* **🔒 Firebase Secure Cloud Vault**: Cloud backups locked by your 11-digit User ID and 4-digit PIN.
+* **🔒 Firebase Secure Cloud Vault**: Cloud backups locked by your 11-digit User ID (Phone Number) and 4-digit PIN.
 * **🔑 16-Character Master Security Recovery Key**: Zero-knowledge vault protection (`DH-XXXX-XXXX-XXXX`) ensures you can recover your records even if you lose your PIN.
 * **📱 100% Offline First**: Works seamlessly without internet access. Local device state keeps you productive anywhere.
 * **📤 WhatsApp Statement Studio**: Generate high-resolution JPG summary cards with 1 tap for instant WhatsApp & Messenger sharing.
 * **🌐 Native Bilingual English & Bengali (বাংলা)**: Complete UI localization with seamless Bengali numeral (`১, ২, ৩, ৪...`) support.
+* **⚙️ Complete Personalization**: Custom categories, payment modes, navigation labels, and multi-currency formats (৳, ₹, $, €, £).
 
 ---
 
 ## 📸 App Architecture & Navigation Layout
 
-DailyHishab provides an intuitive single-screen workspace with fluid tab navigation:
+DailyHishab provides an intuitive workspace with fluid tab navigation:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -106,45 +118,53 @@ DailyHishab provides an intuitive single-screen workspace with fluid tab navigat
 
 ## ✨ Core Features & Highlights
 
-### 📲 1. Direct 1-Tap Install & Add Home Screen Shortcut
+### ☀️ 1. Refined High-Contrast Interface & High Legibility
+* **Crisp Typography**: Dark high-contrast text (`slate-900`) over clean light backgrounds for optimum sunlight and indoor readability.
+* **High Contrast Forms**: Distinct inputs, bold labels, explicit focus rings, and clear validation feedback.
+* **Balance Visibility Toggle**: Easily hide sensitive financial figures with a single tap on the top bar.
+
+### 📲 2. Direct 1-Tap Install & Add Home Screen Shortcut
 * **Direct App Settings Integration**: Tap the glowing **"Add Shortcut / Install App"** button inside Settings for instant installation.
 * **Native PWA Prompt Engine**: Uses web standard `beforeinstallprompt` API to launch the native installation dialog directly.
 * **Device-Aware Manual Guides**: Interactive step-by-step guidance for iOS Safari, Android Chrome, and Desktop PC.
 
-### 💵 2. Rapid Cash-In (+) & Cash-Out (-) Ledger
+### 💵 3. Rapid Cash-In (+) & Cash-Out (-) Ledger
 * **Streamlined Entry**: Log income and expenses in seconds with custom categories, payment modes (Cash, Bkash, Nagad, Card, Bank), and notes.
 * **Dynamic Totals**: Subtotals and net balances recalculate instantly without refreshing.
 * **One-Tap Actions**: Easily duplicate, edit, or remove entries with full undo history.
 
-### 📋 3. Monthly Executive Summary Dashboard
+### 📋 4. Monthly Executive Summary Dashboard
 * **Comprehensive Metrics**: View total income, total expenses, net surplus/deficit, savings rate, and expense-to-income ratios.
 * **Automated Narrative**: Generates human-readable financial insights in English and Bengali.
 * **Month-over-Month (MoM) Variance**: Side-by-side performance comparison against previous months.
 
-### 🩺 4. Financial Health Scorecard (0–100)
+### 🩺 5. Financial Health Scorecard (0–100)
 * **Smart Evaluation**: Assesses cash flow stability, reserve strength, and spending patterns.
 * **Actionable Guidance**: Receives real-time tips on budget allocation and expense reduction.
 
-### 📊 5. Interactive Recharts Analytics & Search
+### 📊 6. Interactive Recharts Analytics & Search
 * **Visual Cash Flow Charts**: Interactive bar and area charts for daily, monthly, and yearly cash flow.
 * **Category Donut Breakdown**: Pinpoint top spending categories effortlessly.
 * **Multi-Filter Search**: Filter transactions by keywords, date ranges, categories, or payment methods.
 
-### 🔐 6. Firebase Cloud Vault & 16-Char Master Recovery Key
+### 🔐 7. Firebase Cloud Vault & Multi-Method Recovery
 * **Individual Cloud Storage**: Backups stored securely in Firebase Firestore (`user_backups/{userId}`).
 * **PIN Authorization**: Protected by salted 4-digit PIN authentication.
 * **16-Character Master Recovery Key**: Auto-assigned `DH-XXXX-XXXX-XXXX` master key enables zero-knowledge account recovery if PIN is lost.
+* **3 Recovery Pathways**: Recover via Master Recovery Key, JSON backup upload, or trusted local device restoration.
 * **Vault Inspector**: Verify cloud snapshot health, entry counts, and sync timestamps directly in Settings.
 
-### 📤 7. Dual-Engine Statement Studio & WhatsApp Sharing
+### 📤 8. Dual-Engine Statement Studio & WhatsApp Sharing
 * **WhatsApp JPG Image Cards**: Generate styled summary images for direct sharing on WhatsApp, Messenger, or Email.
 * **Excel (.XLSX) Worksheets**: Export itemized spreadsheets with headers and totals.
 * **Print-Ready PDF Reports**: Download formatted PDF financial statements ideal for physical archiving.
 
-### 🌐 8. Complete Bilingual (English & বাংলা) Engine
+### 🌐 9. Complete Bilingual & Customization Engine
 * **Full Translation**: Effortlessly switch between English and Bengali (বাংলা).
 * **Bengali Numeral Support**: Toggle full support for Bengali numerals (`১, ২, ৩, ৪...`).
 * **Multi-Currency Support**: Switch between ৳ (BDT), ₹ (INR), $ (USD), € (EUR), £ (GBP), or custom currency symbols.
+* **Custom Dropdown Options**: Add custom transaction categories and payment methods directly in settings.
+* **Custom Navigation Bar**: Customize menu label names to match your preference.
 
 ---
 
@@ -170,12 +190,14 @@ DailyHishab is a **Progressive Web App (PWA)** that can be installed on any smar
 | Feature | Paper Notebook (খাতা) | Generic Spreadsheet | DailyHishab 📊 |
 | :--- | :---: | :---: | :---: |
 | **Home Screen Shortcut** | N/A | Manual bookmarking | **1-Tap Direct Install** |
+| **High-Contrast Readability** | Variable handwriting | Plain grid | **Optimized Light/Dark Modes** |
 | **Setup Time** | Instant | 15+ minutes | **0 Seconds (Direct Link)** |
 | **Offline Operation** | Physical book required | Limited | **100% Offline First** |
 | **Calculations** | Manual & error-prone | Requires formulas | **Instant & Automated** |
 | **WhatsApp JPG Sharing** | Phone camera photo | Not available | **1-Tap HD Image Card** |
 | **Cloud Sync & Recovery** | Lost if misplaced | Manual file saving | **Firebase Phone + PIN Restore** |
 | **Master Security Recovery Key**| N/A | N/A | **16-Char Master Key (`DH-XXXX`)** |
+| **Custom Dropdown Options** | Fixed page | Formula editing | **1-Tap Setting Manager** |
 | **Bengali Numeral (`১, ২, ৩`)** | Manual writing | Complex formatting | **Native 1-Tap Toggle** |
 
 ---
@@ -186,7 +208,7 @@ DailyHishab is a **Progressive Web App (PWA)** that can be installed on any smar
 Frontend Core
 ├── React 18 + Vite       # High-performance component architecture
 ├── TypeScript            # Strict type safety across ledger models
-├── Tailwind CSS          # Responsive, modern UI styling
+├── Tailwind CSS          # Responsive, high-contrast modern UI styling
 ├── Motion (Framer)       # Smooth view animations & modal transitions
 └── Lucide React          # Vector icons
 

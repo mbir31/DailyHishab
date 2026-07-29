@@ -94,19 +94,19 @@ export const AuthSettingsModal: React.FC<AuthSettingsModalProps> = ({ type, onCl
         {type === 'username' ? (
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-200 mb-1">
                 {t.auth.username}
               </label>
               <input
                 type="text"
                 value={usernameInput}
                 onChange={(e) => setUsernameInput(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-300 dark:border-gray-700 text-sm font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
             <button
               onClick={handleSaveUsername}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl active:scale-95 transition-all shadow-md mt-2"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl active:scale-95 transition-all shadow-md mt-2 cursor-pointer"
             >
               {t.auth.saveChanges}
             </button>
@@ -114,7 +114,7 @@ export const AuthSettingsModal: React.FC<AuthSettingsModalProps> = ({ type, onCl
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-200 mb-1">
                 {t.auth.oldPin}
               </label>
               <input
@@ -122,12 +122,12 @@ export const AuthSettingsModal: React.FC<AuthSettingsModalProps> = ({ type, onCl
                 maxLength={6}
                 value={oldPin}
                 onChange={(e) => setOldPin(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-300 dark:border-gray-700 text-sm font-semibold text-gray-900 dark:text-white tracking-widest text-center focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-sm font-bold text-gray-900 dark:text-white tracking-widest text-center focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-200 mb-1">
                 {t.auth.newPin}
               </label>
               <input
@@ -135,12 +135,12 @@ export const AuthSettingsModal: React.FC<AuthSettingsModalProps> = ({ type, onCl
                 maxLength={6}
                 value={newPin}
                 onChange={(e) => setNewPin(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-300 dark:border-gray-700 text-sm font-semibold text-gray-900 dark:text-white tracking-widest text-center focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-sm font-bold text-gray-900 dark:text-white tracking-widest text-center focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-200 mb-1">
                 {t.auth.confirmPin}
               </label>
               <input
@@ -148,13 +148,13 @@ export const AuthSettingsModal: React.FC<AuthSettingsModalProps> = ({ type, onCl
                 maxLength={6}
                 value={confirmPin}
                 onChange={(e) => setConfirmPin(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-300 dark:border-gray-700 text-sm font-semibold text-gray-900 dark:text-white tracking-widest text-center focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-sm font-bold text-gray-900 dark:text-white tracking-widest text-center focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
 
             <button
               onClick={handleSavePin}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl active:scale-95 transition-all shadow-md mt-2"
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl active:scale-95 transition-all shadow-md mt-2 cursor-pointer"
             >
               {t.auth.saveChanges}
             </button>

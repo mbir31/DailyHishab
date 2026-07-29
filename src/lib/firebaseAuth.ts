@@ -10,9 +10,7 @@ const provider = new GoogleAuthProvider();
 provider.setCustomParameters({
   prompt: 'select_account',
 });
-// Request Google Drive & User Profile scopes
-provider.addScope('https://www.googleapis.com/auth/drive.file');
-provider.addScope('https://www.googleapis.com/auth/drive.appdata');
+// Request User Profile scopes for Firebase Auth
 provider.addScope('https://www.googleapis.com/auth/userinfo.email');
 provider.addScope('https://www.googleapis.com/auth/userinfo.profile');
 

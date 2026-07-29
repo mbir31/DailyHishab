@@ -4,9 +4,11 @@ import App from './App.tsx';
 import './index.css';
 
 // Register Service Worker for PWA offline caching
-if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(err => {
+    navigator.serviceWorker.register('/sw.js').then((reg) => {
+      console.log('ServiceWorker registered with scope:', reg.scope);
+    }).catch(err => {
       console.warn('SW registration failed:', err);
     });
   });

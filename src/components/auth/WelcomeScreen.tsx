@@ -267,12 +267,16 @@ export const WelcomeScreen: React.FC = () => {
   const isSetupOrRecoveryView = isFirstSetup || showRecoveryOnLockScreen;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-tr from-slate-900 via-blue-950 to-indigo-950 text-white animate-fade-in overflow-y-auto">
-      <div className="w-full max-w-md glass-panel p-6 sm:p-8 shadow-2xl rounded-3xl border border-white/20 backdrop-blur-2xl my-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-100 text-slate-900 animate-fade-in overflow-y-auto">
+      {/* Subtle Light Background Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-blue-50/50 to-indigo-50/50 pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-blue-200/30 via-transparent to-transparent pointer-events-none" />
+
+      <div className="relative w-full max-w-md bg-white p-6 sm:p-8 shadow-2xl rounded-3xl border border-slate-200/80 my-auto">
         {/* App Logo & Header */}
-        <div className="text-center space-y-2 mb-5">
+        <div className="text-center space-y-2 mb-6">
           <AppLogo variant="stacked" size="xl" animated={true} />
-          <p className="text-xs sm:text-sm font-semibold text-blue-200/80">
+          <p className="text-xs sm:text-sm font-bold text-slate-600 tracking-wide">
             {isSetupOrRecoveryView
               ? activeTab === 'setup'
                 ? 'Initial Account & Cloud Security Setup'
@@ -283,15 +287,15 @@ export const WelcomeScreen: React.FC = () => {
 
         {/* Error Banner */}
         {errorMsg && (
-          <div className="mb-4 p-3 rounded-2xl bg-rose-500/20 border border-rose-500/30 text-rose-200 text-xs font-semibold text-center animate-shake">
+          <div className="mb-4 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold text-center animate-shake shadow-sm">
             {errorMsg}
           </div>
         )}
 
         {/* Success Banner */}
         {successMsg && (
-          <div className="mb-4 p-3 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 text-xs font-semibold text-center animate-fade-in flex items-center justify-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <div className="mb-4 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold text-center animate-fade-in flex items-center justify-center gap-2 shadow-sm">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}
@@ -299,7 +303,7 @@ export const WelcomeScreen: React.FC = () => {
         {isSetupOrRecoveryView ? (
           <div>
             {/* Top Navigation Tabs: New Setup vs Login */}
-            <div className="grid grid-cols-2 p-1 mb-5 rounded-2xl bg-white/10 border border-white/15 text-xs font-bold">
+            <div className="grid grid-cols-2 p-1.5 mb-6 rounded-2xl bg-slate-100 border border-slate-200 text-xs font-bold shadow-inner">
               <button
                 type="button"
                 onClick={() => {
@@ -307,13 +311,13 @@ export const WelcomeScreen: React.FC = () => {
                   setErrorMsg(null);
                   setSuccessMsg(null);
                 }}
-                className={`py-2 px-3 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                className={`py-2.5 px-3 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${
                   activeTab === 'setup'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-blue-200/70 hover:text-white'
+                    ? 'bg-blue-600 text-white shadow-md font-extrabold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
                 }`}
               >
-                <User className="w-3.5 h-3.5" />
+                <User className={`w-4 h-4 ${activeTab === 'setup' ? 'text-white' : 'text-blue-600'}`} />
                 <span>{t.auth.newAccountTab || 'New Setup'}</span>
               </button>
 
@@ -324,13 +328,13 @@ export const WelcomeScreen: React.FC = () => {
                   setErrorMsg(null);
                   setSuccessMsg(null);
                 }}
-                className={`py-2 px-3 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                className={`py-2.5 px-3 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${
                   activeTab === 'recover'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-blue-200/70 hover:text-white'
+                    ? 'bg-blue-600 text-white shadow-md font-extrabold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
                 }`}
               >
-                <LogIn className="w-3.5 h-3.5" />
+                <LogIn className={`w-4 h-4 ${activeTab === 'recover' ? 'text-white' : 'text-blue-600'}`} />
                 <span>{t.auth.loginTab || t.auth.recoverBackupTab || 'Login'}</span>
               </button>
             </div>
@@ -340,11 +344,11 @@ export const WelcomeScreen: React.FC = () => {
               <form onSubmit={handleSetup} className="space-y-4 animate-fade-in">
                 {/* Field 1: 11-digit Phone Number as User ID */}
                 <div>
-                  <label className="block text-xs font-extrabold text-blue-100 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                     11-Digit Phone Number (User ID)
                   </label>
                   <div className="relative flex items-center">
-                    <Smartphone className="absolute left-3.5 w-4 h-4 text-blue-300" />
+                    <Smartphone className="absolute left-3.5 w-4 h-4 text-blue-600" />
                     <input
                       type="text"
                       required
@@ -352,21 +356,21 @@ export const WelcomeScreen: React.FC = () => {
                       value={userIdInput}
                       onChange={(e) => setUserIdInput(e.target.value.replace(/\D/g, ''))}
                       placeholder="017XXXXXXXX"
-                      className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-blue-200/50 text-sm font-mono font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+                      className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-300 focus:border-blue-600 focus:bg-white text-slate-900 placeholder-slate-400 text-sm font-mono font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
                     />
                   </div>
-                  <p className="text-[10px] text-blue-200/70 mt-1">
+                  <p className="text-xs text-slate-500 font-medium mt-1">
                     Serves as your unique account identifier for cloud backup vault
                   </p>
                 </div>
 
                 {/* Field 2: 4-digit Security PIN */}
                 <div>
-                  <label className="block text-xs font-extrabold text-blue-100 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                     4-Digit Security PIN
                   </label>
                   <div className="relative flex items-center">
-                    <KeyRound className="absolute left-3.5 w-4 h-4 text-blue-300" />
+                    <KeyRound className="absolute left-3.5 w-4 h-4 text-blue-600" />
                     <input
                       type={showPin ? 'text' : 'password'}
                       required
@@ -374,12 +378,12 @@ export const WelcomeScreen: React.FC = () => {
                       value={pinInput}
                       onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
                       placeholder="1234"
-                      className="w-full pl-10 pr-10 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-blue-200/50 text-center text-lg font-mono font-bold tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+                      className="w-full pl-10 pr-10 py-3 rounded-2xl bg-slate-50 border border-slate-300 focus:border-blue-600 focus:bg-white text-slate-900 placeholder-slate-400 text-center text-lg font-mono font-bold tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPin(!showPin)}
-                      className="absolute right-3.5 p-1 text-blue-300 hover:text-white"
+                      className="absolute right-3.5 p-1 text-slate-400 hover:text-slate-700"
                     >
                       {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -388,11 +392,11 @@ export const WelcomeScreen: React.FC = () => {
 
                 {/* Field 3: Confirm 4-digit PIN */}
                 <div>
-                  <label className="block text-xs font-extrabold text-blue-100 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                     Confirm 4-Digit Security PIN
                   </label>
                   <div className="relative flex items-center">
-                    <ShieldCheck className="absolute left-3.5 w-4 h-4 text-blue-300" />
+                    <ShieldCheck className="absolute left-3.5 w-4 h-4 text-blue-600" />
                     <input
                       type={showPin ? 'text' : 'password'}
                       required
@@ -400,73 +404,73 @@ export const WelcomeScreen: React.FC = () => {
                       value={confirmPinInput}
                       onChange={(e) => setConfirmPinInput(e.target.value.replace(/\D/g, ''))}
                       placeholder="1234"
-                      className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-blue-200/50 text-center text-lg font-mono font-bold tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+                      className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-300 focus:border-blue-600 focus:bg-white text-slate-900 placeholder-slate-400 text-center text-lg font-mono font-bold tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
                     />
                   </div>
                 </div>
 
                 {/* Field 4: Username */}
                 <div>
-                  <label className="block text-xs font-extrabold text-blue-100 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                     Account Name / Title
                   </label>
                   <div className="relative flex items-center">
-                    <User className="absolute left-3.5 w-4 h-4 text-blue-300" />
+                    <User className="absolute left-3.5 w-4 h-4 text-blue-600" />
                     <input
                       type="text"
                       required
                       value={usernameInput}
                       onChange={(e) => setUsernameInput(e.target.value)}
                       placeholder="e.g. Admin / Daily Cash Book"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-blue-200/50 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+                      className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-300 focus:border-blue-600 focus:bg-white text-slate-900 placeholder-slate-400 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
                     />
                   </div>
                 </div>
 
                 {/* Field 5: Auto-Assigned Master Security Recovery Key */}
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-extrabold text-cyan-200 uppercase tracking-wider flex items-center gap-1">
-                      <Key className="w-3.5 h-3.5 text-cyan-300" />
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <Key className="w-3.5 h-3.5 text-blue-600" />
                       <span>Master Security Recovery Key</span>
                     </label>
-                    <span className="text-[10px] text-cyan-300/80">Auto-Generated</span>
+                    <span className="text-xs font-bold text-blue-600">Auto-Generated</span>
                   </div>
                   <div className="relative flex items-center">
                     <input
                       type="text"
                       readOnly
                       value={userProfile.recoveryKey || 'DH-8A92-4F10-99E1'}
-                      className="w-full pl-3 pr-24 py-2.5 rounded-2xl bg-cyan-950/40 border border-cyan-400/30 text-cyan-200 font-mono text-xs font-bold tracking-wider select-all focus:outline-none"
+                      className="w-full pl-3 pr-24 py-2.5 rounded-2xl bg-slate-100 border border-slate-300 text-slate-900 font-mono text-xs font-bold tracking-wider select-all focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={() => copyToClipboard(userProfile.recoveryKey || 'DH-8A92-4F10-99E1')}
-                      className="absolute right-2 px-2.5 py-1 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 font-bold text-[10px] flex items-center gap-1 transition-all cursor-pointer"
+                      className="absolute right-2 px-3 py-1 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1 transition-all cursor-pointer shadow-sm"
                     >
-                      {copiedKey ? <Check className="w-3 h-3 text-emerald-300" /> : <Copy className="w-3 h-3 text-cyan-300" />}
+                      {copiedKey ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5 text-white" />}
                       <span>{copiedKey ? 'Copied' : 'Copy Key'}</span>
                     </button>
                   </div>
-                  <p className="text-[10px] text-cyan-200/70 mt-1">
+                  <p className="text-xs text-slate-500 font-medium mt-1">
                     Save this 16-character key. You can use it to unlock your cloud vault if you ever forget your PIN.
                   </p>
                 </div>
 
                 {/* Central Firebase Cloud Storage Notice Card */}
-                <div className="p-3 rounded-2xl bg-blue-500/15 border border-blue-400/25 text-xs text-blue-100 space-y-1">
-                  <div className="flex items-center gap-1.5 font-bold text-blue-200">
-                    <Cloud className="w-4 h-4 text-cyan-300" />
+                <div className="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-slate-700 space-y-1">
+                  <div className="flex items-center gap-2 font-extrabold text-blue-900">
+                    <Cloud className="w-4 h-4 text-blue-600" />
                     <span>Firebase Secure Cloud Vault Ready</span>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-blue-200/80">
-                    Completing setup creates your individual secured cloud space on Firebase Firestore (<code className="font-mono bg-black/30 px-1 py-0.5 rounded text-cyan-200">user_backups/{userIdInput || '017XXXXXXXX'}</code>) protected by your 4-digit PIN.
+                  <p className="text-xs leading-relaxed text-slate-600">
+                    Completing setup creates your individual secured cloud space on Firebase Firestore (<code className="font-mono bg-blue-100/80 px-1.5 py-0.5 rounded text-blue-900 font-bold">user_backups/{userIdInput || '017XXXXXXXX'}</code>) protected by your 4-digit PIN.
                   </p>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-500 via-indigo-600 to-teal-500 hover:from-blue-600 hover:to-indigo-700 text-white font-extrabold text-sm shadow-xl shadow-blue-500/30 active:scale-98 transition-all cursor-pointer mt-2"
+                  className="w-full py-3.5 px-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-extrabold text-sm shadow-lg shadow-blue-600/25 active:scale-98 transition-all cursor-pointer mt-2"
                 >
                   Complete Setup & Initialize Cloud Storage
                 </button>
@@ -475,7 +479,7 @@ export const WelcomeScreen: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowRecoveryOnLockScreen(false)}
-                    className="w-full mt-2 py-2 text-xs text-blue-300 hover:text-white flex items-center justify-center gap-1 cursor-pointer"
+                    className="w-full mt-2 py-2 text-xs text-blue-700 hover:text-blue-900 font-bold flex items-center justify-center gap-1 cursor-pointer"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
                     <span>Back to PIN Unlock</span>
@@ -488,12 +492,12 @@ export const WelcomeScreen: React.FC = () => {
             {activeTab === 'recover' && (
               <form onSubmit={handleCloudRecovery} className="space-y-4 animate-fade-in">
                 {/* Information Callout */}
-                <div className="p-3 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 text-xs text-indigo-100 space-y-1">
-                  <div className="flex items-center gap-1.5 font-bold text-cyan-200">
-                    <LogIn className="w-4 h-4 text-cyan-300 shrink-0" />
+                <div className="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 text-xs space-y-1">
+                  <div className="flex items-center gap-2 font-extrabold text-blue-900">
+                    <LogIn className="w-4 h-4 text-blue-600 shrink-0" />
                     <span>{t.auth.loginTitle || t.auth.recoverTitle || 'Account Login'}</span>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-indigo-200/90">
+                  <p className="text-xs leading-relaxed text-slate-600">
                     {t.auth.recoverSubtitle ||
                       'Enter your 11-digit Phone Number and 4-digit Security PIN to log in and restore your financial ledger.'}
                   </p>
@@ -501,11 +505,11 @@ export const WelcomeScreen: React.FC = () => {
 
                 {/* Field 1: Phone Number (11 Digits) */}
                 <div>
-                  <label className="block text-xs font-extrabold text-blue-100 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                     11-Digit Phone Number (User ID)
                   </label>
                   <div className="relative flex items-center">
-                    <Smartphone className="absolute left-3.5 w-4 h-4 text-blue-300" />
+                    <Smartphone className="absolute left-3.5 w-4 h-4 text-blue-600" />
                     <input
                       type="text"
                       required
@@ -513,18 +517,18 @@ export const WelcomeScreen: React.FC = () => {
                       value={recoverUserId}
                       onChange={(e) => setRecoverUserId(e.target.value.replace(/\D/g, ''))}
                       placeholder="017XXXXXXXX"
-                      className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-blue-200/50 text-sm font-mono font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
+                      className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-300 focus:border-blue-600 focus:bg-white text-slate-900 placeholder-slate-400 text-sm font-mono font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
                     />
                   </div>
                 </div>
 
                 {/* Field 2: 4-Digit Security PIN */}
                 <div>
-                  <label className="block text-xs font-extrabold text-blue-100 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                     4-Digit Security PIN
                   </label>
                   <div className="relative flex items-center">
-                    <KeyRound className="absolute left-3.5 w-4 h-4 text-blue-300" />
+                    <KeyRound className="absolute left-3.5 w-4 h-4 text-blue-600" />
                     <input
                       type={showPin ? 'text' : 'password'}
                       required
@@ -532,12 +536,12 @@ export const WelcomeScreen: React.FC = () => {
                       value={recoverPin}
                       onChange={(e) => setRecoverPin(e.target.value.replace(/\D/g, ''))}
                       placeholder="1234"
-                      className="w-full pl-10 pr-10 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-blue-200/50 text-center text-lg font-mono font-bold tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
+                      className="w-full pl-10 pr-10 py-3 rounded-2xl bg-slate-50 border border-slate-300 focus:border-blue-600 focus:bg-white text-slate-900 placeholder-slate-400 text-center text-lg font-mono font-bold tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPin(!showPin)}
-                      className="absolute right-3.5 p-1 text-blue-300 hover:text-white"
+                      className="absolute right-3.5 p-1 text-slate-400 hover:text-slate-700"
                     >
                       {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -547,7 +551,7 @@ export const WelcomeScreen: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isRecovering}
-                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-extrabold text-sm shadow-xl shadow-cyan-500/25 active:scale-98 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+                  className="w-full py-3.5 px-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-extrabold text-sm shadow-lg shadow-blue-600/25 active:scale-98 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
                 >
                   {isRecovering ? (
                     <>
@@ -566,7 +570,7 @@ export const WelcomeScreen: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowRecoveryOnLockScreen(false)}
-                    className="w-full mt-2 py-2 text-xs text-blue-300 hover:text-white flex items-center justify-center gap-1 cursor-pointer"
+                    className="w-full mt-2 py-2 text-xs text-blue-700 hover:text-blue-900 font-bold flex items-center justify-center gap-1 cursor-pointer"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
                     <span>Back to PIN Unlock</span>
@@ -578,21 +582,21 @@ export const WelcomeScreen: React.FC = () => {
         ) : (
           /* Returning User Unlock Form */
           <form onSubmit={handleLogin} className="space-y-5">
-            <div className="text-center space-y-1">
-              <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-bold text-blue-200">
+            <div className="text-center space-y-1.5">
+              <span className="inline-block px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-xs font-extrabold text-blue-900 shadow-sm">
                 {userProfile.username}
               </span>
-              <p className="text-[11px] font-mono font-bold text-blue-300/80">
+              <p className="text-xs font-mono font-bold text-slate-500">
                 User ID: {userProfile.userId || '01712345678'}
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-blue-100 uppercase tracking-wider text-center mb-2">
+              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider text-center mb-2">
                 Enter 4-Digit Security PIN
               </label>
               <div className="relative flex items-center">
-                <Lock className="absolute left-3.5 w-4 h-4 text-blue-300" />
+                <Lock className="absolute left-3.5 w-4 h-4 text-blue-600" />
                 <input
                   type={showPin ? 'text' : 'password'}
                   autoFocus
@@ -601,12 +605,12 @@ export const WelcomeScreen: React.FC = () => {
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
                   placeholder="••••"
-                  className="w-full pl-10 pr-10 py-3.5 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-blue-200/50 text-center text-xl font-mono font-bold tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+                  className="w-full pl-10 pr-10 py-3.5 rounded-2xl bg-slate-50 border border-slate-300 focus:border-blue-600 focus:bg-white text-slate-900 placeholder-slate-400 text-center text-xl font-mono font-bold tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPin(!showPin)}
-                  className="absolute right-3.5 p-1 text-blue-300 hover:text-white"
+                  className="absolute right-3.5 p-1 text-slate-400 hover:text-slate-700"
                 >
                   {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -616,13 +620,13 @@ export const WelcomeScreen: React.FC = () => {
             <button
               type="submit"
               disabled={isLockedOut}
-              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold text-sm shadow-xl shadow-blue-500/30 active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full py-3.5 px-4 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-extrabold text-sm shadow-lg shadow-blue-600/25 active:scale-98 transition-all cursor-pointer disabled:opacity-50"
             >
               {t.auth.login}
             </button>
 
             {/* Link to login with phone & PIN or Forgot PIN */}
-            <div className="text-center pt-2 border-t border-white/10 space-y-2">
+            <div className="text-center pt-3 border-t border-slate-200 space-y-2.5">
               <button
                 type="button"
                 onClick={() => {
@@ -630,18 +634,18 @@ export const WelcomeScreen: React.FC = () => {
                   setActiveTab('recover');
                   setErrorMsg(null);
                 }}
-                className="text-xs text-cyan-300 hover:text-white font-semibold transition-colors flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
+                className="text-xs text-blue-700 hover:text-blue-900 font-extrabold transition-colors flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
               >
-                <LogIn className="w-3.5 h-3.5 text-cyan-300" />
+                <LogIn className="w-4 h-4 text-blue-600" />
                 <span>{t.auth.recoverFromCloudLink || 'Login with Phone Number & PIN'}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setShowForgotPinModal(true)}
-                className="text-[11px] text-amber-300 hover:text-white font-medium flex items-center justify-center gap-1 mx-auto cursor-pointer"
+                className="text-xs text-amber-700 hover:text-amber-900 font-extrabold flex items-center justify-center gap-1 mx-auto cursor-pointer"
               >
-                <HelpCircle className="w-3 h-3 text-amber-300" />
+                <HelpCircle className="w-3.5 h-3.5 text-amber-600" />
                 <span>Forgot PIN / Recovery Options?</span>
               </button>
             </div>
@@ -651,48 +655,48 @@ export const WelcomeScreen: React.FC = () => {
 
       {/* FORGOT PIN & ACCOUNT RECOVERY MODAL */}
       {showForgotPinModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl text-slate-100 space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl text-slate-800 space-y-5">
             <button
               onClick={() => setShowForgotPinModal(false)}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-full bg-slate-800 hover:bg-slate-700 transition-colors cursor-pointer"
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              <div className="p-3 rounded-2xl bg-amber-100 text-amber-700 border border-amber-200">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">PIN Recovery & Vault Security</h3>
-                <p className="text-xs text-slate-400">What to do if you forgot your 4-Digit Security PIN</p>
+                <h3 className="text-lg font-bold text-slate-900">PIN Recovery & Vault Security</h3>
+                <p className="text-xs text-slate-500 font-medium">What to do if you forgot your 4-Digit Security PIN</p>
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/80 text-xs text-slate-300 space-y-2">
-              <div className="flex items-start gap-2 font-semibold text-amber-300">
-                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+            <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 text-xs text-slate-700 space-y-2">
+              <div className="flex items-start gap-2 font-extrabold text-amber-900">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
                 <span>End-to-End Vault Privacy Protection</span>
               </div>
-              <p className="text-[11px] leading-relaxed text-slate-300">
+              <p className="text-xs leading-relaxed text-slate-600">
                 Because your financial data is protected by zero-knowledge encryption, your 4-digit PIN is known only to you and is never stored in plain text anywhere on our servers.
               </p>
             </div>
 
             {/* RECOVERY METHOD 1: MASTER SECURITY RECOVERY KEY */}
-            <form onSubmit={handleRecoveryKeySubmit} className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-700/50 space-y-3">
-              <div className="flex items-center gap-2 text-sm font-extrabold text-cyan-200">
-                <Key className="w-4 h-4 text-cyan-400" />
+            <form onSubmit={handleRecoveryKeySubmit} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-extrabold text-slate-900">
+                <Key className="w-4 h-4 text-blue-600" />
                 <span>Option 1: Unlock Vault with 16-Character Master Recovery Key</span>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Enter your 11-digit Phone Number and the 16-character Master Recovery Key provided during initial setup (e.g. <code className="font-mono bg-slate-800 px-1 py-0.5 rounded text-cyan-300">DH-8A92-4F10-99E1</code>).
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                Enter your 11-digit Phone Number and the 16-character Master Recovery Key provided during initial setup (e.g. <code className="font-mono bg-slate-200/80 px-1.5 py-0.5 rounded text-blue-900 font-bold">DH-8A92-4F10-99E1</code>).
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-300 uppercase mb-1">11-Digit Phone Number</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">11-Digit Phone Number</label>
                   <input
                     type="text"
                     required
@@ -700,18 +704,18 @@ export const WelcomeScreen: React.FC = () => {
                     value={recoveryPhoneInput}
                     onChange={(e) => setRecoveryPhoneInput(e.target.value.replace(/\D/g, ''))}
                     placeholder="017XXXXXXXX"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs font-bold focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 placeholder-slate-400 font-mono text-xs font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-300 uppercase mb-1">16-Character Recovery Key</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">16-Character Recovery Key</label>
                   <input
                     type="text"
                     required
                     value={recoveryKeyInput}
                     onChange={(e) => setRecoveryKeyInput(e.target.value.toUpperCase())}
                     placeholder="DH-XXXX-XXXX-XXXX"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-cyan-300 font-mono text-xs font-bold tracking-wider focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 placeholder-slate-400 font-mono text-xs font-bold tracking-wider focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -719,7 +723,7 @@ export const WelcomeScreen: React.FC = () => {
               <button
                 type="submit"
                 disabled={isVerifyingKey}
-                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+                className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
               >
                 {isVerifyingKey ? (
                   <>
@@ -728,7 +732,7 @@ export const WelcomeScreen: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <ShieldCheck className="w-4 h-4 text-cyan-200" />
+                    <ShieldCheck className="w-4 h-4 text-white" />
                     <span>Verify Master Key & Recover PIN</span>
                   </>
                 )}
@@ -736,16 +740,16 @@ export const WelcomeScreen: React.FC = () => {
             </form>
 
             {/* RECOVERY METHOD 2: JSON FILE RESTORE */}
-            <div className="p-4 rounded-2xl bg-blue-950/40 border border-blue-800/50 space-y-3">
-              <div className="flex items-center gap-2 text-sm font-extrabold text-blue-200">
-                <Upload className="w-4 h-4 text-cyan-400" />
+            <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-200 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-extrabold text-blue-950">
+                <Upload className="w-4 h-4 text-blue-600" />
                 <span>Option 2: Restore from Downloaded Backup JSON File</span>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                If you previously downloaded or exported a <code className="font-mono bg-slate-800 px-1.5 py-0.5 rounded text-cyan-300">DailyHishab_Backup.json</code> file, you can upload it here to instantly restore your data and reset your PIN.
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                If you previously downloaded or exported a <code className="font-mono bg-blue-100/80 px-1.5 py-0.5 rounded text-blue-900 font-bold">DailyHishab_Backup.json</code> file, you can upload it here to instantly restore your data and reset your PIN.
               </p>
 
-              <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md cursor-pointer transition-all active:scale-98">
+              <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md cursor-pointer transition-all active:scale-98">
                 <FileSpreadsheet className="w-4 h-4 text-white" />
                 <span>Select Backup JSON File</span>
                 <input
@@ -758,12 +762,12 @@ export const WelcomeScreen: React.FC = () => {
             </div>
 
             {/* RECOVERY METHOD 3: TRUSTED DEVICE LOCAL ACCESS */}
-            <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/50 space-y-2">
-              <div className="flex items-center gap-2 text-sm font-extrabold text-slate-200">
-                <Smartphone className="w-4 h-4 text-emerald-400" />
+            <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-2">
+              <div className="flex items-center gap-2 text-sm font-extrabold text-emerald-950">
+                <Smartphone className="w-4 h-4 text-emerald-600" />
                 <span>Option 3: Trusted Local Device Session</span>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 If you are using the device where you originally used the app, your ledger entries are continuously backed up locally. You can perform a New Setup with your 11-digit phone number and a fresh PIN without losing local records.
               </p>
             </div>
@@ -772,7 +776,7 @@ export const WelcomeScreen: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowForgotPinModal(false)}
-                className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs cursor-pointer transition-colors"
+                className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer transition-colors"
               >
                 Close
               </button>
@@ -783,3 +787,4 @@ export const WelcomeScreen: React.FC = () => {
     </div>
   );
 };
+
