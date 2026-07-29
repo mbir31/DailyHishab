@@ -1,0 +1,18 @@
+{
+  "collections": [
+    {
+      "path": "user_backups/{userId}",
+      "description": "User ledger backup records indexed by 11-digit Phone Number User ID",
+      "fields": [
+        { "name": "userId", "type": "string", "description": "11-digit Phone Number / User ID" },
+        { "name": "pin", "type": "string", "description": "4-digit Security PIN" },
+        { "name": "updatedAt", "type": "string", "description": "ISO timestamp of last update" },
+        { "name": "createdAt", "type": "string", "description": "ISO timestamp of creation" },
+        { "name": "entryCount", "type": "number", "description": "Total count of ledger entries" },
+        { "name": "totalIncome", "type": "number", "description": "Sum of total income" },
+        { "name": "totalExpense", "type": "number", "description": "Sum of total expense" },
+        { "name": "payload", "type": "map", "description": "Full ledger data containing entries, notes, and profile" }
+      ]
+    }
+  ]
+}

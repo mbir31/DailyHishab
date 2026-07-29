@@ -12,6 +12,7 @@ import {
   triggerAutoBackupSequence,
   restoreFromBackupObject,
 } from '../utils/storage';
+import { verifyAndRestoreUserBackupFromFirebase } from '../lib/firebaseBackupService';
 import { getTodayDateString, shiftDateString } from '../utils/dateHelpers';
 import { getTranslation } from '../i18n/translations';
 
@@ -65,12 +66,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [deferredPwaPrompt, setDeferredPwaPrompt] = useState<any>(null);
   const [isPwaInstalled, setIsPwaInstalled] = useState<boolean>(false);
 
-  // Network online listener
+  // Network online listener & automatic cloud sync engine
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
+    const handleOnline = () => {
+      setIsOnline(true);
+      console.log('🌐 Internet connection restored! Triggering instant cloud auto-backup sync...');
+      triggerAutoBackupSequence();
+    };
     const handleOffline = () => setIsOnline(false);
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+
+    // Initial check on mount: If online, perform cloud backup sync for any pending offline changes
+    if (navigator.onLine) {
+      triggerAutoBackupSequence();
+    }
 
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
@@ -204,6 +215,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cleanPin = pin.trim();
 
     try {
+      // 1. Try Firebase Firestore direct restore first
+      const fbResult = await verifyAndRestoreUserBackupFromFirebase(cleanUserId, cleanPin);
+      if (fbResult.success && fbResult.backupData) {
+        const hashed = await hashPin(cleanPin);
+
+        restoreFromBackupObject(fbResult.backupData, { mode: 'replace' });
+
+        const current = loadUserProfile();
+        const updatedProfile: UserProfile = {
+          ...current,
+          ...(fbResult.backupData.profile || {}),
+          userId: cleanUserId,
+          pin: cleanPin,
+          pinHash: hashed,
+          isFirstSetupCompleted: true,
+          isLoggedIn: true,
+          username: fbResult.backupData.profile?.username || current.username || 'Admin',
+          lastActiveTimestamp: Date.now(),
+        };
+
+        saveUserProfile(updatedProfile);
+        reloadState();
+
+        return {
+          success: true,
+          entryCount: fbResult.entryCount || (fbResult.backupData.entries ? fbResult.backupData.entries.length : 0),
+        };
+      }
+
+      if (fbResult.invalidPin) {
+        return {
+          success: false,
+          error: fbResult.error || 'Incorrect 4-digit Security PIN for this User ID.',
+        };
+      }
+
+      // 2. Fallback to Central Cloud Server endpoint
       const res = await fetch('/api/central-backup/verify-and-restore', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -215,7 +263,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!res.ok || !data.success) {
         return {
           success: false,
-          error: data.error || 'Failed to verify or restore cloud backup',
+          error: data.error || fbResult.error || 'Failed to verify or restore cloud backup',
         };
       }
 

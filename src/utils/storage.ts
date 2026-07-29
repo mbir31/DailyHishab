@@ -1,5 +1,6 @@
 import { Entry, EntryType, UserNote } from '../types/entry.types';
 import { UserProfile, BackupData } from '../types/user.types';
+import { saveUserBackupToFirebase } from '../lib/firebaseBackupService';
 
 const STORAGE_KEYS = {
   PROFILE: 'dailyhishab_user_profile',
@@ -46,6 +47,13 @@ export function isValidUserId(id: string): boolean {
 export function isValidPin(pin: string): boolean {
   if (!pin) return false;
   return /^\d{4}$/.test(pin.trim());
+}
+
+// Generate 16-character Master Recovery Key (e.g. DH-78F2-901B-32A4)
+export function generateRecoveryKey(): string {
+  const chars = '0123456789ABCDEF';
+  const chunk = () => Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  return `DH-${chunk()}-${chunk()}-${chunk()}`;
 }
 
 // Simple cryptographic PIN hash function using Web Crypto API
@@ -95,6 +103,12 @@ export function loadUserProfile(): UserProfile {
     }
     if (!parsed.pin || !/^\d{4}$/.test(String(parsed.pin).trim())) {
       parsed.pin = '1234';
+    }
+    if (!parsed.recoveryKey) {
+      parsed.recoveryKey = generateRecoveryKey();
+      try {
+        localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(parsed));
+      } catch {}
     }
     return parsed;
   } catch (err) {
@@ -351,19 +365,27 @@ export function getContinuousOfflineBackup(): (BackupData & { autoBackupTimestam
 export function triggerAutoBackupSequence(profile?: UserProfile): void {
   const currentProfile = profile || loadUserProfile();
   const storageMode = currentProfile.backupStorageMode || (currentProfile.backupMode as any) || 'both';
-  const isOfflineEnabled = storageMode === 'both' || storageMode === 'local' || storageMode === 'offline';
   const isCloudEnabled = storageMode === 'both' || storageMode === 'cloud' || storageMode === 'online';
 
-  // 1. Continuous Local Device Auto-Backup
-  if (isOfflineEnabled && currentProfile.offlineAutoBackup !== false) {
-    const ts = performContinuousOfflineBackup();
-    if (ts && currentProfile.lastOfflineAutoBackupTime !== ts) {
-      saveUserProfile({ ...currentProfile, lastOfflineAutoBackupTime: ts });
-    }
+  // 1. MANDATE: Continuous Local Device & Offline Storage Auto-Backup
+  // ALWAYS execute unconditionally on EVERY entry/note modification for zero-data-loss security.
+  const offlineTs = performContinuousOfflineBackup();
+  let updatedProfile: UserProfile = { ...currentProfile };
+  if (offlineTs) {
+    updatedProfile.lastOfflineAutoBackupTime = offlineTs;
+    saveUserProfile(updatedProfile);
   }
 
-  // 2. Continuous Cloud Auto-Backup
+  // 2. Continuous Online Cloud Auto-Backup
   if (isCloudEnabled && currentProfile.onlineAutoBackup !== false) {
+    // If device is offline, mark pending sync immediately
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      updatedProfile.pendingCloudSync = true;
+      saveUserProfile(updatedProfile);
+      console.log('📱 Device is currently offline. Entry saved locally & queued for cloud sync upon reconnection.');
+      return;
+    }
+
     try {
       const backupData = createBackupObject();
       const uId = currentProfile.userId && /^\d{11}$/.test(String(currentProfile.userId).trim())
@@ -373,6 +395,30 @@ export function triggerAutoBackupSequence(profile?: UserProfile): void {
         ? String(currentProfile.pin).trim()
         : '1234';
 
+      // Primary client-side Firebase Firestore auto-backup
+      saveUserBackupToFirebase(uId, uPin, 'Continuous Cloud Auto-Backup', backupData)
+        .then((fbRes) => {
+          if (fbRes.success) {
+            const fresh = loadUserProfile();
+            saveUserProfile({
+              ...fresh,
+              pendingCloudSync: false,
+              lastCloudBackupTime: fbRes.lastSync || new Date().toISOString(),
+            });
+            console.log('☁️ Continuous Cloud Auto-Backup successfully synced to Firebase Firestore.');
+          } else {
+            // If Firebase returns error or failed response, flag pending sync
+            const fresh = loadUserProfile();
+            saveUserProfile({ ...fresh, pendingCloudSync: true });
+          }
+        })
+        .catch((err) => {
+          console.warn('Firebase client auto-backup catch:', err);
+          const fresh = loadUserProfile();
+          saveUserProfile({ ...fresh, pendingCloudSync: true });
+        });
+
+      // Secondary server endpoint backup
       fetch('/api/central-backup/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -385,19 +431,22 @@ export function triggerAutoBackupSequence(profile?: UserProfile): void {
         .then((res) => res.json())
         .then((data) => {
           if (data && data.success) {
+            const fresh = loadUserProfile();
             saveUserProfile({
-              ...loadUserProfile(),
+              ...fresh,
+              pendingCloudSync: false,
               lastCloudBackupTime: data.lastSync || new Date().toISOString(),
             });
-          } else if (data && data.error) {
-            console.warn('Cloud auto-backup response error:', data.error);
           }
         })
-        .catch((err) => {
-          console.warn('Cloud auto-backup network catch:', err);
+        .catch(() => {
+          const fresh = loadUserProfile();
+          saveUserProfile({ ...fresh, pendingCloudSync: true });
         });
     } catch (err) {
       console.warn('Failed to send cloud auto-backup:', err);
+      const fresh = loadUserProfile();
+      saveUserProfile({ ...fresh, pendingCloudSync: true });
     }
   }
 }

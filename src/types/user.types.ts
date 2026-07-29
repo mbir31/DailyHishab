@@ -38,8 +38,10 @@ export interface UserProfile {
   backupStorageMode?: BackupStorageMode; // 'cloud' | 'local' | 'both'
   offlineAutoBackup?: boolean; // default true
   onlineAutoBackup?: boolean; // default true
+  pendingCloudSync?: boolean; // flags unsynced changes when offline
   lastOfflineAutoBackupTime?: string;
   lastCloudBackupTime?: string | null;
+  recoveryKey?: string; // 16-character master security recovery key (e.g. DH-8A92-4F10-99E1)
   logoVariant?: 'full' | 'badge' | 'stacked' | 'icon-only';
 }
 
