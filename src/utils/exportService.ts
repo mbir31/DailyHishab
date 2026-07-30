@@ -157,10 +157,113 @@ export interface ExportReportOptions {
   filename: string;
   format: 'jpg' | 'png';
   title?: string;
+  language?: 'en' | 'bn';
+}
+
+function sliceCanvasToA4Pages(
+  canvas: HTMLCanvasElement,
+  filename: string,
+  language: 'en' | 'bn' = 'en'
+): { files: File[]; dataUrls: string[]; pageFilenames: string[] } {
+  const imgWidth = canvas.width;
+  const imgHeight = canvas.height;
+  const pageCanvasHeight = Math.floor((imgWidth * 297) / 210);
+
+  const totalPages = Math.max(1, Math.ceil(imgHeight / pageCanvasHeight));
+
+  const files: File[] = [];
+  const dataUrls: string[] = [];
+  const pageFilenames: string[] = [];
+
+  const mimeType = 'image/jpeg';
+  const bnNums = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  const toBn = (n: number) => String(n).replace(/\d/g, (d) => bnNums[parseInt(d, 10)]);
+
+  if (totalPages === 1) {
+    const dataUrl = canvas.toDataURL(mimeType, 0.95);
+    const curFilename = `${filename}.jpg`;
+    dataUrls.push(dataUrl);
+    pageFilenames.push(curFilename);
+
+    const byteString = atob(dataUrl.split(',')[1]);
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let j = 0; j < byteString.length; j++) {
+      ia[j] = byteString.charCodeAt(j);
+    }
+    const blob = new Blob([ab], { type: mimeType });
+    const file = new File([blob], curFilename, { type: mimeType });
+    files.push(file);
+    return { files, dataUrls, pageFilenames };
+  }
+
+  for (let i = 0; i < totalPages; i++) {
+    const pageCanvas = document.createElement('canvas');
+    pageCanvas.width = imgWidth;
+    pageCanvas.height = pageCanvasHeight;
+    const ctx = pageCanvas.getContext('2d');
+
+    if (ctx) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, imgWidth, pageCanvasHeight);
+
+      const sourceY = i * pageCanvasHeight;
+      const sourceHeight = Math.min(pageCanvasHeight, imgHeight - sourceY);
+
+      ctx.drawImage(
+        canvas,
+        0, sourceY,
+        imgWidth, sourceHeight,
+        0, 0,
+        imgWidth, sourceHeight
+      );
+
+      // Dynamic page footer on each multi-page image slice
+      const footerH = Math.max(28, Math.floor(imgWidth / 30));
+      ctx.fillStyle = '#F8FAFC';
+      ctx.fillRect(0, pageCanvasHeight - footerH, imgWidth, footerH);
+
+      ctx.strokeStyle = '#E2E8F0';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, pageCanvasHeight - footerH);
+      ctx.lineTo(imgWidth, pageCanvasHeight - footerH);
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748B';
+      const fontSize = Math.max(12, Math.floor(imgWidth / 55));
+      ctx.font = `600 ${fontSize}px sans-serif`;
+      ctx.textAlign = 'center';
+
+      const pageLabel =
+        language === 'bn'
+          ? `পৃষ্ঠা ${toBn(i + 1)} / ${toBn(totalPages)}`
+          : `Page ${i + 1} of ${totalPages}`;
+      ctx.fillText(pageLabel, imgWidth / 2, pageCanvasHeight - Math.floor(footerH / 3));
+    }
+
+    const dataUrl = pageCanvas.toDataURL(mimeType, 0.95);
+    dataUrls.push(dataUrl);
+
+    const curFilename = `${filename}_Page_${i + 1}_of_${totalPages}.jpg`;
+    pageFilenames.push(curFilename);
+
+    const byteString = atob(dataUrl.split(',')[1]);
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let j = 0; j < byteString.length; j++) {
+      ia[j] = byteString.charCodeAt(j);
+    }
+    const blob = new Blob([ab], { type: mimeType });
+    const file = new File([blob], curFilename, { type: mimeType });
+    files.push(file);
+  }
+
+  return { files, dataUrls, pageFilenames };
 }
 
 export async function exportElementToImage(options: ExportReportOptions): Promise<boolean> {
-  const { elementId, filename, format } = options;
+  const { elementId, filename, format, language = 'en' } = options;
   const element = document.getElementById(elementId);
   if (!element) {
     console.error(`Export element #${elementId} not found`);
@@ -172,37 +275,45 @@ export async function exportElementToImage(options: ExportReportOptions): Promis
       backgroundColor: format === 'jpg' ? '#FFFFFF' : null,
     });
 
-    const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
-    const dataUrl = canvas.toDataURL(mimeType, 0.95);
+    if (format === 'jpg') {
+      const { files, dataUrls, pageFilenames } = sliceCanvasToA4Pages(canvas, filename, language);
 
-    // Always trigger direct download to save a copy to device storage/gallery
-    const link = document.createElement('a');
-    link.download = `${filename}.${format}`;
-    link.href = dataUrl;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      for (let i = 0; i < dataUrls.length; i++) {
+        const link = document.createElement('a');
+        link.download = pageFilenames[i];
+        link.href = dataUrls[i];
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        if (dataUrls.length > 1) {
+          await new Promise((r) => setTimeout(r, 200));
+        }
+      }
 
-    // Check Web Share API with File support
-    if (navigator.share && navigator.canShare) {
-      try {
-        const response = await fetch(dataUrl);
-        const blob = await response.blob();
-        const file = new File([blob], `${filename}.${format}`, { type: mimeType });
-
-        if (navigator.canShare({ files: [file] })) {
+      if (navigator.share && navigator.canShare && navigator.canShare({ files })) {
+        try {
           await new Promise((resolve) => setTimeout(resolve, 150));
           await navigator.share({
             title: options.title || 'DailyHishab Financial Statement',
             text: 'Financial Summary from DailyHishab',
-            files: [file],
+            files,
           });
-          return true;
+        } catch (shareErr) {
+          console.warn('Web Share failed or cancelled (copy already saved to device):', shareErr);
         }
-      } catch (shareErr) {
-        console.warn('Web Share failed or cancelled (copy already saved to device):', shareErr);
       }
+      return true;
     }
+
+    const mimeType = 'image/png';
+    const dataUrl = canvas.toDataURL(mimeType, 0.95);
+
+    const link = document.createElement('a');
+    link.download = `${filename}.png`;
+    link.href = dataUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
     return true;
   } catch (err) {
@@ -217,8 +328,9 @@ export async function shareStatementAsImage(options: {
   title: string;
   textSummary: string;
   targetApp?: 'whatsapp' | 'general';
+  language?: 'en' | 'bn';
 }): Promise<{ success: boolean; method: 'web-share' | 'whatsapp' | 'download' | 'error'; error?: string }> {
-  const { elementId, filename, title, textSummary, targetApp } = options;
+  const { elementId, filename, title, textSummary, targetApp, language = 'en' } = options;
   const element = document.getElementById(elementId);
   if (!element) {
     return { success: false, method: 'error', error: 'Statement preview template not found' };
@@ -229,29 +341,29 @@ export async function shareStatementAsImage(options: {
       backgroundColor: '#FFFFFF',
     });
 
-    const mimeType = 'image/jpeg';
-    const dataUrl = canvas.toDataURL(mimeType, 0.92);
+    const { files, dataUrls, pageFilenames } = sliceCanvasToA4Pages(canvas, filename, language);
 
-    const response = await fetch(dataUrl);
-    const blob = await response.blob();
-    const file = new File([blob], `${filename}.jpg`, { type: mimeType });
+    // Direct download each page JPG to device storage/gallery
+    for (let i = 0; i < dataUrls.length; i++) {
+      const link = document.createElement('a');
+      link.download = pageFilenames[i];
+      link.href = dataUrls[i];
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      if (dataUrls.length > 1) {
+        await new Promise((r) => setTimeout(r, 200));
+      }
+    }
 
-    // Always trigger direct download to guarantee a copy is saved to device storage/gallery
-    const link = document.createElement('a');
-    link.download = `${filename}.jpg`;
-    link.href = dataUrl;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Try Web Share API (native share drawer to WhatsApp, Telegram, etc.)
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    // Try Web Share API with all files
+    if (navigator.share && navigator.canShare && navigator.canShare({ files })) {
       try {
         await new Promise((resolve) => setTimeout(resolve, 150));
         await navigator.share({
           title: title,
           text: textSummary,
-          files: [file],
+          files: files,
         });
         return { success: true, method: 'web-share' };
       } catch (shareErr: any) {
@@ -264,7 +376,8 @@ export async function shareStatementAsImage(options: {
 
     // If targeted for WhatsApp specifically or fallback mode
     if (targetApp === 'whatsapp') {
-      const waText = encodeURIComponent(`${textSummary}\n\n*(JPG Statement image saved to device gallery - attach it to your message)*`);
+      const pageInfo = files.length > 1 ? ` (${files.length} JPG Pages)` : '';
+      const waText = encodeURIComponent(`${textSummary}\n\n*(JPG Statement image${pageInfo} saved to device gallery - attach it to your message)*`);
       window.open(`https://api.whatsapp.com/send?text=${waText}`, '_blank');
       return { success: true, method: 'whatsapp' };
     }

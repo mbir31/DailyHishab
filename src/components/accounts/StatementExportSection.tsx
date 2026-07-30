@@ -83,6 +83,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
       title: `${appTitle} Statement (${dateLabel})`,
       textSummary,
       targetApp,
+      language: userProfile.language,
     });
 
     setIsSharingImage(false);
@@ -142,7 +143,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
   // 3. Export to PDF (.pdf) with full Bangla font & high DPI canvas rendering support
   const handleExportPDF = async () => {
     setIsExportingPDF(true);
-    setExportMsg(userProfile.language === 'bn' ? 'বাংলা ফ্রন্টসহ পিডিএফ স্টেটমেন্ট ফাইল তৈরি করা হচ্ছে...' : 'Generating PDF statement with Bangla font support...');
+    setExportMsg(userProfile.language === 'bn' ? 'বাংলা ফন্টসহ পিডিএফ স্টেটমেন্ট ফাইল তৈরি করা হচ্ছে...' : 'Generating PDF statement with Bangla font support...');
 
     try {
       const element = document.getElementById('statement-image-export-card');
@@ -156,30 +157,69 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
         backgroundColor: '#FFFFFF',
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const pdfWidth = pdf.internal.pageSize.getWidth(); // 210 mm
+      const pdfHeight = pdf.internal.pageSize.getHeight(); // 297 mm
 
       const imgWidth = canvas.width;
       const imgHeight = canvas.height;
-      const ratio = imgWidth / pdfWidth;
-      const scaledHeight = imgHeight / ratio;
 
-      if (scaledHeight <= pdfHeight) {
+      // Calculate single A4 page height in canvas pixel space (210mm : 297mm ratio)
+      const pageCanvasHeight = Math.floor((imgWidth * pdfHeight) / pdfWidth);
+
+      if (imgHeight <= pageCanvasHeight) {
+        // Fits within a single A4 page
+        const scaledHeight = (imgHeight * pdfWidth) / imgWidth;
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
         pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, scaledHeight);
+
+        // Footer for single page
+        pdf.setFontSize(8);
+        pdf.setTextColor(140, 140, 140);
+        const pageStr = userProfile.language === 'bn' ? 'পৃষ্ঠা ১ / ১' : 'Page 1 of 1';
+        pdf.text(`${appTitle} Statement • ${pageStr}`, pdfWidth / 2, pdfHeight - 5, { align: 'center' });
       } else {
-        let heightLeft = scaledHeight;
-        let position = 0;
+        // Exceeds single A4 page height -> split across multiple pages cleanly
+        const totalPages = Math.ceil(imgHeight / pageCanvasHeight);
 
-        pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, scaledHeight);
-        heightLeft -= pdfHeight;
+        for (let i = 0; i < totalPages; i++) {
+          if (i > 0) {
+            pdf.addPage();
+          }
 
-        while (heightLeft > 0) {
-          position = heightLeft - scaledHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, scaledHeight);
-          heightLeft -= pdfHeight;
+          // Create a dedicated page slice canvas
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = imgWidth;
+          pageCanvas.height = pageCanvasHeight;
+          const ctx = pageCanvas.getContext('2d');
+
+          if (ctx) {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, imgWidth, pageCanvasHeight);
+
+            const sourceY = i * pageCanvasHeight;
+            const sourceHeight = Math.min(pageCanvasHeight, imgHeight - sourceY);
+
+            ctx.drawImage(
+              canvas,
+              0, sourceY,
+              imgWidth, sourceHeight,
+              0, 0,
+              imgWidth, sourceHeight
+            );
+          }
+
+          const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.95);
+          pdf.addImage(pageImgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+          // Footer for each page
+          pdf.setFontSize(8);
+          pdf.setTextColor(140, 140, 140);
+          const pageStr =
+            userProfile.language === 'bn'
+              ? `পৃষ্ঠা ${formatNumberOnly(i + 1, 'bn')} / ${formatNumberOnly(totalPages, 'bn')}`
+              : `Page ${i + 1} of ${totalPages}`;
+          pdf.text(`${appTitle} Statement • ${pageStr}`, pdfWidth / 2, pdfHeight - 5, { align: 'center' });
         }
       }
 
@@ -447,17 +487,15 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
           {/* Statement Header Banner */}
           <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-900 text-white rounded-2xl p-6 shadow-md border border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {userProfile.photoUrl ? (
+              {(userProfile.photoURL || (userProfile as any).photoUrl) ? (
                 <img
-                  src={userProfile.photoUrl}
+                  src={userProfile.photoURL || (userProfile as any).photoUrl || ''}
                   alt={userProfile.username || 'User Profile'}
                   className="w-12 h-12 rounded-2xl object-cover shadow-lg border-2 border-white/30 shrink-0"
                 />
               ) : (
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-teal-400 p-0.5 shadow-lg flex items-center justify-center shrink-0">
-                  <div className="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center text-white font-black text-lg tracking-wider">
-                    DH
-                  </div>
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg border-2 border-white/30 shrink-0">
+                  {userProfile.username ? userProfile.username.charAt(0).toUpperCase() : 'D'}
                 </div>
               )}
 
@@ -494,8 +532,8 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
           <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200 text-xs text-slate-600 font-medium grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <div>
-                <span className="text-slate-400 font-normal">{userProfile.language === 'bn' ? 'হিসাব মালিক: ' : 'Account Holder: '}</span>
-                <strong className="text-slate-900 font-bold">{userProfile.username || (userProfile.language === 'bn' ? 'সম্মানিত হিসাব মালিক' : 'Valued Account Owner')}</strong>
+                <span className="text-slate-400 font-normal">{userProfile.language === 'bn' ? 'হিসাব রক্ষক/যাচাইকারী: ' : 'Accountant / Verifier: '}</span>
+                <strong className="text-slate-900 font-bold">{userProfile.username || (userProfile.language === 'bn' ? 'সম্মানিত হিসাব রক্ষক/যাচাইকারী' : 'Valued Accountant / Verifier')}</strong>
               </div>
               <div>
                 <span className="text-slate-400 font-normal">{userProfile.language === 'bn' ? 'মুদ্রা ও ফরম্যাট: ' : 'Currency & Format: '}</span>
@@ -622,9 +660,9 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                   <div className="col-span-2 text-right">{userProfile.language === 'bn' ? 'টাকা' : 'Amount'} ({currencySymbol})</div>
                 </div>
 
-                {/* Table Rows - ONLY filled validEntries */}
+                {/* Table Rows - ALL validEntries */}
                 <div className="divide-y divide-slate-100 text-xs">
-                  {validEntries.slice(0, 50).map((e, idx) => (
+                  {validEntries.map((e, idx) => (
                     <div
                       key={e.id || idx}
                       className={`py-2 px-3 grid grid-cols-12 gap-2 items-center ${
@@ -690,14 +728,6 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                   </div>
                 </div>
               </div>
-            )}
-
-            {validEntries.length > 50 && (
-              <p className="text-[10px] text-slate-400 text-center pt-0.5 italic">
-                {userProfile.language === 'bn'
-                  ? `+ আরও ${formatNumberOnly(validEntries.length - 50, 'bn')} টি লেনদেন ডাটাবেজে সংরক্ষিত রয়েছে`
-                  : `+ ${validEntries.length - 50} additional itemized entries saved in database`}
-              </p>
             )}
           </div>
 
