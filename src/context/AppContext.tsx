@@ -11,6 +11,7 @@ import {
   loadAllEntriesSync,
   triggerAutoBackupSequence,
   restoreFromBackupObject,
+  syncEntriesWithIDB,
 } from '../utils/storage';
 import { verifyAndRestoreUserBackupFromFirebase } from '../lib/firebaseBackupService';
 import { getTodayDateString, shiftDateString } from '../utils/dateHelpers';
@@ -41,6 +42,9 @@ interface AppContextType {
   
   // Helpers
   isOnline: boolean;
+  isSyncing: boolean;
+  lastSyncedTime: number | null;
+  triggerManualSync: (customUserId?: string, customPin?: string) => Promise<{ success: boolean; message?: string }>;
   t: ReturnType<typeof getTranslation>;
   reloadState: () => void;
   clearAllData: () => void;
@@ -58,6 +62,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeTab, setActiveTab] = useState<ActiveTab>('income');
   const [selectedDate, setSelectedDate] = useState<string>(getTodayDateString());
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [lastSyncedTime, setLastSyncedTime] = useState<number | null>(null);
   
   const [currentIncomeEntries, setCurrentIncomeEntries] = useState<Entry[]>([]);
   const [currentExpenseEntries, setCurrentExpenseEntries] = useState<Entry[]>([]);
@@ -66,22 +72,134 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [deferredPwaPrompt, setDeferredPwaPrompt] = useState<any>(null);
   const [isPwaInstalled, setIsPwaInstalled] = useState<boolean>(false);
 
+  // Load entries when selected date or active tab changes
+  const refreshEntriesForSelectedDate = useCallback(() => {
+    const incomes = getEntriesForDate(selectedDate, 'income');
+    const expenses = getEntriesForDate(selectedDate, 'expense');
+    setCurrentIncomeEntries(incomes);
+    setCurrentExpenseEntries(expenses);
+  }, [selectedDate]);
+
+  useEffect(() => {
+    refreshEntriesForSelectedDate();
+  }, [refreshEntriesForSelectedDate]);
+
+  // Comprehensive Two-Way Instant Cloud Vault Synchronization Engine
+  const syncCloudVault = useCallback(async (customUserId?: string, customPin?: string) => {
+    const targetUserId = (customUserId || userProfile.userId || '').trim();
+    const targetPin = (customPin || userProfile.pin || '').trim();
+
+    if (!targetUserId || !targetPin || !userProfile.isFirstSetupCompleted) {
+      return;
+    }
+
+    if (!navigator.onLine) {
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      // 1. Fetch cloud vault backup from Firebase Firestore
+      let cloudResult = await verifyAndRestoreUserBackupFromFirebase(targetUserId, targetPin);
+
+      // 2. Fallback to Central Cloud Server endpoint if Firestore doc is not found or fails
+      if (!cloudResult.success || !cloudResult.backupData) {
+        try {
+          const res = await fetch('/api/central-backup/verify-and-restore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: targetUserId, pin: targetPin }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.backupData) {
+              cloudResult = { success: true, backupData: data.backupData };
+            }
+          }
+        } catch (e) {
+          // silent fallback
+        }
+      }
+
+      if (cloudResult.success && cloudResult.backupData) {
+        // Merge fetched cloud vault entries & notes into local device storage
+        const didMerge = restoreFromBackupObject(cloudResult.backupData, { mode: 'merge' });
+        if (didMerge) {
+          refreshEntriesForSelectedDate();
+        }
+      }
+
+      // Trigger push of local state (which is now merged with cloud) up to cloud vault
+      triggerAutoBackupSequence(userProfile);
+      setLastSyncedTime(Date.now());
+    } catch (err) {
+      console.warn('Instant cloud sync fetch warning:', err);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [userProfile, refreshEntriesForSelectedDate]);
+
+  const triggerManualSync = useCallback(async (customUserId?: string, customPin?: string): Promise<{ success: boolean; message?: string }> => {
+    if (!navigator.onLine) {
+      return {
+        success: false,
+        message: userProfile.language === 'bn' ? 'অফলাইন! সিঙ্ক করতে ইন্টারনেট সংযোগ চালু করুন।' : 'Offline! Please connect to internet to sync.',
+      };
+    }
+    const idToUse = (customUserId || userProfile.userId || '').trim();
+    const pinToUse = (customPin || userProfile.pin || '').trim();
+    if (!idToUse || !pinToUse) {
+      return {
+        success: false,
+        message: userProfile.language === 'bn' ? 'ইউজার আইডি বা পিন যুক্ত নেই।' : 'No User ID or PIN assigned.',
+      };
+    }
+
+    await syncCloudVault(idToUse, pinToUse);
+    return {
+      success: true,
+      message: userProfile.language === 'bn' ? 'ক্লাউড ভল্ট সিঙ্ক সফলভাবে সম্পন্ন হয়েছে!' : 'Cloud vault synced successfully!',
+    };
+  }, [navigator.onLine, userProfile, syncCloudVault]);
+
   // Network online listener & automatic cloud sync engine
   useEffect(() => {
+    // Zero-loss sync: Check IndexedDB on mount to recover any local storage evictions
+    syncEntriesWithIDB().then(() => {
+      refreshEntriesForSelectedDate();
+    });
+
+    const handleSyncTrigger = () => {
+      if (document.visibilityState === 'visible' && userProfile.isLoggedIn && userProfile.isFirstSetupCompleted && navigator.onLine) {
+        syncCloudVault();
+      }
+    };
+
     const handleOnline = () => {
       setIsOnline(true);
-      console.log('🌐 Internet connection restored! Triggering instant cloud auto-backup sync...');
-      triggerAutoBackupSequence();
+      console.log('🌐 Internet connection restored! Triggering instant cloud sync...');
+      if (userProfile.isLoggedIn && userProfile.isFirstSetupCompleted) {
+        syncCloudVault();
+      }
     };
     const handleOffline = () => setIsOnline(false);
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+    window.addEventListener('focus', handleSyncTrigger);
+    document.addEventListener('visibilitychange', handleSyncTrigger);
 
-    // Initial check on mount: If online, perform cloud backup sync for any pending offline changes
-    if (navigator.onLine) {
-      triggerAutoBackupSequence();
+    // Initial check on mount: If online and logged in, perform cloud backup sync
+    if (navigator.onLine && userProfile.isLoggedIn && userProfile.isFirstSetupCompleted) {
+      syncCloudVault();
     }
+
+    // Continuous 20s background sync poll when online & logged in
+    const syncInterval = setInterval(() => {
+      if (userProfile.isLoggedIn && userProfile.isFirstSetupCompleted && navigator.onLine) {
+        syncCloudVault();
+      }
+    }, 20000);
 
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
@@ -96,36 +214,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('focus', handleSyncTrigger);
+      document.removeEventListener('visibilitychange', handleSyncTrigger);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      clearInterval(syncInterval);
     };
-  }, []);
-
-  // Theme application
-  useEffect(() => {
-    const root = document.documentElement;
-    let themeToApply = userProfile.theme;
-    if (themeToApply === 'system') {
-      themeToApply = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    root.setAttribute('data-theme', themeToApply);
-    if (themeToApply === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-  }, [userProfile.theme]);
-
-  // Load entries when selected date or active tab changes
-  const refreshEntriesForSelectedDate = useCallback(() => {
-    const incomes = getEntriesForDate(selectedDate, 'income');
-    const expenses = getEntriesForDate(selectedDate, 'expense');
-    setCurrentIncomeEntries(incomes);
-    setCurrentExpenseEntries(expenses);
-  }, [selectedDate]);
-
-  useEffect(() => {
-    refreshEntriesForSelectedDate();
-  }, [refreshEntriesForSelectedDate]);
+  }, [userProfile.isLoggedIn, userProfile.isFirstSetupCompleted, syncCloudVault, refreshEntriesForSelectedDate]);
 
   // Ref for last activity timestamp to prevent re-rendering app on every click or keystroke
   const lastActiveRef = React.useRef<number>(userProfile.lastActiveTimestamp || Date.now());
@@ -183,6 +277,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isLoggedIn: true,
         lastActiveTimestamp: Date.now(),
       });
+      syncCloudVault(userProfile.userId, pin).then(() => {
+        refreshEntriesForSelectedDate();
+      });
       return true;
     }
     return false;
@@ -192,6 +289,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const hashed = await hashPin(pin);
     const cleanUserId = userId.trim() || '01712345678';
     const cleanPin = pin.trim() || '1234';
+
+    // Smart check: If user completes setup with an existing account ID, attempt to pull existing cloud vault entries first
+    try {
+      const fbCheck = await verifyAndRestoreUserBackupFromFirebase(cleanUserId, cleanPin);
+      if (fbCheck.success && fbCheck.backupData) {
+        restoreFromBackupObject(fbCheck.backupData, { mode: 'merge' });
+      }
+    } catch (e) {
+      console.warn('Setup cloud check catch:', e);
+    }
+
     const updatedProfile: UserProfile = {
       ...userProfile,
       username: username.trim() || 'Admin',
@@ -220,8 +328,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (fbResult.success && fbResult.backupData) {
         const hashed = await hashPin(cleanPin);
 
-        restoreFromBackupObject(fbResult.backupData, { mode: 'replace' });
-
         const current = loadUserProfile();
         const updatedProfile: UserProfile = {
           ...current,
@@ -235,7 +341,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           lastActiveTimestamp: Date.now(),
         };
 
+        // Save profile first so credentials match active user
         saveUserProfile(updatedProfile);
+        restoreFromBackupObject(fbResult.backupData, { mode: 'replace' });
         reloadState();
 
         return {
@@ -273,10 +381,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const hashed = await hashPin(cleanPin);
 
-      // Restore entries & notes from backup
-      restoreFromBackupObject(data.backupData, { mode: 'replace' });
-
-      // Update local profile with restored values & credentials
       const current = loadUserProfile();
       const updatedProfile: UserProfile = {
         ...current,
@@ -290,7 +394,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         lastActiveTimestamp: Date.now(),
       };
 
+      // Save profile first so credentials match active user
       saveUserProfile(updatedProfile);
+      restoreFromBackupObject(data.backupData, { mode: 'replace' });
       reloadState();
 
       return {
@@ -362,6 +468,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currentExpenseEntries,
         saveCurrentDateEntries,
         isOnline,
+        isSyncing,
+        lastSyncedTime,
+        triggerManualSync,
         t,
         reloadState,
         clearAllData: handleClearAllData,

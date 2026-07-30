@@ -151,6 +151,66 @@ function isValid4DigitPin(pin: string): boolean {
   return /^\d{4}$/.test(clean);
 }
 
+// Server-side entry & note merging helpers
+function mergeEntriesServer(existingEntries: any[] = [], incomingEntries: any[] = []): any[] {
+  const entryMap = new Map<string, any>();
+  if (Array.isArray(existingEntries)) {
+    existingEntries.forEach((e) => {
+      if (e && e.id) entryMap.set(e.id, e);
+    });
+  }
+  if (Array.isArray(incomingEntries)) {
+    incomingEntries.forEach((r) => {
+      if (!r) return;
+      if (r.id && entryMap.has(r.id)) {
+        const cur = entryMap.get(r.id)!;
+        if ((r.updatedAt || 0) >= (cur.updatedAt || 0)) {
+          entryMap.set(r.id, r);
+        }
+      } else {
+        const existingList = Array.from(entryMap.values());
+        const dup = existingList.find(
+          (e) =>
+            e.date === r.date &&
+            e.type === r.type &&
+            Number(e.amount) === Number(r.amount) &&
+            (e.description || '').trim() === (r.description || '').trim()
+        );
+        if (!dup && r.id) {
+          entryMap.set(r.id, r);
+        } else if (dup && (r.updatedAt || 0) > (dup.updatedAt || 0)) {
+          entryMap.set(dup.id, { ...dup, ...r });
+        }
+      }
+    });
+  }
+  return Array.from(entryMap.values());
+}
+
+function mergeNotesServer(existingNotes: any[] = [], incomingNotes: any[] = []): any[] {
+  const noteMap = new Map<string, any>();
+  if (Array.isArray(existingNotes)) {
+    existingNotes.forEach((n) => {
+      if (n) noteMap.set(`${n.dateFrom}_${n.dateTo}`, n);
+    });
+  }
+  if (Array.isArray(incomingNotes)) {
+    incomingNotes.forEach((rn) => {
+      if (!rn) return;
+      const key = `${rn.dateFrom}_${rn.dateTo}`;
+      if (!noteMap.has(key)) {
+        noteMap.set(key, rn);
+      } else {
+        const cur = noteMap.get(key)!;
+        if ((rn.updatedAt || 0) >= (cur.updatedAt || 0)) {
+          noteMap.set(key, rn);
+        }
+      }
+    });
+  }
+  return Array.from(noteMap.values());
+}
+
 // Save backup to central developer cloud store
 app.post('/api/central-backup/save', async (req, res) => {
   try {
@@ -169,15 +229,46 @@ app.post('/api/central-backup/save', async (req, res) => {
       fs.mkdirSync(userBackupDir, { recursive: true });
     }
 
+    const latestPath = path.join(userBackupDir, 'latest.json');
+    let finalPayload = payload;
+
+    if (fs.existsSync(latestPath)) {
+      try {
+        const raw = fs.readFileSync(latestPath, 'utf-8');
+        const existingRecord = JSON.parse(raw);
+        const expectedPin = (existingRecord.pin || existingRecord.payload?.profile?.pin || '').trim();
+        if (expectedPin && expectedPin !== (pin || '1234').trim()) {
+          return res.status(401).json({ error: 'Security authorization failed: Incorrect 4-digit PIN for this User ID.' });
+        }
+
+        const existingPayload = existingRecord.payload || {};
+        const mergedEntriesList = mergeEntriesServer(existingPayload.entries || [], payload.entries || []);
+        const mergedNotesList = mergeNotesServer(existingPayload.notes || [], payload.notes || []);
+
+        finalPayload = {
+          ...existingPayload,
+          ...payload,
+          profile: {
+            ...(existingPayload.profile || {}),
+            ...(payload.profile || {}),
+          },
+          entries: mergedEntriesList,
+          notes: mergedNotesList,
+        };
+      } catch (e) {
+        // proceed with incoming payload fallback
+      }
+    }
+
     const timestamp = new Date().toISOString();
     const backupId = `backup_${Date.now()}`;
-    const entryCount = Array.isArray(payload.entries) ? payload.entries.length : 0;
+    const entryCount = Array.isArray(finalPayload.entries) ? finalPayload.entries.length : 0;
     
     // Calculate summary statistics for backup overview
     let totalIncome = 0;
     let totalExpense = 0;
-    if (Array.isArray(payload.entries)) {
-      payload.entries.forEach((e: any) => {
+    if (Array.isArray(finalPayload.entries)) {
+      finalPayload.entries.forEach((e: any) => {
         if (e.type === 'income') totalIncome += Number(e.amount || 0);
         else if (e.type === 'expense') totalExpense += Number(e.amount || 0);
       });
@@ -193,7 +284,7 @@ app.post('/api/central-backup/save', async (req, res) => {
       entryCount,
       totalIncome,
       totalExpense,
-      payload,
+      payload: finalPayload,
     };
 
     const filePath = path.join(userBackupDir, `${backupId}.json`);

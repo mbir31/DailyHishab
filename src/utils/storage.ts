@@ -92,6 +92,109 @@ function openIDB(): Promise<IDBDatabase> {
   });
 }
 
+// Merging helper functions to ensure no entries or notes are lost across sessions or devices
+export function mergeEntries(existingEntries: Entry[] = [], incomingEntries: Entry[] = []): Entry[] {
+  const entryMap = new Map<string, Entry>();
+
+  if (Array.isArray(existingEntries)) {
+    existingEntries.forEach((e) => {
+      if (e && e.id) {
+        entryMap.set(e.id, e);
+      }
+    });
+  }
+
+  if (Array.isArray(incomingEntries)) {
+    incomingEntries.forEach((r) => {
+      if (!r) return;
+      if (r.id && entryMap.has(r.id)) {
+        const cur = entryMap.get(r.id)!;
+        if ((r.updatedAt || 0) >= (cur.updatedAt || 0)) {
+          entryMap.set(r.id, r);
+        }
+      } else {
+        const existingList = Array.from(entryMap.values());
+        const dup = existingList.find(
+          (e) =>
+            e.date === r.date &&
+            e.type === r.type &&
+            Number(e.amount) === Number(r.amount) &&
+            (e.description || '').trim() === (r.description || '').trim()
+        );
+        if (!dup && r.id) {
+          entryMap.set(r.id, r);
+        } else if (dup && (r.updatedAt || 0) > (dup.updatedAt || 0)) {
+          entryMap.set(dup.id, { ...dup, ...r });
+        }
+      }
+    });
+  }
+
+  return Array.from(entryMap.values());
+}
+
+export function mergeNotes(existingNotes: UserNote[] = [], incomingNotes: UserNote[] = []): UserNote[] {
+  const noteMap = new Map<string, UserNote>();
+
+  if (Array.isArray(existingNotes)) {
+    existingNotes.forEach((n) => {
+      if (n) noteMap.set(`${n.dateFrom}_${n.dateTo}`, n);
+    });
+  }
+
+  if (Array.isArray(incomingNotes)) {
+    incomingNotes.forEach((rn) => {
+      if (!rn) return;
+      const key = `${rn.dateFrom}_${rn.dateTo}`;
+      if (!noteMap.has(key)) {
+        noteMap.set(key, rn);
+      } else {
+        const cur = noteMap.get(key)!;
+        if ((rn.updatedAt || 0) >= (cur.updatedAt || 0)) {
+          noteMap.set(key, rn);
+        }
+      }
+    });
+  }
+
+  return Array.from(noteMap.values());
+}
+
+// Synchronize LocalStorage with IndexedDB for zero-loss offline cache
+export async function syncEntriesWithIDB(): Promise<Entry[]> {
+  try {
+    const localEntries = loadAllEntriesSync();
+    const idb = await openIDB();
+    const tx = idb.transaction('entries', 'readonly');
+    const store = tx.objectStore('entries');
+    const idbEntries = await new Promise<Entry[]>((resolve) => {
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => resolve([]);
+    });
+
+    if (idbEntries.length === 0 && localEntries.length > 0) {
+      const writeTx = idb.transaction('entries', 'readwrite');
+      const writeStore = writeTx.objectStore('entries');
+      localEntries.forEach((e) => writeStore.put(e));
+      return localEntries;
+    }
+
+    if (idbEntries.length > 0) {
+      const merged = mergeEntries(localEntries, idbEntries);
+      if (merged.length !== localEntries.length) {
+        localStorage.setItem(STORAGE_KEYS.ENTRIES, JSON.stringify(merged));
+      }
+      return merged;
+    }
+
+    return localEntries;
+  } catch (err) {
+    console.warn('IDB sync warning:', err);
+    return loadAllEntriesSync();
+  }
+}
+
 // User Profile Local Storage
 export function loadUserProfile(): UserProfile {
   try {
@@ -170,8 +273,13 @@ export function saveEntriesForDate(dateStr: string, type: EntryType, entriesForD
   // Filter out existing entries for this date & type
   const remaining = all.filter(e => !(e.date === dateStr && e.type === type));
   
+  // Filter out empty placeholder rows before saving to database
+  const validEntries = entriesForDate.filter(
+    e => (e.description && e.description.trim() !== '') || Number(e.amount || 0) !== 0
+  );
+
   // Re-assign exact serial numbers starting from 1
-  const sanitized = entriesForDate.map((e, idx) => ({
+  const sanitized = validEntries.map((e, idx) => ({
     ...e,
     date: dateStr,
     type,
@@ -364,6 +472,19 @@ export function getContinuousOfflineBackup(): (BackupData & { autoBackupTimestam
 // Sequence trigger invoked on data entries / notes changes
 export function triggerAutoBackupSequence(profile?: UserProfile): void {
   const currentProfile = profile || loadUserProfile();
+
+  // MANDATORY SECURITY & DATA INTEGRITY GUARD:
+  // Do NOT execute cloud backups if user setup is incomplete or user is not logged in!
+  if (!currentProfile.isFirstSetupCompleted || !currentProfile.isLoggedIn) {
+    if (currentProfile.isFirstSetupCompleted) {
+      const offlineTs = performContinuousOfflineBackup();
+      if (offlineTs) {
+        saveUserProfile({ ...currentProfile, lastOfflineAutoBackupTime: offlineTs });
+      }
+    }
+    return;
+  }
+
   const storageMode = currentProfile.backupStorageMode || (currentProfile.backupMode as any) || 'both';
   const isCloudEnabled = storageMode === 'both' || storageMode === 'cloud' || storageMode === 'online';
 

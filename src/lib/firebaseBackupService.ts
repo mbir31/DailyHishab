@@ -1,4 +1,5 @@
 import { db, doc, setDoc, getDoc, deleteDoc } from './firebase';
+import { mergeEntries, mergeNotes } from '../utils/storage';
 
 export interface FirebaseBackupRecord {
   id: string;
@@ -39,20 +40,14 @@ export async function saveUserBackupToFirebase(
 
     const timestamp = new Date().toISOString();
     const backupId = `backup_${cleanUserId}`;
-    const entryCount = payload.entries.length;
-
-    let totalIncome = 0;
-    let totalExpense = 0;
-    payload.entries.forEach((e: any) => {
-      if (e.type === 'income') totalIncome += Number(e.amount || 0);
-      else if (e.type === 'expense') totalExpense += Number(e.amount || 0);
-    });
-
     const cleanPin = (pin || '1234').trim();
     const cleanRecoveryKey = (payload?.profile?.recoveryKey || '').trim();
     const docRef = doc(db, 'user_backups', cleanUserId);
 
-    // Security Check: If vault already exists, enforce PIN match before overwriting
+    let finalPayload = payload;
+
+    // Security Check & Smart Non-Destructive Merge:
+    // If vault already exists, enforce PIN match & merge existing cloud entries/notes with incoming
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       const existingData = docSnap.data() as FirebaseBackupRecord;
@@ -63,7 +58,30 @@ export async function saveUserBackupToFirebase(
           error: 'Security authorization failed: Incorrect 4-digit PIN for this 11-digit User ID vault.',
         };
       }
+
+      const existingPayload = existingData.payload || {};
+      const mergedEntriesList = mergeEntries(existingPayload.entries || [], payload.entries || []);
+      const mergedNotesList = mergeNotes(existingPayload.notes || [], payload.notes || []);
+
+      finalPayload = {
+        ...existingPayload,
+        ...payload,
+        profile: {
+          ...(existingPayload.profile || {}),
+          ...(payload.profile || {}),
+        },
+        entries: mergedEntriesList,
+        notes: mergedNotesList,
+      };
     }
+
+    const entryCount = finalPayload.entries.length;
+    let totalIncome = 0;
+    let totalExpense = 0;
+    finalPayload.entries.forEach((e: any) => {
+      if (e.type === 'income') totalIncome += Number(e.amount || 0);
+      else if (e.type === 'expense') totalExpense += Number(e.amount || 0);
+    });
 
     const backupRecord: FirebaseBackupRecord = {
       id: backupId,
@@ -76,7 +94,7 @@ export async function saveUserBackupToFirebase(
       entryCount,
       totalIncome,
       totalExpense,
-      payload,
+      payload: finalPayload,
     };
 
     await setDoc(docRef, backupRecord);
