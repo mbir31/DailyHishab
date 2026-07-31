@@ -160,17 +160,120 @@ export interface ExportReportOptions {
   language?: 'en' | 'bn';
 }
 
-function sliceCanvasToA4Pages(
+export interface PageSlice {
+  startY: number;
+  endY: number;
+  sliceHeight: number;
+}
+
+/**
+ * Calculates smart vertical cut points so that no data row or section block is split across A4 page boundaries.
+ */
+export function calculateSmartPageSlices(
+  element: HTMLElement | null,
+  canvas: HTMLCanvasElement,
+  pageCanvasHeight: number,
+  options?: { topMargin?: number; bottomMargin?: number }
+): PageSlice[] {
+  const topMargin = options?.topMargin ?? Math.floor(pageCanvasHeight * 0.03); // ~3% top padding
+  const bottomMargin = options?.bottomMargin ?? Math.floor(pageCanvasHeight * 0.05); // ~5% bottom padding (footer area)
+  const maxContentHeight = pageCanvasHeight - topMargin - bottomMargin;
+
+  if (canvas.height <= pageCanvasHeight) {
+    return [{ startY: 0, endY: canvas.height, sliceHeight: canvas.height }];
+  }
+
+  const items: { top: number; bottom: number }[] = [];
+
+  if (element) {
+    const containerRect = element.getBoundingClientRect();
+    const scale = canvas.width / (containerRect.width || element.offsetWidth || 1);
+
+    const selectors = [
+      '[data-page-break-avoid="true"]',
+      '.statement-row',
+      '.statement-block',
+      'tr',
+      '.avoid-page-break',
+    ].join(', ');
+
+    const breakAvoidNodes = Array.from(element.querySelectorAll<HTMLElement>(selectors));
+
+    for (const node of breakAvoidNodes) {
+      const rect = node.getBoundingClientRect();
+      if (rect.height <= 0) continue;
+      const top = (rect.top - containerRect.top) * scale;
+      const bottom = (rect.bottom - containerRect.top) * scale;
+      items.push({ top, bottom });
+    }
+
+    items.sort((a, b) => a.top - b.top);
+  }
+
+  const slices: PageSlice[] = [];
+  let currentY = 0;
+
+  while (currentY < canvas.height) {
+    let idealEndY = currentY + maxContentHeight;
+
+    if (idealEndY >= canvas.height - 15) {
+      slices.push({
+        startY: currentY,
+        endY: canvas.height,
+        sliceHeight: canvas.height - currentY,
+      });
+      break;
+    }
+
+    let adjustedCutY = idealEndY;
+
+    // Check if idealEndY splits any non-breakable item
+    for (const item of items) {
+      if (item.top < idealEndY && item.bottom > idealEndY) {
+        // Cut right above this row/block with a 6px safe buffer
+        const safeCut = item.top - Math.floor(6 * (canvas.width / 820));
+        if (safeCut > currentY + Math.floor(maxContentHeight * 0.25)) {
+          adjustedCutY = safeCut;
+        }
+        break;
+      }
+    }
+
+    if (adjustedCutY <= currentY) {
+      adjustedCutY = idealEndY;
+    }
+
+    slices.push({
+      startY: currentY,
+      endY: adjustedCutY,
+      sliceHeight: adjustedCutY - currentY,
+    });
+
+    currentY = adjustedCutY;
+  }
+
+  return slices;
+}
+
+export function sliceCanvasToA4Pages(
   canvas: HTMLCanvasElement,
   filename: string,
-  language: 'en' | 'bn' = 'en'
+  language: 'en' | 'bn' = 'en',
+  element?: HTMLElement | null
 ): { files: File[]; dataUrls: string[]; pageFilenames: string[] } {
   const imgWidth = canvas.width;
   const imgHeight = canvas.height;
   const pageCanvasHeight = Math.floor((imgWidth * 297) / 210);
 
-  const totalPages = Math.max(1, Math.ceil(imgHeight / pageCanvasHeight));
+  const topMargin = Math.floor(pageCanvasHeight * 0.03);
+  const bottomMargin = Math.floor(pageCanvasHeight * 0.05);
 
+  const slices = calculateSmartPageSlices(element || null, canvas, pageCanvasHeight, {
+    topMargin,
+    bottomMargin,
+  });
+
+  const totalPages = slices.length;
   const files: File[] = [];
   const dataUrls: string[] = [];
   const pageFilenames: string[] = [];
@@ -197,6 +300,8 @@ function sliceCanvasToA4Pages(
     return { files, dataUrls, pageFilenames };
   }
 
+  const footerH = Math.max(28, Math.floor(imgWidth / 30));
+
   for (let i = 0; i < totalPages; i++) {
     const pageCanvas = document.createElement('canvas');
     pageCanvas.width = imgWidth;
@@ -207,19 +312,18 @@ function sliceCanvasToA4Pages(
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, imgWidth, pageCanvasHeight);
 
-      const sourceY = i * pageCanvasHeight;
-      const sourceHeight = Math.min(pageCanvasHeight, imgHeight - sourceY);
+      const slice = slices[i];
 
+      // Draw slice onto page canvas starting cleanly at topMargin
       ctx.drawImage(
         canvas,
-        0, sourceY,
-        imgWidth, sourceHeight,
-        0, 0,
-        imgWidth, sourceHeight
+        0, slice.startY,
+        imgWidth, slice.sliceHeight,
+        0, topMargin,
+        imgWidth, slice.sliceHeight
       );
 
       // Dynamic page footer on each multi-page image slice
-      const footerH = Math.max(28, Math.floor(imgWidth / 30));
       ctx.fillStyle = '#F8FAFC';
       ctx.fillRect(0, pageCanvasHeight - footerH, imgWidth, footerH);
 
@@ -276,7 +380,7 @@ export async function exportElementToImage(options: ExportReportOptions): Promis
     });
 
     if (format === 'jpg') {
-      const { files, dataUrls, pageFilenames } = sliceCanvasToA4Pages(canvas, filename, language);
+      const { files, dataUrls, pageFilenames } = sliceCanvasToA4Pages(canvas, filename, language, element);
 
       for (let i = 0; i < dataUrls.length; i++) {
         const link = document.createElement('a');
@@ -341,7 +445,7 @@ export async function shareStatementAsImage(options: {
       backgroundColor: '#FFFFFF',
     });
 
-    const { files, dataUrls, pageFilenames } = sliceCanvasToA4Pages(canvas, filename, language);
+    const { files, dataUrls, pageFilenames } = sliceCanvasToA4Pages(canvas, filename, language, element);
 
     // Direct download each page JPG to device storage/gallery
     for (let i = 0; i < dataUrls.length; i++) {

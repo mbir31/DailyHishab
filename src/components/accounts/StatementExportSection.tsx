@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { FileSpreadsheet, FileText, CheckCircle2, Share2, Loader2, Send, ShieldCheck, Download, Award, Stamp } from 'lucide-react';
-import { shareStatementAsImage, renderElementToCanvas } from '../../utils/exportService';
+import { shareStatementAsImage, renderElementToCanvas, calculateSmartPageSlices } from '../../utils/exportService';
 
 interface StatementExportSectionProps {
   fromDate: string;
@@ -167,11 +167,19 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
       // Calculate single A4 page height in canvas pixel space (210mm : 297mm ratio)
       const pageCanvasHeight = Math.floor((imgWidth * pdfHeight) / pdfWidth);
 
-      if (imgHeight <= pageCanvasHeight) {
+      const topMargin = Math.floor(pageCanvasHeight * 0.03);
+      const bottomMargin = Math.floor(pageCanvasHeight * 0.05);
+
+      const slices = calculateSmartPageSlices(element, canvas, pageCanvasHeight, {
+        topMargin,
+        bottomMargin,
+      });
+
+      if (slices.length === 1) {
         // Fits within a single A4 page
         const scaledHeight = (imgHeight * pdfWidth) / imgWidth;
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, scaledHeight);
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, Math.min(scaledHeight, pdfHeight));
 
         // Footer for single page
         pdf.setFontSize(8);
@@ -179,13 +187,15 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
         const pageStr = userProfile.language === 'bn' ? 'পৃষ্ঠা ১ / ১' : 'Page 1 of 1';
         pdf.text(`${appTitle} Statement • ${pageStr}`, pdfWidth / 2, pdfHeight - 5, { align: 'center' });
       } else {
-        // Exceeds single A4 page height -> split across multiple pages cleanly
-        const totalPages = Math.ceil(imgHeight / pageCanvasHeight);
+        // Exceeds single A4 page height -> split across multiple pages cleanly between data rows
+        const totalPages = slices.length;
 
         for (let i = 0; i < totalPages; i++) {
           if (i > 0) {
             pdf.addPage();
           }
+
+          const slice = slices[i];
 
           // Create a dedicated page slice canvas
           const pageCanvas = document.createElement('canvas');
@@ -197,15 +207,13 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, imgWidth, pageCanvasHeight);
 
-            const sourceY = i * pageCanvasHeight;
-            const sourceHeight = Math.min(pageCanvasHeight, imgHeight - sourceY);
-
+            // Draw slice onto page canvas starting cleanly at topMargin
             ctx.drawImage(
               canvas,
-              0, sourceY,
-              imgWidth, sourceHeight,
-              0, 0,
-              imgWidth, sourceHeight
+              0, slice.startY,
+              imgWidth, slice.sliceHeight,
+              0, topMargin,
+              imgWidth, slice.sliceHeight
             );
           }
 
@@ -485,7 +493,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
           <div className="h-2 w-full bg-gradient-to-r from-blue-700 via-indigo-600 to-teal-500 rounded-t-3xl -mt-8 -mx-8 mb-4" />
 
           {/* Statement Header Banner */}
-          <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-900 text-white rounded-2xl p-6 shadow-md border border-slate-800 flex items-center justify-between">
+          <div data-page-break-avoid="true" className="statement-block bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-900 text-white rounded-2xl p-6 shadow-md border border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-4">
               {(userProfile.photoURL || (userProfile as any).photoUrl) ? (
                 <img
@@ -529,7 +537,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
           </div>
 
           {/* Account & Report Metadata Bar */}
-          <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200 text-xs text-slate-600 font-medium grid grid-cols-2 gap-4">
+          <div data-page-break-avoid="true" className="statement-block bg-slate-50 rounded-2xl p-3.5 border border-slate-200 text-xs text-slate-600 font-medium grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <div>
                 <span className="text-slate-400 font-normal">{userProfile.language === 'bn' ? 'হিসাব রক্ষক/যাচাইকারী: ' : 'Accountant / Verifier: '}</span>
@@ -566,7 +574,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
             })();
 
             return (
-              <div className={`grid ${isMonthlyOrYearly ? 'grid-cols-4' : 'grid-cols-3'} gap-3`}>
+              <div data-page-break-avoid="true" className={`statement-block grid ${isMonthlyOrYearly ? 'grid-cols-4' : 'grid-cols-3'} gap-3`}>
                 {/* Income Card */}
                 <div className="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 flex flex-col justify-between">
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">
@@ -630,7 +638,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
 
           {/* Itemized Transactions Table */}
           <div className="space-y-2 pt-1">
-            <div className="flex items-center justify-between text-xs font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-200">
+            <div data-page-break-avoid="true" className="statement-block flex items-center justify-between text-xs font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-200">
               <span>
                 {userProfile.language === 'bn' ? 'বিস্তারিত লেনদেন বিবরণী' : 'Itemized Balance Statement Records'} ({userProfile.language === 'bn' ? `${formatNumberOnly(validEntries.length, 'bn')} টি লেনদেন` : `${validEntries.length} entries`})
               </span>
@@ -640,7 +648,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
             </div>
 
             {validEntries.length === 0 ? (
-              <div className="p-6 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300 space-y-1">
+              <div data-page-break-avoid="true" className="statement-block p-6 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300 space-y-1">
                 <p className="text-xs font-bold text-slate-700">
                   {userProfile.language === 'bn' ? 'নির্দিষ্ট তারিখে কোনো লেনদেন রেকর্ড নেই' : 'No transactions recorded for this date / period'}
                 </p>
@@ -651,7 +659,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
             ) : (
               <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
                 {/* Table Header */}
-                <div className="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider py-2.5 px-3 grid grid-cols-12 gap-2 items-center">
+                <div data-page-break-avoid="true" className="statement-block bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider py-2.5 px-3 grid grid-cols-12 gap-2 items-center">
                   <div className="col-span-1 text-center">{userProfile.language === 'bn' ? 'ক্রম' : 'SL'}</div>
                   <div className="col-span-2">{userProfile.language === 'bn' ? 'তারিখ' : 'Date'}</div>
                   <div className="col-span-2">{userProfile.language === 'bn' ? 'ক্যাটাগরি' : 'Category'}</div>
@@ -665,7 +673,8 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                   {validEntries.map((e, idx) => (
                     <div
                       key={e.id || idx}
-                      className={`py-2 px-3 grid grid-cols-12 gap-2 items-center ${
+                      data-page-break-avoid="true"
+                      className={`statement-row py-2 px-3 grid grid-cols-12 gap-2 items-center ${
                         idx % 2 === 0 ? 'bg-slate-50/60' : 'bg-white'
                       }`}
                     >
@@ -711,7 +720,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                 </div>
 
                 {/* Subtotal Summary Row */}
-                <div className="bg-slate-100 border-t border-slate-300 py-2.5 px-3 flex items-center justify-between text-xs font-bold text-slate-800">
+                <div data-page-break-avoid="true" className="statement-block bg-slate-100 border-t border-slate-300 py-2.5 px-3 flex items-center justify-between text-xs font-bold text-slate-800">
                   <span>
                     {userProfile.language === 'bn' ? 'সাময়িক হিসাব মোট' : 'Period Totals'} ({formatNumberOnly(validEntries.length, userProfile.language)} {userProfile.language === 'bn' ? 'টি' : 'items'})
                   </span>
@@ -732,7 +741,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
           </div>
 
           {/* Verification Stamp & Security Footer */}
-          <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
+          <div data-page-break-avoid="true" className="statement-block pt-3 border-t border-slate-200 flex items-center justify-between">
             {/* Security disclaimer */}
             <div className="space-y-1 text-[10px] text-slate-500 max-w-[500px]">
               <div className="flex items-center gap-1.5 text-slate-800 font-bold">
