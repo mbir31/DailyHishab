@@ -165,31 +165,31 @@ export const EntryRow: React.FC<EntryRowProps> = ({
   return (
     <tr className="border-b border-gray-200/50 dark:border-gray-800/60 hover:bg-black/5 dark:hover:bg-white/5 transition-colors group">
       {/* Column 1: Serial Number + Delete */}
-      <td className="py-2.5 px-2 sm:px-3 text-center align-top pt-3 font-bold text-gray-500 dark:text-gray-400 w-12 sm:w-16 shrink-0 relative">
-        <div className="flex items-center justify-center gap-1">
-          <span className="group-hover:hidden">
+      <td className="py-2 sm:py-2.5 px-1 sm:px-3 text-center align-top pt-2.5 sm:pt-3 font-bold text-gray-500 dark:text-gray-400 w-[10%] sm:w-14 relative">
+        <div className="flex items-center justify-center gap-0.5">
+          <span className="group-hover:hidden text-xs sm:text-sm">
             {userProfile.language === 'bn' ? toBengaliNumerals(entry.serial) : entry.serial}
           </span>
           <button
             type="button"
             onClick={() => onDelete(index)}
-            className="hidden group-hover:flex items-center justify-center p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500 text-rose-600 dark:text-rose-400 transition-all active:scale-90 cursor-pointer"
+            className="hidden group-hover:flex items-center justify-center p-1 sm:p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500 text-rose-600 dark:text-rose-400 transition-all active:scale-90 cursor-pointer"
             title={t.entries.deleteRow}
             aria-label="Delete Row"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         </div>
       </td>
 
       {/* Column 2: Customer / Description + Category & Tag Selectors */}
-      <td className="py-2 px-2 sm:px-3 align-top space-y-1.5">
+      <td className="py-1.5 sm:py-2 px-1 sm:px-3 align-top space-y-1 sm:space-y-1.5 w-[58%] sm:w-auto min-w-0">
         <textarea
           value={entry.description}
           onChange={handleDescriptionChange}
           placeholder={userProfile.customLabels?.descriptionPlaceholder || t.entries.descriptionPlaceholder}
           rows={1}
-          className="w-full bg-transparent px-2.5 py-1.5 rounded-lg border border-transparent hover:border-gray-300 dark:hover:border-gray-700 focus:border-blue-500 focus:bg-white/50 dark:focus:bg-gray-900/50 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm font-medium resize-none overflow-hidden outline-none transition-all leading-relaxed"
+          className="w-full min-w-0 bg-transparent px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg border border-transparent hover:border-gray-300 dark:hover:border-gray-700 focus:border-blue-500 focus:bg-white/50 dark:focus:bg-gray-900/50 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-xs sm:text-sm font-medium resize-none overflow-hidden outline-none transition-all leading-relaxed break-words"
           onInput={(e) => {
             const target = e.target as HTMLTextAreaElement;
             target.style.height = 'auto';
@@ -198,14 +198,14 @@ export const EntryRow: React.FC<EntryRowProps> = ({
         />
 
         {/* Category & Tag Selector Pill Row */}
-        <div className="flex flex-wrap items-center gap-1.5 px-1">
+        <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 px-0.5">
           {/* Category Dropdown Pill & Add Option Trigger */}
-          <div className="relative inline-flex items-center gap-1">
-            <div className="relative inline-flex items-center">
+          <div className="relative inline-flex items-center gap-0.5 sm:gap-1 min-w-0 max-w-full">
+            <div className="relative inline-flex items-center min-w-0 max-w-full">
               <select
                 value={entry.category || ''}
                 onChange={handleCategorySelectChange}
-                className="appearance-none bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[11px] font-bold text-gray-700 dark:text-gray-300 px-2.5 py-0.5 pr-6 rounded-full border border-gray-300/40 dark:border-gray-700/40 outline-none cursor-pointer transition-all"
+                className="appearance-none bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[10px] sm:text-[11px] font-bold text-gray-700 dark:text-gray-300 px-1.5 sm:px-2.5 py-0.5 pr-4 sm:pr-6 rounded-full border border-gray-300/40 dark:border-gray-700/40 outline-none cursor-pointer transition-all max-w-[100px] sm:max-w-[180px] truncate"
               >
                 <option value="" className="bg-white dark:bg-gray-900 text-gray-400">
                   {userProfile.language === 'bn' ? '-- ক্যাটাগরি --' : '-- Category --'}
@@ -226,7 +226,7 @@ export const EntryRow: React.FC<EntryRowProps> = ({
                   {userProfile.language === 'bn' ? '+ ক্যাটাগরি অপশন যোগ করুন...' : '+ Add / Manage Options...'}
                 </option>
               </select>
-              <ChevronDown className="w-3 h-3 text-gray-400 absolute right-1.5 pointer-events-none" />
+              <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-400 absolute right-1 sm:right-1.5 pointer-events-none" />
             </div>
 
             <button
@@ -235,7 +235,7 @@ export const EntryRow: React.FC<EntryRowProps> = ({
                 setShowCatManager(!showCatManager);
                 setShowTagManager(false);
               }}
-              className="p-1 rounded-full text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer"
+              className="p-0.5 sm:p-1 rounded-full text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer shrink-0"
               title="Add or remove dropdown options"
             >
               <Plus className="w-3 h-3" />
@@ -248,7 +248,7 @@ export const EntryRow: React.FC<EntryRowProps> = ({
               {entry.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 dark:bg-indigo-400/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20"
+                  className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-indigo-500/10 dark:bg-indigo-400/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20"
                 >
                   <span>#{tag}</span>
                   <button
@@ -272,14 +272,14 @@ export const EntryRow: React.FC<EntryRowProps> = ({
                 setShowTagManager(!showTagManager);
                 setShowCatManager(false);
               }}
-              className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border transition-all cursor-pointer ${
+              className={`inline-flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full border transition-all cursor-pointer ${
                 showTagManager
                   ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
                   : 'bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-gray-700 dark:text-gray-300 border-gray-300/40 dark:border-gray-700/40'
               }`}
               title="Tag this entry with custom tags"
             >
-              <Tag className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
+              <Tag className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-indigo-500 dark:text-indigo-400" />
               <span>{userProfile.language === 'bn' ? '+ ট্যাগ' : '+ Tag'}</span>
             </button>
           </div>
@@ -462,9 +462,9 @@ export const EntryRow: React.FC<EntryRowProps> = ({
       </td>
 
       {/* Column 3: Amount */}
-      <td className="py-2 px-2 sm:px-3 align-top pt-3 w-28 sm:w-40">
-        <div className="relative flex items-center">
-          <span className="absolute left-2.5 text-xs font-bold text-gray-400 dark:text-gray-500 select-none">
+      <td className="py-1.5 sm:py-2 px-1 sm:px-3 align-top pt-2.5 sm:pt-3 w-[32%] sm:w-36 min-w-0">
+        <div className="relative flex items-center min-w-0">
+          <span className="absolute left-1.5 sm:left-2.5 text-[11px] sm:text-xs font-bold text-gray-400 dark:text-gray-500 select-none pointer-events-none">
             {userProfile.currency || (userProfile.language === 'bn' ? '৳' : '₹')}
           </span>
           <input
@@ -473,7 +473,7 @@ export const EntryRow: React.FC<EntryRowProps> = ({
             value={displayAmount}
             onChange={handleAmountChange}
             placeholder={userProfile.language === 'bn' ? '০' : '0'}
-            className={`w-full bg-transparent pl-7 pr-2.5 py-1.5 rounded-lg border border-transparent hover:border-gray-300 dark:hover:border-gray-700 focus:border-blue-500 focus:bg-white/50 dark:focus:bg-gray-900/50 text-right font-bold font-tabular text-sm sm:text-base outline-none transition-all ${
+            className={`w-full min-w-0 bg-transparent pl-5 sm:pl-7 pr-1 sm:pr-2.5 py-1 sm:py-1.5 rounded-lg border border-transparent hover:border-gray-300 dark:hover:border-gray-700 focus:border-blue-500 focus:bg-white/50 dark:focus:bg-gray-900/50 text-right font-bold font-tabular text-xs sm:text-base outline-none transition-all ${
               type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
             }`}
           />

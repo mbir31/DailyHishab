@@ -136,19 +136,19 @@ export const EntryTable: React.FC<EntryTableProps> = ({ type }) => {
 
       {/* Main Glassmorphic Table Container */}
       <div className="glass-panel overflow-hidden shadow-xl border border-white/50 dark:border-white/10 rounded-2xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="w-full">
+          <table className="w-full text-left border-collapse table-fixed">
             <thead>
-              <tr className="bg-black/5 dark:bg-white/5 border-b border-gray-200/60 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                <th className="py-3 px-2 sm:px-3 text-center w-12 sm:w-16">
+              <tr className="bg-black/5 dark:bg-white/5 border-b border-gray-200/60 dark:border-gray-800 text-[11px] sm:text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="py-2.5 sm:py-3 px-1 sm:px-3 text-center w-[10%] sm:w-14">
                   {userProfile.customLabels?.slNoColumnHeader || t.entries.slNo}
                 </th>
-                <th className="py-3 px-2 sm:px-3">
+                <th className="py-2.5 sm:py-3 px-1.5 sm:px-3 w-[58%] sm:w-auto">
                   {type === 'income'
                     ? userProfile.customLabels?.incomeColumnHeader || 'Customer / Description'
                     : userProfile.customLabels?.expenseColumnHeader || 'Expense Description'}
                 </th>
-                <th className="py-3 px-2 sm:px-3 text-right w-28 sm:w-40">
+                <th className="py-2.5 sm:py-3 px-1.5 sm:px-3 text-right w-[32%] sm:w-36">
                   {userProfile.customLabels?.amountColumnHeader || t.entries.amount}
                 </th>
               </tr>
