@@ -475,7 +475,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
       <div style={{ position: 'absolute', left: '-9999px', top: '0px', width: '820px', pointerEvents: 'none' }}>
         <div
           id="statement-image-export-card"
-          className="w-[820px] p-8 bg-white text-slate-800 font-sans space-y-5 rounded-3xl border border-slate-200 shadow-2xl relative overflow-hidden"
+          className="w-[820px] p-6 bg-white text-slate-800 font-sans space-y-3.5 rounded-3xl border border-slate-200 shadow-2xl relative overflow-hidden"
         >
           {/* Diagonal Background Watermark (if enabled) */}
           {enableBackgroundWatermark && (
@@ -490,55 +490,55 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
           )}
 
           {/* Top Decorative Gradient Accent Bar */}
-          <div className="h-2 w-full bg-gradient-to-r from-blue-700 via-indigo-600 to-teal-500 rounded-t-3xl -mt-8 -mx-8 mb-4" />
+          <div className="h-2 w-full bg-gradient-to-r from-blue-700 via-indigo-600 to-teal-500 rounded-t-3xl -mt-6 -mx-6 mb-3" />
 
           {/* Statement Header Banner */}
-          <div data-page-break-avoid="true" className="statement-block bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-900 text-white rounded-2xl p-6 shadow-md border border-slate-800 flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div data-page-break-avoid="true" className="statement-block bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-900 text-white rounded-2xl p-4 shadow-md border border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-3.5">
               {(userProfile.photoURL || (userProfile as any).photoUrl) ? (
                 <img
                   src={userProfile.photoURL || (userProfile as any).photoUrl || ''}
                   alt={userProfile.username || 'User Profile'}
-                  className="w-12 h-12 rounded-2xl object-cover shadow-lg border-2 border-white/30 shrink-0"
+                  className="w-10 h-10 rounded-xl object-cover shadow-lg border-2 border-white/30 shrink-0"
                 />
               ) : (
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg border-2 border-white/30 shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg border-2 border-white/30 shrink-0">
                   {userProfile.username ? userProfile.username.charAt(0).toUpperCase() : 'D'}
                 </div>
               )}
 
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-black text-white tracking-tight">
+                  <h1 className="text-xl font-black text-white tracking-tight">
                     {appTitle}
                   </h1>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold uppercase tracking-wider">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold uppercase tracking-wider">
                     {userProfile.language === 'bn' ? 'যাচাইকৃত খাতা' : 'Verified Ledger'}
                   </span>
                 </div>
-                <p className="text-xs text-slate-300 font-medium mt-0.5">
+                <p className="text-[11px] text-slate-300 font-medium mt-0.5">
                   {userProfile.subtitle || (userProfile.language === 'bn' ? 'ব্যক্তিগত ও বাণিজ্যিক আর্থিক হিসাব বিবরণী' : 'Personal & Business General Financial Statement')}
                 </p>
               </div>
             </div>
 
             {/* Upper Right Header Texts (Always in English as requested) */}
-            <div className="text-right space-y-1">
-              <span className="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-extrabold border border-blue-400/30 uppercase tracking-widest">
+            <div className="text-right space-y-0.5">
+              <span className="inline-block px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[9px] font-extrabold border border-blue-400/30 uppercase tracking-widest">
                 OFFICIAL STATEMENT
               </span>
-              <div className="text-xs font-bold text-slate-200 font-mono">
+              <div className="text-[11px] font-bold text-slate-200 font-mono">
                 Ref: DH-{fromDate.replace(/-/g, '')}-{toDate.replace(/-/g, '')}
               </div>
-              <p className="text-[11px] text-slate-400 font-medium font-mono">
+              <p className="text-[10px] text-slate-400 font-medium font-mono">
                 Period: {formatDDMMYYYY(fromDate, 'en')} to {formatDDMMYYYY(toDate, 'en')}
               </p>
             </div>
           </div>
 
           {/* Account & Report Metadata Bar */}
-          <div data-page-break-avoid="true" className="statement-block bg-slate-50 rounded-2xl p-3.5 border border-slate-200 text-xs text-slate-600 font-medium grid grid-cols-2 gap-4">
-            <div className="space-y-1">
+          <div data-page-break-avoid="true" className="statement-block bg-slate-50 rounded-xl p-2.5 border border-slate-200 text-[11px] text-slate-600 font-medium grid grid-cols-2 gap-3">
+            <div className="space-y-0.5">
               <div>
                 <span className="text-slate-400 font-normal">{userProfile.language === 'bn' ? 'হিসাব রক্ষক/যাচাইকারী: ' : 'Accountant / Verifier: '}</span>
                 <strong className="text-slate-900 font-bold">{userProfile.username || (userProfile.language === 'bn' ? 'সম্মানিত হিসাব রক্ষক/যাচাইকারী' : 'Valued Accountant / Verifier')}</strong>
@@ -549,7 +549,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
               </div>
             </div>
 
-            <div className="space-y-1 text-right">
+            <div className="space-y-0.5 text-right">
               <div>
                 <span className="text-slate-400 font-normal">{userProfile.language === 'bn' ? 'ইস্যুর তারিখ: ' : 'Issued On: '}</span>
                 <strong className="text-slate-900 font-bold">{new Date().toLocaleDateString(userProfile.language === 'bn' ? 'bn-BD' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong>
@@ -574,16 +574,16 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
             })();
 
             return (
-              <div data-page-break-avoid="true" className={`statement-block grid ${isMonthlyOrYearly ? 'grid-cols-4' : 'grid-cols-3'} gap-3`}>
+              <div data-page-break-avoid="true" className={`statement-block grid ${isMonthlyOrYearly ? 'grid-cols-4' : 'grid-cols-3'} gap-2.5`}>
                 {/* Income Card */}
-                <div className="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 flex flex-col justify-between">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">
+                <div className="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 flex flex-col justify-between">
+                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-emerald-800">
                     {userProfile.language === 'bn' ? 'মোট আয়' : 'Total Income'}
                   </span>
-                  <div className="text-lg font-black text-emerald-700 font-tabular my-1">
+                  <div className="text-base font-black text-emerald-700 font-tabular my-0.5">
                     {formatCurrency(totalIncome, userProfile.language, currencySymbol)}
                   </div>
-                  <span className="text-[10px] font-semibold text-emerald-600">
+                  <span className="text-[9px] font-semibold text-emerald-600">
                     {userProfile.language === 'bn'
                       ? `${formatNumberOnly(validEntries.filter((e) => e.type === 'income').length, 'bn')} টি আয় রেকর্ড`
                       : `${validEntries.filter((e) => e.type === 'income').length} Revenue Records`}
@@ -591,14 +591,14 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                 </div>
 
                 {/* Expense Card */}
-                <div className="p-3.5 rounded-2xl bg-rose-50/80 border border-rose-200/80 flex flex-col justify-between">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-800">
+                <div className="p-2.5 rounded-xl bg-rose-50/80 border border-rose-200/80 flex flex-col justify-between">
+                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-rose-800">
                     {userProfile.language === 'bn' ? 'মোট ব্যয়' : 'Total Expense'}
                   </span>
-                  <div className="text-lg font-black text-rose-700 font-tabular my-1">
+                  <div className="text-base font-black text-rose-700 font-tabular my-0.5">
                     {formatCurrency(totalExpense, userProfile.language, currencySymbol)}
                   </div>
-                  <span className="text-[10px] font-semibold text-rose-600">
+                  <span className="text-[9px] font-semibold text-rose-600">
                     {userProfile.language === 'bn'
                       ? `${formatNumberOnly(validEntries.filter((e) => e.type === 'expense').length, 'bn')} টি ব্যয় রেকর্ড`
                       : `${validEntries.filter((e) => e.type === 'expense').length} Expense Records`}
@@ -606,28 +606,28 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                 </div>
 
                 {/* Net Balance Card */}
-                <div className={`p-3.5 rounded-2xl border flex flex-col justify-between ${netBalance >= 0 ? 'bg-blue-50/80 border-blue-200/80' : 'bg-amber-50/80 border-amber-200/80'}`}>
-                  <span className={`text-[10px] font-extrabold uppercase tracking-wider ${netBalance >= 0 ? 'text-blue-800' : 'text-amber-800'}`}>
+                <div className={`p-2.5 rounded-xl border flex flex-col justify-between ${netBalance >= 0 ? 'bg-blue-50/80 border-blue-200/80' : 'bg-amber-50/80 border-amber-200/80'}`}>
+                  <span className={`text-[9px] font-extrabold uppercase tracking-wider ${netBalance >= 0 ? 'text-blue-800' : 'text-amber-800'}`}>
                     {userProfile.language === 'bn' ? 'জমা / ব্যালেন্স' : 'Net Balance'}
                   </span>
-                  <div className={`text-lg font-black font-tabular my-1 ${netBalance >= 0 ? 'text-blue-700' : 'text-amber-700'}`}>
+                  <div className={`text-base font-black font-tabular my-0.5 ${netBalance >= 0 ? 'text-blue-700' : 'text-amber-700'}`}>
                     {formatCurrency(netBalance, userProfile.language, currencySymbol)}
                   </div>
-                  <span className={`text-[10px] font-bold ${netBalance >= 0 ? 'text-blue-600' : 'text-amber-600'}`}>
+                  <span className={`text-[9px] font-bold ${netBalance >= 0 ? 'text-blue-600' : 'text-amber-600'}`}>
                     {netBalance >= 0 ? (userProfile.language === 'bn' ? '🟢 উদ্ধৃত্ত' : '🟢 Surplus') : (userProfile.language === 'bn' ? '🔴 ঘাটতি' : '🔴 Deficit')}
                   </span>
                 </div>
 
                 {/* Profit Margin / Retention Card (ONLY shown on Monthly or Yearly Statements) */}
                 {isMonthlyOrYearly && (
-                  <div className="p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200/80 flex flex-col justify-between">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-800">
+                  <div className="p-2.5 rounded-xl bg-indigo-50/80 border border-indigo-200/80 flex flex-col justify-between">
+                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-indigo-800">
                       {userProfile.language === 'bn' ? 'প্রফিট মার্জিন' : 'Profit Margin'}
                     </span>
-                    <div className="text-lg font-black text-indigo-700 font-tabular my-1">
+                    <div className="text-base font-black text-indigo-700 font-tabular my-0.5">
                       {formatNumberOnly(totalIncome > 0 ? Math.round((netBalance / totalIncome) * 100) : 0, userProfile.language)}%
                     </div>
-                    <span className="text-[10px] font-semibold text-indigo-600">
+                    <span className="text-[9px] font-semibold text-indigo-600">
                       {userProfile.language === 'bn' ? 'শুদ্ধ মুনাফা হার' : 'Net Cash Retention'}
                     </span>
                   </div>
@@ -637,18 +637,18 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
           })()}
 
           {/* Itemized Transactions Table */}
-          <div className="space-y-2 pt-1">
-            <div data-page-break-avoid="true" className="statement-block flex items-center justify-between text-xs font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-200">
+          <div className="space-y-1.5 pt-0.5">
+            <div data-page-break-avoid="true" className="statement-block flex items-center justify-between text-[11px] font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-200">
               <span>
                 {userProfile.language === 'bn' ? 'বিস্তারিত লেনদেন বিবরণী' : 'Itemized Balance Statement Records'} ({userProfile.language === 'bn' ? `${formatNumberOnly(validEntries.length, 'bn')} টি লেনদেন` : `${validEntries.length} entries`})
               </span>
-              <span className="text-slate-500 font-normal normal-case text-[11px]">
+              <span className="text-slate-500 font-normal normal-case text-[10px]">
                 {userProfile.language === 'bn' ? 'টাকার পরিমাণ' : 'Amounts in'} {currencySymbol}
               </span>
             </div>
 
             {validEntries.length === 0 ? (
-              <div data-page-break-avoid="true" className="statement-block p-6 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300 space-y-1">
+              <div data-page-break-avoid="true" className="statement-block p-5 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300 space-y-1">
                 <p className="text-xs font-bold text-slate-700">
                   {userProfile.language === 'bn' ? 'নির্দিষ্ট তারিখে কোনো লেনদেন রেকর্ড নেই' : 'No transactions recorded for this date / period'}
                 </p>
@@ -659,7 +659,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
             ) : (
               <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
                 {/* Table Header */}
-                <div data-page-break-avoid="true" className="statement-block bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider py-2.5 px-3 grid grid-cols-12 gap-2 items-center">
+                <div data-page-break-avoid="true" className="statement-block bg-slate-900 text-white text-[9.5px] font-extrabold uppercase tracking-wider py-2 px-2.5 grid grid-cols-12 gap-1.5 items-center">
                   <div className="col-span-1 text-center">{userProfile.language === 'bn' ? 'ক্রম' : 'SL'}</div>
                   <div className="col-span-2">{userProfile.language === 'bn' ? 'তারিখ' : 'Date'}</div>
                   <div className="col-span-2">{userProfile.language === 'bn' ? 'ক্যাটাগরি' : 'Category'}</div>
@@ -669,38 +669,38 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                 </div>
 
                 {/* Table Rows - ALL validEntries */}
-                <div className="divide-y divide-slate-100 text-xs">
+                <div className="divide-y divide-slate-100">
                   {validEntries.map((e, idx) => (
                     <div
                       key={e.id || idx}
                       data-page-break-avoid="true"
-                      className={`statement-row py-2 px-3 grid grid-cols-12 gap-2 items-center ${
+                      className={`statement-row py-1.5 px-2.5 grid grid-cols-12 gap-1.5 items-center ${
                         idx % 2 === 0 ? 'bg-slate-50/60' : 'bg-white'
                       }`}
                     >
-                      <div className="col-span-1 text-center font-bold text-slate-400 text-[11px]">
+                      <div className="col-span-1 text-center font-bold text-slate-400 text-[10px]">
                         {formatNumberOnly(idx + 1, userProfile.language)}
                       </div>
 
-                      <div className="col-span-2 font-medium text-slate-700 text-[11px]">
+                      <div className="col-span-2 font-medium text-slate-700 text-[10px]">
                         {formatDateWithDay(e.date, userProfile.language, true)}
                       </div>
 
                       <div className="col-span-2">
-                        <span className="inline-block px-2 py-0.5 rounded-md bg-slate-200/70 text-slate-700 text-[10px] font-bold truncate max-w-[100px]">
+                        <span className="inline-block px-1.5 py-0.5 rounded-md bg-slate-200/70 text-slate-700 text-[9px] font-bold truncate max-w-[95px]">
                           {e.category || (userProfile.language === 'bn' ? 'সাধারণ' : 'General')}
                         </span>
                       </div>
 
                       <div className="col-span-4 space-y-0.5 min-w-0">
-                        <div className="font-bold text-slate-900 truncate text-xs">
+                        <div className="font-bold text-slate-900 truncate text-[10.5px]">
                           {e.description || e.category || (userProfile.language === 'bn' ? 'লেনদেন হিসাব' : 'Transaction Record')}
                         </div>
                       </div>
 
                       <div className="col-span-1 text-center">
                         <span
-                          className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wide ${
+                          className={`inline-block px-1 py-0.5 rounded text-[8.5px] font-extrabold uppercase tracking-wide ${
                             e.type === 'income'
                               ? 'bg-emerald-100 text-emerald-800'
                               : 'bg-rose-100 text-rose-800'
@@ -710,7 +710,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                         </span>
                       </div>
 
-                      <div className="col-span-2 text-right font-black font-tabular text-xs">
+                      <div className="col-span-2 text-right font-black font-tabular text-[11px]">
                         <span className={e.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}>
                           {e.type === 'income' ? '+' : '-'}{formatCurrency(e.amount || 0, userProfile.language, currencySymbol)}
                         </span>
@@ -720,18 +720,18 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                 </div>
 
                 {/* Subtotal Summary Row */}
-                <div data-page-break-avoid="true" className="statement-block bg-slate-100 border-t border-slate-300 py-2.5 px-3 flex items-center justify-between text-xs font-bold text-slate-800">
+                <div data-page-break-avoid="true" className="statement-block bg-slate-100 border-t border-slate-300 py-2 px-2.5 flex items-center justify-between text-[11px] font-bold text-slate-800">
                   <span>
                     {userProfile.language === 'bn' ? 'সাময়িক হিসাব মোট' : 'Period Totals'} ({formatNumberOnly(validEntries.length, userProfile.language)} {userProfile.language === 'bn' ? 'টি' : 'items'})
                   </span>
-                  <div className="flex items-center gap-4 font-tabular text-[11px]">
+                  <div className="flex items-center gap-3.5 font-tabular text-[10.5px]">
                     <span className="text-emerald-700 font-black">
                       {userProfile.language === 'bn' ? 'মোট জমা: ' : 'Total In: +'}{formatCurrency(totalIncome, userProfile.language, currencySymbol)}
                     </span>
                     <span className="text-rose-700 font-black">
                       {userProfile.language === 'bn' ? 'মোট খরচ: ' : 'Total Out: -'}{formatCurrency(totalExpense, userProfile.language, currencySymbol)}
                     </span>
-                    <span className={`font-black text-xs ${netBalance >= 0 ? 'text-blue-700' : 'text-amber-700'}`}>
+                    <span className={`font-black text-[11px] ${netBalance >= 0 ? 'text-blue-700' : 'text-amber-700'}`}>
                       {userProfile.language === 'bn' ? 'জমা / ব্যালেন্স: ' : 'Net Balance: '}{formatCurrency(netBalance, userProfile.language, currencySymbol)}
                     </span>
                   </div>
@@ -741,7 +741,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
           </div>
 
           {/* Verification Stamp & Security Footer */}
-          <div data-page-break-avoid="true" className="statement-block pt-3 border-t border-slate-200 flex items-center justify-between">
+          <div data-page-break-avoid="true" className="statement-block pt-2.5 border-t border-slate-200 flex items-center justify-between">
             {/* Security disclaimer */}
             <div className="space-y-1 text-[10px] text-slate-500 max-w-[500px]">
               <div className="flex items-center gap-1.5 text-slate-800 font-bold">

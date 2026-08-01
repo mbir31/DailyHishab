@@ -71,9 +71,9 @@ export function removeCustomCategory(type: EntryType, categoryToRemove: string):
   return updated;
 }
 
-export const DEFAULT_PRESET_TAGS: string[] = [];
+export const DEFAULT_PRESET_TAGS: string[] = ['cash', 'bank', 'online', 'urgent', 'vendor', 'client'];
 
-export const POPULAR_TAGS: string[] = [];
+export const POPULAR_TAGS: string[] = ['cash', 'bank', 'online', 'urgent', 'vendor', 'client'];
 
 const PRESET_TAGS_STORAGE_KEY = 'dailyhishab_preset_tags';
 
@@ -82,17 +82,8 @@ export function getPresetTags(): string[] {
     const stored = localStorage.getItem(PRESET_TAGS_STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed)) {
+      if (Array.isArray(parsed) && parsed.length > 0) {
         const tags = parsed.map((t: string) => t.replace(/^#/, ''));
-        // Clean up legacy preset tags if user hasn't customized yet
-        const legacyDefaults = ['cash', 'bank', 'online', 'urgent', 'projecta', 'vendor', 'client', 'pending'];
-        if (
-          tags.length === legacyDefaults.length &&
-          tags.every((t, i) => t.toLowerCase() === legacyDefaults[i])
-        ) {
-          localStorage.setItem(PRESET_TAGS_STORAGE_KEY, JSON.stringify([]));
-          return [];
-        }
         return tags;
       }
     }

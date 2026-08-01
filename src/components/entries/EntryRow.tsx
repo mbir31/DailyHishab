@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Entry, EntryType } from '../../types/entry.types';
-import { Trash2, ChevronDown, Plus, X } from 'lucide-react';
+import { Trash2, ChevronDown, Plus, X, Tag, Hash } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import {
   getCustomCategories,
   addCustomCategory,
   removeCustomCategory,
+  getPresetTags,
+  addPresetTag,
+  removePresetTag,
+  extractTagsFromText,
 } from '../../utils/categories';
 import { toBengaliNumerals, parseBengaliToEnglishDigits } from '../../utils/numberFormat';
 
@@ -31,6 +35,11 @@ export const EntryRow: React.FC<EntryRowProps> = ({
   const [showCatManager, setShowCatManager] = useState<boolean>(false);
   const [catInput, setCatInput] = useState<string>('');
 
+  // Preset & Entry Tags State
+  const [presetTags, setPresetTags] = useState<string[]>([]);
+  const [showTagManager, setShowTagManager] = useState<boolean>(false);
+  const [tagInput, setTagInput] = useState<string>('');
+
   // Display Amount state to allow typing in both Bangla and English numerals
   const [displayAmount, setDisplayAmount] = useState<string>(() => {
     if (!entry.amount) return '';
@@ -39,6 +48,7 @@ export const EntryRow: React.FC<EntryRowProps> = ({
 
   useEffect(() => {
     setCustomCategories(getCustomCategories(type));
+    setPresetTags(getPresetTags());
   }, [type]);
 
   // Sync display string with entry.amount when modified externally or language changes
@@ -58,13 +68,18 @@ export const EntryRow: React.FC<EntryRowProps> = ({
   }, [entry.amount, userProfile.language]);
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onUpdate(index, { description: e.target.value });
+    const text = e.target.value;
+    const extracted = extractTagsFromText(text).map((t) => t.replace(/^#/, ''));
+    const currentTags = entry.tags || [];
+    const merged = Array.from(new Set([...currentTags, ...extracted]));
+    onUpdate(index, { description: text, tags: merged });
   };
 
   const handleCategorySelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
     if (val === '__manage_options__') {
       setShowCatManager(true);
+      setShowTagManager(false);
     } else {
       onUpdate(index, { category: val });
     }
@@ -85,6 +100,45 @@ export const EntryRow: React.FC<EntryRowProps> = ({
     if (entry.category === catToRemove) {
       onUpdate(index, { category: '' });
     }
+  };
+
+  const handleToggleTag = (tagToToggle: string) => {
+    const clean = tagToToggle.trim().replace(/^#/, '');
+    if (!clean) return;
+    const currentTags = entry.tags || [];
+    let newTags: string[];
+    if (currentTags.some((t) => t.toLowerCase() === clean.toLowerCase())) {
+      newTags = currentTags.filter((t) => t.toLowerCase() !== clean.toLowerCase());
+    } else {
+      newTags = [...currentTags, clean];
+    }
+    onUpdate(index, { tags: newTags });
+  };
+
+  const handleAddNewCustomTag = () => {
+    if (!tagInput.trim()) return;
+    const clean = tagInput.trim().replace(/^#/, '');
+    if (!clean) return;
+
+    const updatedPresets = addPresetTag(clean);
+    setPresetTags(updatedPresets);
+
+    const currentTags = entry.tags || [];
+    if (!currentTags.some((t) => t.toLowerCase() === clean.toLowerCase())) {
+      onUpdate(index, { tags: [...currentTags, clean] });
+    }
+    setTagInput('');
+  };
+
+  const handleRemoveTagFromEntry = (tagToRemove: string) => {
+    const currentTags = entry.tags || [];
+    const updated = currentTags.filter((t) => t.toLowerCase() !== tagToRemove.toLowerCase());
+    onUpdate(index, { tags: updated });
+  };
+
+  const handleRemovePresetTagFromList = (tagToRemove: string) => {
+    const updated = removePresetTag(tagToRemove);
+    setPresetTags(updated);
   };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,7 +182,7 @@ export const EntryRow: React.FC<EntryRowProps> = ({
         </div>
       </td>
 
-      {/* Column 2: Customer / Description + Category Selector */}
+      {/* Column 2: Customer / Description + Category & Tag Selectors */}
       <td className="py-2 px-2 sm:px-3 align-top space-y-1.5">
         <textarea
           value={entry.description}
@@ -143,7 +197,7 @@ export const EntryRow: React.FC<EntryRowProps> = ({
           }}
         />
 
-        {/* Category Selector Pill Row */}
+        {/* Category & Tag Selector Pill Row */}
         <div className="flex flex-wrap items-center gap-1.5 px-1">
           {/* Category Dropdown Pill & Add Option Trigger */}
           <div className="relative inline-flex items-center gap-1">
@@ -154,7 +208,7 @@ export const EntryRow: React.FC<EntryRowProps> = ({
                 className="appearance-none bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[11px] font-bold text-gray-700 dark:text-gray-300 px-2.5 py-0.5 pr-6 rounded-full border border-gray-300/40 dark:border-gray-700/40 outline-none cursor-pointer transition-all"
               >
                 <option value="" className="bg-white dark:bg-gray-900 text-gray-400">
-                  -- Category --
+                  {userProfile.language === 'bn' ? '-- ক্যাটাগরি --' : '-- Category --'}
                 </option>
                 {/* Custom entry value if set and not in customCategories */}
                 {entry.category && !customCategories.includes(entry.category) && (
@@ -169,7 +223,7 @@ export const EntryRow: React.FC<EntryRowProps> = ({
                   </option>
                 ))}
                 <option value="__manage_options__" className="bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 font-bold">
-                  + Add / Manage Options...
+                  {userProfile.language === 'bn' ? '+ ক্যাটাগরি অপশন যোগ করুন...' : '+ Add / Manage Options...'}
                 </option>
               </select>
               <ChevronDown className="w-3 h-3 text-gray-400 absolute right-1.5 pointer-events-none" />
@@ -177,11 +231,56 @@ export const EntryRow: React.FC<EntryRowProps> = ({
 
             <button
               type="button"
-              onClick={() => setShowCatManager(!showCatManager)}
+              onClick={() => {
+                setShowCatManager(!showCatManager);
+                setShowTagManager(false);
+              }}
               className="p-1 rounded-full text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer"
               title="Add or remove dropdown options"
             >
               <Plus className="w-3 h-3" />
+            </button>
+          </div>
+
+          {/* Active Entry Tags Pills */}
+          {entry.tags && entry.tags.length > 0 && (
+            <div className="inline-flex flex-wrap items-center gap-1">
+              {entry.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 dark:bg-indigo-400/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20"
+                >
+                  <span>#{tag}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTagFromEntry(tag)}
+                    className="hover:text-rose-500 transition-colors cursor-pointer"
+                    title={`Remove #${tag}`}
+                  >
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Tag Selector Trigger Button Pill */}
+          <div className="relative inline-flex items-center">
+            <button
+              type="button"
+              onClick={() => {
+                setShowTagManager(!showTagManager);
+                setShowCatManager(false);
+              }}
+              className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border transition-all cursor-pointer ${
+                showTagManager
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
+                  : 'bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-gray-700 dark:text-gray-300 border-gray-300/40 dark:border-gray-700/40'
+              }`}
+              title="Tag this entry with custom tags"
+            >
+              <Tag className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
+              <span>{userProfile.language === 'bn' ? '+ ট্যাগ' : '+ Tag'}</span>
             </button>
           </div>
 
@@ -264,6 +363,96 @@ export const EntryRow: React.FC<EntryRowProps> = ({
                         </button>
                       </span>
                     ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Tag Option Manager Popover */}
+          {showTagManager && (
+            <div className="w-full mt-1.5 p-2.5 rounded-xl bg-indigo-50/90 dark:bg-gray-800/90 border border-indigo-200 dark:border-indigo-900/50 space-y-2 shadow-sm animate-fade-in">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold text-indigo-900 dark:text-indigo-300 flex items-center gap-1">
+                  <Hash className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                  {userProfile.language === 'bn' ? 'কাস্টম ট্যাগ দিয়ে এন্ট্রি লেবেল করুন (#Tags)' : 'Tag Entry with Custom #Tags'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowTagManager(false)}
+                  className="p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg cursor-pointer"
+                  title="Close tag manager"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Input field to type new custom tag */}
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  autoFocus
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleAddNewCustomTag();
+                    if (e.key === 'Escape') setShowTagManager(false);
+                  }}
+                  placeholder={userProfile.language === 'bn' ? 'নতুন ট্যাগ টাইপ করুন (যেমন: জরুরি, ক্যাশ, প্রজেক্ট)...' : 'Type new tag (e.g. urgent, cash, project-a)...'}
+                  className="flex-1 px-2.5 py-1 text-xs bg-white dark:bg-gray-900 border border-indigo-300 dark:border-gray-700 rounded-lg outline-none text-gray-900 dark:text-white placeholder-gray-400"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddNewCustomTag}
+                  disabled={!tagInput.trim()}
+                  className="px-2.5 py-1 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>{userProfile.language === 'bn' ? 'ট্যাগ যোগ' : 'Add Tag'}</span>
+                </button>
+              </div>
+
+              {/* Quick Select Presets / Saved Tags */}
+              <div className="pt-1.5 border-t border-indigo-200/50 dark:border-gray-700/50">
+                <div className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                  {userProfile.language === 'bn' ? 'দ্রুত নির্বাচনযোগ্য ট্যাগসমূহ:' : 'Quick Select Tags:'}
+                </div>
+                {presetTags.length === 0 ? (
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 italic">
+                    {userProfile.language === 'bn' ? 'কোনো পূর্বনির্ধারিত ট্যাগ নেই। উপরে নতুন ট্যাগ লিখুন!' : 'No saved tags yet. Type a tag above to create one!'}
+                  </p>
+                ) : (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {presetTags.map((tag) => {
+                      const isSelected = entry.tags?.some((t) => t.toLowerCase() === tag.toLowerCase());
+                      return (
+                        <span
+                          key={tag}
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold transition-all ${
+                            isSelected
+                              ? 'bg-indigo-600 text-white shadow-2xs'
+                              : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700 hover:border-indigo-400'
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => handleToggleTag(tag)}
+                            className="cursor-pointer hover:underline"
+                            title={isSelected ? `Remove #${tag}` : `Add #${tag}`}
+                          >
+                            #{tag}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePresetTagFromList(tag)}
+                            className="p-0.5 hover:bg-rose-500/20 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-full transition-all cursor-pointer ml-0.5"
+                            title={`Delete #${tag} from preset tags`}
+                          >
+                            <X className="w-2.5 h-2.5" />
+                          </button>
+                        </span>
+                      );
+                    })}
                   </div>
                 )}
               </div>
