@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Entry } from '../../types/entry.types';
 import { useApp } from '../../context/AppContext';
 import { formatDDMMYYYY, formatDateWithDay } from '../../utils/dateHelpers';
@@ -8,6 +8,8 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { FileSpreadsheet, FileText, CheckCircle2, Share2, Loader2, Send, ShieldCheck, Download, Award, Stamp } from 'lucide-react';
 import { shareStatementAsImage, renderElementToCanvas, calculateSmartPageSlices } from '../../utils/exportService';
+
+const SEAL_SETTINGS_STORAGE_KEY = 'dailyhishab_statement_seal_settings';
 
 interface StatementExportSectionProps {
   fromDate: string;
@@ -26,17 +28,91 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
   const [isSharingWhatsApp, setIsSharingWhatsApp] = useState<boolean>(false);
   const [isExportingPDF, setIsExportingPDF] = useState<boolean>(false);
 
-  // Digital Seal & Watermark customization state
-  const [enableStamp, setEnableStamp] = useState<boolean>(true);
-  const [stampText, setStampText] = useState<string>(
-    userProfile.language === 'bn' ? 'যাচাইকৃত ও অনুমোদিত' : 'PAID & VERIFIED'
-  );
-  const [stampStyle, setStampStyle] = useState<'circular' | 'rectangular' | 'badge'>('circular');
-  const [stampColor, setStampColor] = useState<'bluish-purple' | 'classic-red' | 'emerald-green' | 'dark-navy'>('bluish-purple');
-  const [enableBackgroundWatermark, setEnableBackgroundWatermark] = useState<boolean>(false);
-  const [watermarkText, setWatermarkText] = useState<string>(
-    userProfile.language === 'bn' ? 'অফিসিয়াল নথি' : 'OFFICIAL STATEMENT'
-  );
+  // Digital Seal & Watermark customization state (Persisted in localStorage)
+  const [enableStamp, setEnableStamp] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(SEAL_SETTINGS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed.enableStamp === 'boolean') return parsed.enableStamp;
+      }
+    } catch (e) {}
+    return true;
+  });
+
+  const [stampText, setStampText] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(SEAL_SETTINGS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.stampText) return parsed.stampText;
+      }
+    } catch (e) {}
+    return userProfile.language === 'bn' ? 'যাচাইকৃত ও অনুমোদিত' : 'PAID & VERIFIED';
+  });
+
+  const [stampStyle, setStampStyle] = useState<'circular' | 'rectangular' | 'badge'>(() => {
+    try {
+      const saved = localStorage.getItem(SEAL_SETTINGS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (['circular', 'rectangular', 'badge'].includes(parsed.stampStyle)) return parsed.stampStyle;
+      }
+    } catch (e) {}
+    return 'circular';
+  });
+
+  const [stampColor, setStampColor] = useState<'bluish-purple' | 'classic-red' | 'emerald-green' | 'dark-navy'>(() => {
+    try {
+      const saved = localStorage.getItem(SEAL_SETTINGS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (['bluish-purple', 'classic-red', 'emerald-green', 'dark-navy'].includes(parsed.stampColor)) return parsed.stampColor;
+      }
+    } catch (e) {}
+    return 'bluish-purple';
+  });
+
+  const [enableBackgroundWatermark, setEnableBackgroundWatermark] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(SEAL_SETTINGS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed.enableBackgroundWatermark === 'boolean') return parsed.enableBackgroundWatermark;
+      }
+    } catch (e) {}
+    return false;
+  });
+
+  const [watermarkText, setWatermarkText] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(SEAL_SETTINGS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.watermarkText) return parsed.watermarkText;
+      }
+    } catch (e) {}
+    return userProfile.language === 'bn' ? 'অফিসিয়াল নথি' : 'OFFICIAL STATEMENT';
+  });
+
+  // Save seal & watermark preferences automatically whenever modified
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        SEAL_SETTINGS_STORAGE_KEY,
+        JSON.stringify({
+          enableStamp,
+          stampText,
+          stampStyle,
+          stampColor,
+          enableBackgroundWatermark,
+          watermarkText,
+        })
+      );
+    } catch (e) {
+      console.error('Failed to save statement seal settings:', e);
+    }
+  }, [enableStamp, stampText, stampStyle, stampColor, enableBackgroundWatermark, watermarkText]);
 
   const currencySymbol = userProfile.currency || (userProfile.language === 'bn' ? '৳' : '₹');
   const appTitle = userProfile.mainTitle || 'DailyHishab';
@@ -715,16 +791,16 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                         </span>
                       </div>
 
-                      <div className="col-span-4 min-w-0 flex items-center flex-wrap gap-1">
-                        <span className="font-bold text-slate-900 text-[10px] leading-tight truncate">
+                      <div className="col-span-4 min-w-0 flex items-center gap-1 overflow-hidden">
+                        <span className="font-bold text-slate-900 text-[10px] leading-tight truncate shrink min-w-0">
                           {e.description || e.category || (userProfile.language === 'bn' ? 'লেনদেন হিসাব' : 'Transaction Record')}
                         </span>
                         {e.tags && e.tags.length > 0 && (
-                          <span className="inline-flex flex-wrap items-center gap-0.5 shrink-0">
+                          <span className="inline-flex items-center gap-0.5 shrink-0">
                             {e.tags.map((t) => (
                               <span
                                 key={t}
-                                className="inline-block px-1 py-[1px] rounded bg-indigo-100/90 text-indigo-900 text-[8px] font-extrabold border border-indigo-200/60 leading-none"
+                                className="inline-block px-1 py-[1px] rounded bg-indigo-100/90 text-indigo-900 text-[8px] font-extrabold border border-indigo-200/60 leading-none whitespace-nowrap"
                               >
                                 #{t}
                               </span>
