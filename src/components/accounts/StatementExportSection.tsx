@@ -51,12 +51,35 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
       ? '#0f172a'
       : '#283593'; // Classic bluish-purple rubber stamp ink
 
-  // Filter out blank / unfilled entries (entries with 0 or empty amount AND blank description)
-  const validEntries = entries.filter((e) => {
-    const hasAmount = typeof e.amount === 'number' && e.amount > 0;
-    const hasDesc = typeof e.description === 'string' && e.description.trim().length > 0;
-    return hasAmount || hasDesc;
-  });
+  // Filter out blank / unfilled entries and sort tagged entries first, grouped by tag
+  const validEntries = entries
+    .filter((e) => {
+      const hasAmount = typeof e.amount === 'number' && e.amount > 0;
+      const hasDesc = typeof e.description === 'string' && e.description.trim().length > 0;
+      return hasAmount || hasDesc;
+    })
+    .sort((a, b) => {
+      const aTags = a.tags && a.tags.length > 0 ? a.tags.map((t) => t.trim().toLowerCase()).filter(Boolean) : [];
+      const bTags = b.tags && b.tags.length > 0 ? b.tags.map((t) => t.trim().toLowerCase()).filter(Boolean) : [];
+
+      const aHasTags = aTags.length > 0;
+      const bHasTags = bTags.length > 0;
+
+      // 1. Tagged entries first, untagged entries later
+      if (aHasTags && !bHasTags) return -1;
+      if (!aHasTags && bHasTags) return 1;
+
+      // 2. Group entries with the same tag together
+      if (aHasTags && bHasTags) {
+        const tagStrA = aTags.sort().join(',');
+        const tagStrB = bTags.sort().join(',');
+        if (tagStrA !== tagStrB) {
+          return tagStrA.localeCompare(tagStrB);
+        }
+      }
+
+      return 0;
+    });
 
   // Total calculations based on valid entries
   const totalIncome = validEntries.reduce((s, e) => (e.type === 'income' ? s + (e.amount || 0) : s), 0);
@@ -659,7 +682,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
             ) : (
               <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
                 {/* Table Header */}
-                <div data-page-break-avoid="true" className="statement-block bg-slate-900 text-white text-[9.5px] font-extrabold uppercase tracking-wider py-2 px-2.5 grid grid-cols-12 gap-1.5 items-center">
+                <div data-page-break-avoid="true" className="statement-block bg-slate-900 text-white text-[9.5px] font-extrabold uppercase tracking-wider py-1 px-2.5 grid grid-cols-12 gap-1.5 items-center">
                   <div className="col-span-1 text-center">{userProfile.language === 'bn' ? 'ক্রম' : 'SL'}</div>
                   <div className="col-span-2">{userProfile.language === 'bn' ? 'তারিখ' : 'Date'}</div>
                   <div className="col-span-2">{userProfile.language === 'bn' ? 'ক্যাটাগরি' : 'Category'}</div>
@@ -674,7 +697,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                     <div
                       key={e.id || idx}
                       data-page-break-avoid="true"
-                      className={`statement-row py-1.5 px-2.5 grid grid-cols-12 gap-1.5 items-center ${
+                      className={`statement-row py-0.5 px-2.5 grid grid-cols-12 gap-1.5 items-center ${
                         idx % 2 === 0 ? 'bg-slate-50/60' : 'bg-white'
                       }`}
                     >
@@ -687,20 +710,32 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                       </div>
 
                       <div className="col-span-2">
-                        <span className="inline-block px-1.5 py-0.5 rounded-md bg-slate-200/70 text-slate-700 text-[9px] font-bold truncate max-w-[95px]">
+                        <span className="inline-block px-1.5 py-[1px] rounded-md bg-slate-200/70 text-slate-700 text-[9px] font-bold truncate max-w-[95px]">
                           {e.category || (userProfile.language === 'bn' ? 'সাধারণ' : 'General')}
                         </span>
                       </div>
 
-                      <div className="col-span-4 space-y-0.5 min-w-0">
-                        <div className="font-bold text-slate-900 truncate text-[10.5px]">
+                      <div className="col-span-4 min-w-0">
+                        <div className="font-bold text-slate-900 truncate text-[10px] leading-tight">
                           {e.description || e.category || (userProfile.language === 'bn' ? 'লেনদেন হিসাব' : 'Transaction Record')}
                         </div>
+                        {e.tags && e.tags.length > 0 && (
+                          <div className="flex flex-wrap items-center gap-0.5 mt-0.5">
+                            {e.tags.map((t) => (
+                              <span
+                                key={t}
+                                className="inline-block px-1 py-[1px] rounded bg-indigo-100/90 text-indigo-900 text-[8px] font-extrabold border border-indigo-200/60 leading-none"
+                              >
+                                #{t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       <div className="col-span-1 text-center">
                         <span
-                          className={`inline-block px-1 py-0.5 rounded text-[8.5px] font-extrabold uppercase tracking-wide ${
+                          className={`inline-block px-1 py-[1px] rounded text-[8.5px] font-extrabold uppercase tracking-wide leading-none ${
                             e.type === 'income'
                               ? 'bg-emerald-100 text-emerald-800'
                               : 'bg-rose-100 text-rose-800'
@@ -710,7 +745,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                         </span>
                       </div>
 
-                      <div className="col-span-2 text-right font-black font-tabular text-[11px]">
+                      <div className="col-span-2 text-right font-black font-tabular text-[10.5px]">
                         <span className={e.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}>
                           {e.type === 'income' ? '+' : '-'}{formatCurrency(e.amount || 0, userProfile.language, currencySymbol)}
                         </span>
@@ -720,7 +755,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                 </div>
 
                 {/* Subtotal Summary Row */}
-                <div data-page-break-avoid="true" className="statement-block bg-slate-100 border-t border-slate-300 py-2 px-2.5 flex items-center justify-between text-[11px] font-bold text-slate-800">
+                <div data-page-break-avoid="true" className="statement-block bg-slate-100 border-t border-slate-300 py-1 px-2.5 flex items-center justify-between text-[11px] font-bold text-slate-800">
                   <span>
                     {userProfile.language === 'bn' ? 'সাময়িক হিসাব মোট' : 'Period Totals'} ({formatNumberOnly(validEntries.length, userProfile.language)} {userProfile.language === 'bn' ? 'টি' : 'items'})
                   </span>

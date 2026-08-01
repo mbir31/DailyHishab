@@ -23,12 +23,35 @@ export const ExportStatementModal: React.FC<ExportStatementModalProps> = ({
 
   const currency = userProfile.currency || (userProfile.language === 'bn' ? '৳' : '₹');
 
-  // Filter out blank / unfilled entries
-  const validEntries = entries.filter((e) => {
-    const hasAmount = typeof e.amount === 'number' && e.amount > 0;
-    const hasDesc = typeof e.description === 'string' && e.description.trim().length > 0;
-    return hasAmount || hasDesc;
-  });
+  // Filter out blank / unfilled entries and sort tagged entries first, grouped by tag
+  const validEntries = entries
+    .filter((e) => {
+      const hasAmount = typeof e.amount === 'number' && e.amount > 0;
+      const hasDesc = typeof e.description === 'string' && e.description.trim().length > 0;
+      return hasAmount || hasDesc;
+    })
+    .sort((a, b) => {
+      const aTags = a.tags && a.tags.length > 0 ? a.tags.map((t) => t.trim().toLowerCase()).filter(Boolean) : [];
+      const bTags = b.tags && b.tags.length > 0 ? b.tags.map((t) => t.trim().toLowerCase()).filter(Boolean) : [];
+
+      const aHasTags = aTags.length > 0;
+      const bHasTags = bTags.length > 0;
+
+      // 1. Tagged entries first, untagged entries later
+      if (aHasTags && !bHasTags) return -1;
+      if (!aHasTags && bHasTags) return 1;
+
+      // 2. Group entries with the same tag together
+      if (aHasTags && bHasTags) {
+        const tagStrA = aTags.sort().join(',');
+        const tagStrB = bTags.sort().join(',');
+        if (tagStrA !== tagStrB) {
+          return tagStrA.localeCompare(tagStrB);
+        }
+      }
+
+      return 0;
+    });
 
   // Compute total summary
   const totalIncome = validEntries
