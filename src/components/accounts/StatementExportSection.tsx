@@ -715,12 +715,12 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                         </span>
                       </div>
 
-                      <div className="col-span-4 min-w-0">
-                        <div className="font-bold text-slate-900 truncate text-[10px] leading-tight">
+                      <div className="col-span-4 min-w-0 flex items-center flex-wrap gap-1">
+                        <span className="font-bold text-slate-900 text-[10px] leading-tight truncate">
                           {e.description || e.category || (userProfile.language === 'bn' ? 'লেনদেন হিসাব' : 'Transaction Record')}
-                        </div>
+                        </span>
                         {e.tags && e.tags.length > 0 && (
-                          <div className="flex flex-wrap items-center gap-0.5 mt-0.5">
+                          <span className="inline-flex flex-wrap items-center gap-0.5 shrink-0">
                             {e.tags.map((t) => (
                               <span
                                 key={t}
@@ -729,7 +729,7 @@ export const StatementExportSection: React.FC<StatementExportSectionProps> = ({
                                 #{t}
                               </span>
                             ))}
-                          </div>
+                          </span>
                         )}
                       </div>
 
